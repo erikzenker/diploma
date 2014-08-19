@@ -144,8 +144,7 @@ Table of contents
 ** Linux-HA (http://www.linux-ha.org/wiki/Main_Page)
 
 ** Sources
-   - [[ref:hpcc1]]
-   - High performance cluster computing 1: 536 22.3
+   - [[ref:hpcc1]] p. 536 22.3 
      
 * Load balancing
   - dynamic placement of work
