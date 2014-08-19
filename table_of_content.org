@@ -136,10 +136,20 @@ Table of contents
     - duplication of critical components
 *** Resilience
     - provide and maintain an acceptable level of service in face of faults
+*** Checkpointing
+    - Snapshot of the temporary state of an process application
+      --> Incremental
+      --> Non-blocking
+
 ** Linux-HA (http://www.linux-ha.org/wiki/Main_Page)
 
-
+** Sources
+   - High performance cluster computing 1: 536 22.3
 * Load balancing
+  - dynamic placement of work
+    --> processes are allocated at start-up and stay on the same location
+  - process migration
+    --> processes can move according to overload conditions
   - Dynamic load balancing needed 
   - Distribution of workload to processes of the network
   - Workload migration to other process
@@ -160,7 +170,7 @@ Table of contents
 
 ** Source 
    - High Performance Cluster Computing - Volume 1 : Architectures and Systems, Kapitel 14
-
+   - High Performance Cluster Computing - Volume 1 : p. 536 22.2
 
 * Graph based communication
   - Overlay network on communication layer (MPI)
