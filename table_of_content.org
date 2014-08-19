@@ -170,7 +170,8 @@ Table of contents
   - Creation of subgraphs
   - PVM uses some similar kind of model
     --> migration of processes to other PVM deamons
-
+  - Foundation for fault tolerance and load balancing
+  - Load sharing by hosting several vertices by the same host
 ** Graph
    - A graph is a set of vertices where some pairs of
      vertices are conntected by edges.
