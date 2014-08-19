@@ -283,5 +283,5 @@ Table of contents
 * Conclusion
 
 * Sources
-** High Performance Cluster Computing - Volume 1 : Architectures and Systems
-<<ref::hpcc1>> 
+** ref:hpcc1
+   High Performance Cluster Computing - Volume 1 : Architectures and Systems
