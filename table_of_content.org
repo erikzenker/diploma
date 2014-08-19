@@ -133,7 +133,8 @@ Table of contents
 * Fault tolerance
 ** Methods
 *** Replication (http://en.wikipedia.org/wiki/Redundancy_(engineering))
-    - duplication of critical components
+    - Duplication of critical components
+    - Active process replication
 *** Resilience
     - provide and maintain an acceptable level of service in face of faults
 *** Checkpointing
@@ -151,6 +152,9 @@ Table of contents
     --> processes are allocated at start-up and stay on the same location
   - process migration
     --> processes can move according to overload conditions
+    --> when to migrate ?
+    --> which process to choose ?
+    --> where to migrate to ?
   - Dynamic load balancing needed 
   - Distribution of workload to processes of the network
   - Workload migration to other process
