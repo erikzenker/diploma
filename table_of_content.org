@@ -144,8 +144,11 @@ Table of contents
 ** Linux-HA (http://www.linux-ha.org/wiki/Main_Page)
 
 ** Sources
+   - @reference
    - High performance cluster computing 1: 536 22.3
+     
 * Load balancing
+  $reference 
   - dynamic placement of work
     --> processes are allocated at start-up and stay on the same location
   - process migration
