@@ -102,17 +102,6 @@ Table of contents
            --> Future of calculation ressources
    - *Point of interest in this thesis*
 
-
-
-*** Tightly coupled
-   - Multiple CPUs connected at bus level which have acces to 
-     the same physical memory and share their memory adress space
-     --> shared memory system
-     --> parallel computing
-
-*** Loosely coupled (Computer cluster) 
-
-
 ** Traditional communication mechanisms for clusters 
 
 *** TCP, UDP, IP and Sockets
