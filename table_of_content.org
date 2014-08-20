@@ -81,7 +81,7 @@ Table of contents
     --> Virtualisation
 
 ** Cluster Computing
-  - Separation from shared memory systems
+   - Separation from shared memory systems
 
    - Multiple CPUs connected via a high speed communication system
    - Computation-intensive purposes
@@ -100,7 +100,7 @@ Table of contents
          - Grid Computing / Meta Computing as connection of clusters (supercomputers)
            --> Dynamically addition and deletion of calculation nodes
            --> Future of calculation ressources
-   - *Point of interest in this thesis*
+   - 
 
 ** Traditional communication mechanisms for clusters 
 
@@ -167,20 +167,19 @@ Table of contents
 
 
 ** (?) Fault tolerance
-** Methods
-*** Replication (http://en.wikipedia.org/wiki/Redundancy_(engineering))
+*** Methods
+**** Replication (http://en.wikipedia.org/wiki/Redundancy_(engineering))
     - Duplication of critical components
     - Active process replication
-*** Resilience
+**** Resilience
     - provide and maintain an acceptable level of service in face of faults
-*** Checkpointing
+**** Checkpointing
     - Snapshot of the temporary state of an process application
       --> Incremental
       --> Non-blocking
 
-** Linux-HA (http://www.linux-ha.org/wiki/Main_Page)
 
-** Sources
+*** Sources
    - [[ref:hpcc1]] p. 536 22.3 
      
 
