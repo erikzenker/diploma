@@ -80,17 +80,9 @@ Table of contents
     --> Flexible hardware system (fpgas, neuronal chips)
     --> Virtualisation
 
-** Multiple-processor computer systems (Parallel Computing / Supercomputer)
-  - Introduction on parallel computation and its varying models
-  - Development of computing community
+** Cluster Computing
+  - Separation from shared memory systems
 
-*** Tightly coupled
-   - Multiple CPUs connected at bus level which have acces to 
-     the same physical memory and share their memory adress space
-     --> shared memory system
-     --> parallel computing
-
-*** Loosely coupled (Computer cluster) 
    - Multiple CPUs connected via a high speed communication system
    - Computation-intensive purposes
    - A lot of 500 fastest supercomputers are cluster systems
@@ -109,6 +101,16 @@ Table of contents
            --> Dynamically addition and deletion of calculation nodes
            --> Future of calculation ressources
    - *Point of interest in this thesis*
+
+
+
+*** Tightly coupled
+   - Multiple CPUs connected at bus level which have acces to 
+     the same physical memory and share their memory adress space
+     --> shared memory system
+     --> parallel computing
+
+*** Loosely coupled (Computer cluster) 
 
 
 ** Traditional communication mechanisms for clusters 
