@@ -124,7 +124,14 @@ exchange between nodes will not be discussed in detail in this thesis.
 
 The message passing interface (MPI) is a standardized and portable
 message-passing specification, specified by the Message Passing
-Interface Forum \cite{ref:mpi_specification}.
+Interface Forum \cite{ref:mpi_specification}.Implementations area
+available on virtually every parallel computer systems and has become
+the de facto standard for communication in cluster systems.
+
+The MPI communication is implemented on top of existing communication
+abstractraction provided by the underlying system (sockets, AM, etc.)
+
+
 
 The first version of the specification, known as MPI-1, was completed
 in 1994 making use of the most attractive features of allready
@@ -183,17 +190,20 @@ the following steps:
 \end{itemize}
 
 MPI provides a large and versatile set of routines. At its most
-basic, MPI provides function for sending and receiving a messages.
-Both blocking
-\begin{itemize}
-  \item $MPI\_Send$
-  \item $MPI\_Recv$
-\end{itemize}
-and nonblocking
-\begin{itemize}
-\item $MPI\_ISend$
-\item $MPI\_IRecv$
-\end{itemize}
+basic, MPI has functions for sending and receiving a message.
+These functions are available both blocking and nonblocking.
+
+Further a variaty of collective operations that involve
+a group of processes are defined. All members of the group
+have to paticipate to sucessfully execute the collective operation.
+The result of the operation is either received by one process,
+the so called root, or by all processes of a group.
+
+
+Popular implementations are MPICH and Open MPI. MPICH2 implements the
+MPI-2.1 specification. Open MPI has the goal to be full MPI-3 standard conform.
+
+
 
 \begin{itemize}
 \item Standardized and portable message-passing \cite{ref:mp} specification, not implementation
@@ -203,13 +213,8 @@ and nonblocking
 \item Sending messages between processes on same or different nodes
 \item high performance at a relatively low cost
 
-\item Communication on top of existing communication mechanisms
-  (overlay network, communication middleware)
-\item De facto standard for communication in cluster / hpc systems
-\item Implementations are available on virtually every parallel
-  computer systems
-\item Overlay network implemented on top of the communication
-  abstractraction provided by the system (sockets, AM, etc.)
+\item 
+\item 
 \item Zero-data copy transfer
 \item Usable in shared and distributed memory systems
 \item Free libraries available (OpenMPI)

@@ -78,7 +78,6 @@ clean:
 
 auto_git:
 	git commit -a -m "automatic commit"
-	git push
 
 # Points out abbreviations and reminds you of escaping
 # the space after the period
