@@ -258,13 +258,16 @@ ranks, thus changing the communication topology also leads
 to a lot of changes in the algorithm.
 
 \subsection{Communication topologie}
-\begin{itemize}
-\item 3- or 2-dimensional mesh
-\item next neighbor communication
-\item Some collective operations (Allgather, Gather, GatherV, AllReduce, Reduce
-\item Offload of simulation data to GPU
-\end{itemize}
+The simulation volume of the PIC algorithm is decomposed
+into a 2- or 3- dimensional mesh structured. Individual
+mesh cells are communicating mainly with the next 
+neighboring cells, so that basic send and receive operation
+can be used. To decouple communication and computation,
+nonblocking variant of this basic operations are used.
 
+\todo{find out why collective operations are used}
+There are also some collective operations like allgather, gather
+gatherv, allreduce and reduce used.
 
 \subsection{Requirements for the upcoming generation of super computers}
 \begin{itemize}
