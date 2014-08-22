@@ -49,11 +49,11 @@ computers form so called compute clusters \cite{ref:hpcc1}.
 
 These loosely coupled components of a cluster are built from
 multiprocessor PCs or workstation and are connected via a high-speed
-network connection.
+network connection with small-latency and high-bandwidth.
 
 Therefore a compute cluster forms a homogeneous network of compute
-entities, which are also called nodes. Every node can consist out of
-different compute devices such as multicore CPUs and with more and
+entities, which are also called nodes. Each node can be equipped with
+different compute devices such one or more central processing units (CPUs) and with more and
 more popularity also acceleration devices like graphic cards. With the
 consequence of a hierarchicle structure on the node with non-uniform
 memory access (NUMA) \cite[numa]{ref:numa}.
@@ -178,7 +178,8 @@ the following steps:
 \item Init MPI environment
 \item Ask for own rank
 \item Ask for number of ranks overall
-\item Depend on own rank and number of overall processes do some task (varying flow of control between ranks)
+\item Depend on own rank and number of overall processes do some task
+  (varying flow of control between ranks)
 \item Communicate with other processes
 \item Finalize MPI environment
 \item Exit MPI programm
@@ -229,6 +230,30 @@ abstractraction provided by the underlying cluster system (sockets, AM, etc.)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{PIConGPU - the application}
 \label{sec:picongpu}
+PIConGPU is a relativistic 2D3V PIC code designed for simulating laser-plasma
+interactions \cite{ref:picongpu}. The application is optimized for the
+execution on clusters with NVIDIA GPU-accelerated nodes. 
+
+The host CPUs are utilized for memory transfers between CPU and GPU and also 
+for internode communication via MPI (Section \ref{sec:mpi).
+
+The simulation volume is divided into subdomains and each subdomain is
+mapped to its own GPU. Thus each GPU can simulates the phyisics of its
+own volume.  In the case a subdomain needs to exchange data with an
+neighboring subdomain, because particles etc. cross the border of the
+subdomain.  Data will be copied to the host and then transfered to the
+host of the neighboring subdomain. Where the memory is copied to the
+neighboring subdomain host GPU memory.
+
+The implementation of PIConGPU has some lack of abstraction for their
+communication. Because there is no abstraction layer which hides
+the MPI communication calls, which makes it impossible to exchange it.
+
+Also the communication topology of the simulations is not be modeled
+satisfying. Neighboring subdomains are directly adressed by their
+ranks, thus changing the communication topology also leads
+to a lot of changes in the algorithm.
+
 \begin{itemize}
   \item A Many-GPGPU Particle-in-Cell Code
   \item Electric and magnetic fields are interpolated on a physical
