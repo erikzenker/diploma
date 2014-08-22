@@ -173,19 +173,16 @@ compromises the full set of processes with ranks in the range 0 to
 the number of processes. A typical MPI program run is composed from
 the following steps:
 
-\begin{itemize}
-  \item MPI process
-    \begin{enumerate}
-      \item Start MPI programm
-      \item Init MPI environment
-      \item Ask for own rank
-      \item Ask for number of ranks overall
-      \item Depend on own rank and overall ranks do some task (varying flow of control between ranks)
-      \item Communicate with other ranks
-      \item Finalize MPI environment
-      \item Exit MPI programm
-    \end{enumerate}
-\end{itemize}
+\begin{enumerate}
+\item Start MPI programm
+\item Init MPI environment
+\item Ask for own rank
+\item Ask for number of ranks overall
+\item Depend on own rank and overall ranks do some task (varying flow of control between ranks)
+\item Communicate with other ranks
+\item Finalize MPI environment
+\item Exit MPI programm
+\end{enumerate}
 
 MPI provides a large and versatile set of routines. At its most
 basic, MPI has functions for sending and receiving a message.
