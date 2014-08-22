@@ -76,9 +76,12 @@ computation.
 \end{itemize}
 
 There are several ways to retrieve data from other nodes. The most
-obvious way is to use direct communication between nodes. This
-can be very low level protocols like TCP, UDP, IP by using UNIX sockets (\ref{sec:tcp_udp_ip}) or more modern and abstract models like the message passing interface (\ref{sec:mpi}) and the parallel virual machine (\ref{sec:pvm}).These traditional ways to communicate in 
-cluster systems  will be discussed in section \ref{sec:communication}.
+obvious way is to use direct communication between nodes. This can be
+very low level protocols like TCP, UDP, IP by using UNIX sockets
+(\ref{sec:tcp_udp_ip}) or more modern and abstract models like the
+message passing interface (\ref{sec:mpi}) and the parallel virual
+machine (\ref{sec:pvm}).These traditional ways to communicate in
+cluster systems will be discussed in section \ref{sec:communication}.
 
 \todo{More related work + references to distributed shared memory} An
 other way is to create a layer on top of the all cluster nodes, so
@@ -86,9 +89,8 @@ that the cluster looks like a single machine with a lot of devices and
 a shared memory. This is called a distributed shared memory
 architecture. The layer can be adjusted to the needs of the user.  It
 can be an own operating system like MOSIX \cite{ref:mosix}, some
-virtualisation layer \cite{ref:cluster_virt} etc.
-This kind of data exchange between nodes will not be discussed in
-detail in this thesis.
+virtualisation layer \cite{ref:cluster_virt} etc.  This kind of data
+exchange between nodes will not be discussed in detail in this thesis.
 \begin{itemize}
 \item Usage of simple parallization schemas like OpenMP, Pthreads
 \item No explicit communication necessary
