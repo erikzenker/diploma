@@ -76,6 +76,10 @@ pdf: $(DOC_PDF)
 clean:
 	rm -f $(DOC_CLEAN)
 
+auto_git:
+	git commit -a -m "automatic commit"
+	git push
+
 # Points out abbreviations and reminds you of escaping
 # the space after the period
 check-french-spacing: $(DOC_TEX) $(DOC_TEX_ADD)
