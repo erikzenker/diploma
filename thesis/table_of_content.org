@@ -1,0 +1,346 @@
+Diplomarbeit Stichpunkte
+Erik Zenker
+
+Table of contents
+=================
+* Things to think about
+  - Chapter about efficiency / requirements of communication
+  - Fault tolerance and load balancing chapter is no main section 
+    --> put it somewhere else !
+    --> Mind that fault tolerance and load balancing is not
+        the topic of my thesis !
+        Have this topics in mind and describe how to use my work
+        to achieve ft and lb.
+
+* Topic
+  Lastverteilung, Fehlertoleranz und Kollektive Operationen sind
+  heutzutage wichtige Mechanismen im Bereich des
+  Hochleistungsrechnens. Deswegen ist es nötig eine möglichst
+  unabhängige Kommunikationsstruktur zur Verfügung zu stellen, auf
+  welcher diese drei Techniken aufbauen können.
+  
+  Besonders bei rechenintensiven Multi-GPGPU Particle-in-Cell (PIC)
+  Programmcodes ist eine generische und flexible Kommunikationsschicht
+  ein grundlegender Bestandteil. Diese Schicht, zwischen Applikation und
+  Kommunikationskanal, soll unabhängig von den zu Grunde liegenden
+  Kommunikations-Middleware (z.B.: MPI, ZMQ) sein und somit eine
+  einfache Ersetzung ermöglichen.
+  
+  Ziel dieser Arbeit ist es, die Kommunikations-Topologie von PIConGPU
+  zu erfassen, daraus eine generische Kommunikationsschicht zu entwerfen
+  und im Speziellen für MPI zu implementieren. Dabei ist es die Aufgabe
+  dieser Kommunikationsschicht, Daten zwischen Kommunikationsknoten
+  auszutauschen und somit, in Hinblick auf Lastverteilung und
+  Fehlertoleranz, das Verschieben ganzer Arbeitsbereiche auf andere
+  Rechner oder Geräte zu ermöglichen.
+
+* Introduction
+  - Motivation
+    * HPC systems are hierachicle but homogeneous systems
+    * HPC systems crow by adding more of the same computation entities
+    * Heterogenous Phyisical systems getting more complex and multi scale
+    * Leads to memory boundation in single entities
+    * Physical system has to be mapped to HPC system, so it is still computable
+    * Flexible and generic communication layer is necessary
+      ==> Most generic mapping from physical system to hpc system is a graph
+      ==> Modeling of different hierachies (intra and inter communication through different interfaces)
+          + local communication on a multicore is a shared memory environment (gather can be an empty function)
+	  + communication between cluster nodes can be handled by mpi
+	  + communication between host and device are special copy operations
+  - Simulations, algorithms with more precision and resolution
+  - Simulations need more computational power
+  - Development of faster and more powerful super computers
+  - BUT More hardware --> more failures
+  - PIConGPU is ready for super computers of the next generation
+  - BUT Communication layer in PIConGPU is not exchangeable and not flexible
+    --> MPI as communcation layer is static and
+        not hidden behind interfaces
+    --> MPI is very stodgy and inflexible
+  
+  - Communication model is foundation for *fault tolerance* and *load balancing*
+  - Need to abstract from MPI as communication middleware
+    --> Makes it possible to exchange it
+    --> Use of communication layer which has builtin
+        fault tolerance and load balancing or
+    --> Build communication layer on top of MPI
+  - Provide a general communication layer --> *commuication based on graphs*
+    --> Will be based on MPI because PIConGPU uses MPI and MPI
+        is available on many cluster systems
+  - Main emphasis on dynamic communication framework
+    --> ready for fault tolerance and load balancing
+  - Communication on distributed Memmory systems (why?)
+  - What will come in this thesis
+
+* Technical Background (<= 10 Seiten)
+  - Not to long and not to general
+  - Background for special needs of my communication framework
+  - A lot of references
+  - Several possibilities to map physical system to hpc system
+    --> Flexible communication system in software
+    --> Flexible hardware system (fpgas, neuronal chips)
+    --> Virtualisation
+
+** Cluster Computing
+   - Separation from shared memory systems
+
+   - Multiple CPUs connected via a high speed communication system
+   - Computation-intensive purposes
+   - A lot of 500 fastest supercomputers are cluster systems
+     --> Distributed memory system
+     --> Distributed computing (http://en.wikipedia.org/wiki/Distributed_processing)
+         - Autonomous computational entities(nodes), each of which has its own local memory
+         - Nodes communicates with each other by message passing
+         - Tolerates failures in individual nodes
+         - Nodes have incomplete view of the system
+     --> Distributed systems
+     --> Distributed shared memory (http://en.wikipedia.org/wiki/Distributed_shared_memory)
+         - Physically separate memories can be addressed as one (logically shared) adress space
+         - Provides by a library or the operating system
+         - Examples : Kerrighed, OpenSSI, MOSIX, TreadMarks, DIPC
+         - Grid Computing / Meta Computing as connection of clusters (supercomputers)
+           --> Dynamically addition and deletion of calculation nodes
+           --> Future of calculation ressources
+   - 
+
+** Traditional communication mechanisms for clusters 
+
+*** TCP, UDP, IP and Sockets
+   - Unix like communication
+   - Very low level
+*** RPC
+   - Community of distributed systems
+   - Communication in programming like flavor
+*** Message passing (http://en.wikipedia.org/wiki/Message_passing)
+    - High level of abstraction
+    - Fits needs of parallel programming community
+    - Sending messages between processes on same or different nodes
+    - high performance at a relatively low cost
+**** MPI
+     - Standardized and portable message-passing specification
+     - Communication on top of existing communication mechanisms (overlay network, communication middleware)
+     - De facto standard for communication
+     - Implementations are available on virtually every parallel 
+       computer systems
+     - Overlay network implemented on top of the communication
+       abstractraction provided by the system (sockets, AM, etc.)
+     - Zero-Copy data transfer
+     - Usable in shared and distributed memory systems
+     - Free libraries available (OpenMPI)
+     - Language independent communication protocol
+     - Point-to-point communication
+     - Collective communication
+     - Barrier operation
+
+     - Not very flexible --> static ranks
+     - Makes runtime load balancing hard
+     - No built-in fault tolerance
+     - Does not offer any run-time management system
+***** MPI-1 (MPI-1.3)
+      - message passing
+      - static runtime environment
+***** MPI-2 (MPI-2.2)
+      - parallel I/O
+      - dynamic process management
+      - remote memory operations
+***** MPI-3 (MPI-3.0)
+      - nonblocking collective operations
+      - extensions to one-sided operations
+***** Sources
+      - http://en.wikipedia.org/wiki/Message_Passing_Interface
+      - http://www.mcs.anl.gov/research/projects/mpi/
+      - http://www.mpi-forum.org/
+      -  High Performance Cluster Computing - Volume 1 : Architectures and Systems
+      	 
+*** Parallel Virtual Machine
+   - Parallel Virtual Machine connects a collection of heterogeneous computers
+     to a single "parallel virtual machine"
+     (http://en.wikipedia.org/wiki/PVM)
+   - Support for communication and synchronization operations
+   - Configuration control
+   - synamic Spawning of pocressen
+   - PVM daemons are spawned on a set of nodes
+   - Local processes connect to PVM daemons and can 
+     communicate through this daemon to other PVM daemons
+*** Source
+    - High performance cluster computing 1 : p. 522 - 21.3.2
+
+
+
+** (?) Fault tolerance
+*** Methods
+**** Replication (http://en.wikipedia.org/wiki/Redundancy_(engineering))
+    - Duplication of critical components
+    - Active process replication
+**** Resilience
+    - provide and maintain an acceptable level of service in face of faults
+**** Checkpointing
+    - Snapshot of the temporary state of an process application
+      --> Incremental
+      --> Non-blocking
+
+
+*** Sources
+   - [[ref:hpcc1]] p. 536 22.3 
+     
+
+** (?) Load balancing
+  - dynamic placement of work
+    --> processes are allocated at start-up and stay on the same location
+  - process migration
+    --> processes can move according to overload conditions
+    --> when to migrate ?
+    --> which process to choose ?
+    --> where to migrate to ?
+  - Dynamic load balancing needed 
+  - Distribution of workload to processes of the network
+  - Workload migration to other process
+  - Application specific balancing system on top of an existing network-specific balancing system
+    --> algorithms with mesh refinement lead to unbalanced load at runtime
+    --> static load balancing not possible
+  - balancing device(s) collects status information from compute nodes
+    --> can be a single device or a group of devices (also in tree structure possible)
+  - Balancing factors
+    + 
+  - Balancing methods
+    + Weighting
+    + Randomization
+    + Round-Robin
+    + Hashing
+    + Fastest response
+    + Nearest neighbor
+
+** Source 
+   - High Performance Cluster Computing - Volume 1 : Architectures and Systems, Kapitel 14
+   - High Performance Cluster Computing - Volume 1 : p. 536 22.2
+
+
+** PIConGPU
+  - Is memory bound
+  - bytes / flop  
+*** Brief description
+*** Requirements for upcoming super computers
+*** Communication Topologies
+
+
+* Design
+** Graph based communication layer
+  - Overlay network on communication layer (MPI)
+  - Based on mathematical model of graphs
+  - Communicaton between adjacent nodes of a graph
+  - Collective communication between all nodes of a graph
+  - Creation of subgraphs
+  - PVM uses some similar kind of model
+    --> migration of processes to other PVM deamons
+  - Foundation for fault tolerance and load balancing
+  - Load sharing by hosting several vertices by the same host
+
+*** Mathematical graph
+   - A graph is a set of vertices where some pairs of
+     vertices are conntected by edges.
+*** Communicator
+    - Every process that wants to take part on communication in general,
+      need an instance of the Communicator and is identifiable by a
+      CommID (Communicator ID).
+    - The Communicator provides standard p2p and collective operations
+      on a high abstraction level (similar to boost::mpi interface)
+    - The communication itself is implemented by the Communication
+      policy.
+**** Communication policy
+     - Core communication class, implements communcation functionality
+     - Implemented with MPI C bindings in the prototype
+     - Also boost::mpi, boost::asio, ZMQ or P2P-overlay network imaginable
+**** Context
+     - A set of Communicators which are able to communicate with each other.
+     - All Communicators of a context can perform a collective operation
+**** P2P
+     - Direct communication functions (send, recv) between Communicators
+**** Collective
+     - Collective communication functions
+       + gather
+       + gather2
+       + allGather
+       + allGather2
+       + scatter
+       + allToAll
+       + reduce
+       + allReduce
+       + broadcast
+       + synchronize
+       + createContext
+       + getGlobalContext
+**** Event
+     - Returned by non-blocking functions or asynchronous function
+     - Events can be checked weather the the function has finished or not
+
+*** Graph
+    - Desciption of directed graphs
+    - Vertices and edges are defined by properties
+    - A Property is a struct / class that at least provide an id
+    - Creation of subgraph
+    - Predefined topologie structures
+    - Combining topologies to create bigger / more complex structures
+      --> Ring topologie, which every vertex will be replaced by a star topologie
+    - Deletion of vertices at runtime
+    - Adding vertices and edges at runtime
+    
+**** GraphPolicy
+     - Implements graph functionality
+     - BGL
+
+*** NameService
+    - Connection between Graph and Communicator
+    - Every Communicator announces its hosted vertices of a graph
+    - Locate the host Communicator of vertices
+
+*** GraphCommunicator
+    - Provides point to point and collective communication schemas on graph base
+    - Communicator is used as communication backend and NameService provide location information of the vertices of the Graph
+    - Point to point communication between vertices
+    - Collective operations on graphs
+
+*** Game of Life
+    - Simple example for generic communicator
+    - Game field is modeled as 2D mesh graph
+      0--1--2
+      |\/|\/|
+      |/\|/\|
+      3--4--5
+      |\/|\/|
+      |/\|/\|
+      6--7--8
+    - Rules where take from : http://en.wikipedia.org/wiki/Conway's_Game_of_Life
+    - Every Vertex calculates one Cell (Vertex == Cell)
+    - Every cell is connected with its neighboring cells
+    - One process calculates several cells
+
+*** (?) Redistribution of vertices
+    - Vertices are not statically bounded to Communicators
+    - Redistribution of vertices to a different host Communicator is possible
+    - Redistribution within Communicators of a graph is no problem
+    - Redistribution to Communicators outside of a graph needs
+      recreation of the graph and reannounce *TODO*
+
+*** (?) Vertex resilience
+    - The same vertex could be hosted by several Communicators
+    - Sending data to a vertex will be transformed to a
+      multicast operation
+    - Builtin fault tolerance through copies of vertices
+
+
+* Implementation
+  - Sprachmittel von C++ nutzen
+  - Wie können Graphen beschrieben werden
+
+
+* Evaluation
+** Benchmark
+** Evaluation of design decisions
+
+
+* Future work
+
+* Conclusion
+
+* Sources
+** ref:hpcc1
+   High Performance Cluster Computing - Volume 1 : Architectures and Systems
