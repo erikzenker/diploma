@@ -230,20 +230,23 @@ abstractraction provided by the underlying cluster system (sockets, AM, etc.)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{PIConGPU - the application}
 \label{sec:picongpu}
-PIConGPU is a relativistic 2D3V PIC code designed for simulating laser-plasma
-interactions \cite{ref:picongpu}. The application is optimized for the
-execution on clusters with NVIDIA GPU-accelerated nodes. 
+PIConGPU is a relativistic 2D3V many general purpose graphic
+processing units (GPGPU) particle-in-cell (PIC) code designed for
+simulating laser-plasma interactions \cite{ref:picongpu}. The
+application is optimized for the execution on clusters with NVIDIA
+GPU-accelerated nodes.
 
 The host CPUs are utilized for memory transfers between CPU and GPU and also 
-for internode communication via MPI (Section \ref{sec:mpi).
+for internode communication via MPI (Section \ref{sec:mpi}.
 
 The simulation volume is divided into subdomains and each subdomain is
 mapped to its own GPU. Thus each GPU can simulates the phyisics of its
 own volume.  In the case a subdomain needs to exchange data with an
-neighboring subdomain, because particles etc. cross the border of the
-subdomain.  Data will be copied to the host and then transfered to the
-host of the neighboring subdomain. Where the memory is copied to the
-neighboring subdomain host GPU memory.
+neighboring subdomain, because particles, fields etc. cross the border of the
+subdomain.  Data will be copied onto the host and is then transfered to the
+host of the neighboring subdomain. After that  the memory is copied to the
+neighboring subdomain hosts GPU memory. The data transfer between 
+CPU and GPU is also called offload.
 
 The implementation of PIConGPU has some lack of abstraction for their
 communication. Because there is no abstraction layer which hides
@@ -254,16 +257,14 @@ satisfying. Neighboring subdomains are directly adressed by their
 ranks, thus changing the communication topology also leads
 to a lot of changes in the algorithm.
 
+\subsection{Communication topologie}
 \begin{itemize}
-  \item A Many-GPGPU Particle-in-Cell Code
-  \item Electric and magnetic fields are interpolated on a physical
-    grid dividing the simulated volume into cells
-  \item Simulated volume divided in cubes / squares
-  \item Every GPU computes one of these cubes / squares
-  \item One MPI process per cube square
-  \item Offload of simulation data to GPUs
-  \item Communication based on MPI
+\item 3- or 2-dimensional mesh
+\item next neighbor communication
+\item Some collective operations (Allgather, Gather, GatherV, AllReduce, Reduce
+\item Offload of simulation data to GPU
 \end{itemize}
+
 
 \subsection{Requirements for the upcoming generation of super computers}
 \begin{itemize}
@@ -272,13 +273,6 @@ to a lot of changes in the algorithm.
   generation of acceleration devices
 \end{itemize}
 
-\subsection{Communication topologie}
-\begin{itemize}
-\item 3- or 2-dimensional mesh
-\item next neighbor communication
-\item Some collective operations (Allgather, Gather, GatherV, AllReduce, Reduce
-\item Offload of simulation data to GPU
-\end{itemize}
 
 
 \cleardoublepage
