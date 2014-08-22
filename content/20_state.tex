@@ -128,10 +128,6 @@ Interface Forum \cite{ref:mpi_specification}.Implementations area
 available on virtually every parallel computer systems and has become
 the de facto standard for communication in cluster systems.
 
-The MPI communication is implemented on top of existing communication
-abstractraction provided by the underlying system (sockets, AM, etc.)
-
-
 
 The first version of the specification, known as MPI-1, was completed
 in 1994 making use of the most attractive features of allready
@@ -198,6 +194,9 @@ a group of processes are defined. All members of the group
 have to paticipate to sucessfully execute the collective operation.
 The result of the operation is either received by one process,
 the so called root, or by all processes of a group.
+
+The MPI communication is implemented on top of existing communication
+abstractraction provided by the underlying system (sockets, AM, etc.)
 
 
 Popular implementations are MPICH and Open MPI. MPICH2 implements the
