@@ -1,0 +1,273 @@
+\chapter{Technical Background}
+\label{sec:state}
+
+% Hier werden zwei wesentliche Aufgaben erledigt:
+
+% 1. Der Leser muß alles beigebracht bekommen, was er zum Verständnis
+% der späteren Kapitel braucht. Insbesondere sind in unserem Fach die
+% Systemvoraussetzungen zu klären, die man später benutzt. Zulässig ist
+% auch, daß man hier auf Tutorials oder Ähnliches verweist, die hier auf
+% dem Netz zugänglich sind.
+
+% 2. Es muß klar werden, was anderswo zu diesem Problem gearbeitet
+% wird. Insbesondere sollen natürlich die Lücken der anderen klar
+% werden. Warum ist die eigene Arbeit, der eigene Ansatz wichtig, um
+% hier den Stand der Technik weiterzubringen? Dieses Kapitel wird von
+% vielen Lesern übergangen (nicht aber vom Gutachter ;-), auch später
+% bei Veröffentlichungen ist "Related Work" eine wichtige Sache.
+
+% Viele Leser stellen dann später fest, daß sie einige der Grundlagen
+% doch brauchen und blättern zurück. Deshalb ist es gut,
+% Rückwärtsverweise in späteren Kapiteln zu haben, und zwar so, daß man
+% die Abschnitte, auf die verwiesen wird, auch für sich lesen
+% kann. Diese Kapitel kann relativ lang werden, je größer der Kontext
+% der Arbeit, desto länger. Es lohnt sich auch! Den Text kann man unter
+% Umständen wiederverwenden, indem man ihn als "Tutorial" zu einem
+% Gebiet auch dem Netz zugänglich macht.
+
+% Dadurch gewinnt man manchmal wertvolle Hinweise von Kollegen. Dieses
+% Kapitel wird in der Regel zuerst geschrieben und ist das Einfachste
+% (oder das Schwerste weil erste).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% TECHNICAL BACKGROUND                                                         %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% HIGH PERFORMANCE COMPUTING                                                   %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Cluster computing}
+Parallel computers are not anymore specialized traditional
+supercomputing platforms, instead low cost off-the-shelf commodity
+computers form so called compute clusters \cite{ref:hpcc1}.
+
+These loosely coupled components of a cluster are built from
+multiprocessor PCs or workstation and are connected via a high-speed
+network connection.
+
+Therefore a compute cluster forms a homogeneous network of compute
+entities, which are also called nodes. Every node can consist out of
+different compute devices such as multicore CPUs and with more and
+more popularity also acceleration devices like graphic cards. With the
+consequence of a hierarchicle structure on the node with non-uniform
+memory access (NUMA) \cite[numa]{ref:numa}.
+
+The memory between nodes is not shared in principle, thus normally
+every node has its own memory and therfore a compute cluster belongs
+to the class of distributed memory architectures.
+
+Only a few problems can be calculated without exchanging information
+between other nodes. Thus each node has the challange to retrieve all
+the data, that is needed to calculate the next step of its
+computation.
+
+\begin{itemize}
+\item Computational power of single computer are limited by 
+  phsical laws
+\item Computers of a cluster need to work together
+\item Future of high performance computing \cite{ref:hpc}
+\item Scales
+\end{itemize}
+
+There are several ways to retrieve data from other nodes. The most
+obvious way is to use direct communication between nodes. This
+can be very low level protocols like TCP, UDP, IP by using UNIX sockets (\ref{sec:tcp_udp_ip}) or more modern and abstract models like the message passing interface (\ref{sec:mpi}) and the parallel virual machine (\ref{sec:pvm}).These traditional ways to communicate in 
+cluster systems  will be discussed in section \ref{sec:communication}.
+
+\todo{More related work + references to distributed shared memory} An
+other way is to create a layer on top of the all cluster nodes, so
+that the cluster looks like a single machine with a lot of devices and
+a shared memory. This is called a distributed shared memory
+architecture. The layer can be adjusted to the needs of the user.  It
+can be an own operating system like MOSIX \cite{ref:mosix}, some
+virtualisation layer \cite{ref:cluster_virt} etc.
+This kind of data exchange between nodes will not be discussed in
+detail in this thesis.
+\begin{itemize}
+\item Usage of simple parallization schemas like OpenMP, Pthreads
+\item No explicit communication necessary
+\item Easy usage for non computer scientists
+\item higher abstraction \rightarrow loose of control and efficiency
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% TRADITIONAL COMMUNICATION MECHANISMS IN CLUSTER SYSTEMS                      %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Traditional communication mechanisms in cluster systems}
+\label{sec:communication}
+
+
+\subsection{IP,TCP, UDP, Sockets}
+\label{sec:tcp_udp_ip}
+\begin{itemize}
+  \item Communication in the UNIX way
+  \item IP, Internet Protocol was there before LAN and clusters \cite{ref:ip}
+  \item TCP and UDP on top of IP (TCP/IP, UDP/IP) \cite{ref:tcp, ref:udp}
+  \item TCP/IP and UDP/IP where made available through Berkeley Sockets \cite{ref:sockets}
+  \item Sockets where designed by the UNIX philosophie; everything is a file (file descriptors)
+  \item Sockets where not designed with the usage in hpc environment in mind
+\end{itemize}
+
+\subsection{Message passing intferface (MPI)}
+\label{sec:mpi}
+
+The message passing interface (MPI) is a standardized and portable
+message-passing specification, specified by the Message Passing
+Interface Forum \cite{ref:mpi_specification}.
+
+The first version of the specification, known as MPI-1, was completed
+in 1994 making use of the most attractive features of allready
+existing message passing systems.  Further improvements followed 1997
+by version MPI-2 and 2008 by version MPI-3. There might be some
+confusion about the several MPI specification versions. Major versions
+like MPI-2 or MPI-3 come with new features to the MPI standard and
+minor versions like MPI-1.1 or MPI-1.2 come with clarifiacations of
+allready existing features.  In the following the key features of the
+varying MPI versions are listed:
+
+\begin{itemize}
+  \item MPI-1 (1994)
+    \begin{itemize}
+      \item Basix point-to-point communication
+      \item Collectives
+      \item Derived datatypes
+    \end{itemize}
+  \item MPI-2 (1997)
+    \begin{itemize}
+      \item Parallel I/O
+      \item Remote memory operations (one-sided)
+      \item Dynamic process management
+    \end{itemize}
+  \item MPI-3 (1998)
+    \begin{itemize}
+      \item Nonblocking collectives
+      \item Improved one-sided communication interface
+    \end{itemize}
+\end{itemize}
+
+An MPI programm is a set of autonomous processes, executing their own
+code, in an MIMD style \cite{Flynn:1972:COE:1952456.1952459}.  Each
+process rests in his own adress space and communicates via MPI
+communication primitives with other processes in the same MPI
+programm. 
+
+Processes are identified according to their relative rank in a group by
+consecutive integers from 0 to groupsizie-1. Which the initial group
+compromises the full set of processes with ranks in the range 0 to 
+the number of processes. A typical MPI program run is composed from
+the following steps:
+
+\begin{itemize}
+  \item MPI process
+    \begin{enumerate}
+      \item Start MPI programm
+      \item Init MPI environment
+      \item Ask for own rank
+      \item Ask for number of ranks overall
+      \item Depend on own rank and overall ranks do some task (varying flow of control between ranks)
+      \item Communicate with other ranks
+      \item Finalize MPI environment
+      \item Exit MPI programm
+    \end{enumerate}
+\end{itemize}
+
+MPI provides a large and versatile set of routines. At its most
+basic, MPI provides function for sending and receiving a messages.
+Both blocking
+\begin{itemize}
+  \item $MPI\_Send$
+  \item $MPI\_Recv$
+\end{itemize}
+and nonblocking
+\begin{itemize}
+\item $MPI\_ISend$
+\item $MPI\_IRecv$
+\end{itemize}
+
+\begin{itemize}
+\item Standardized and portable message-passing \cite{ref:mp} specification, not implementation
+\item High level of abstraction
+\item layer 5 and higher of OSI Reference Model
+\item Fits needs of parallel programming community
+\item Sending messages between processes on same or different nodes
+\item high performance at a relatively low cost
+
+\item Communication on top of existing communication mechanisms
+  (overlay network, communication middleware)
+\item De facto standard for communication in cluster / hpc systems
+\item Implementations are available on virtually every parallel
+  computer systems
+\item Overlay network implemented on top of the communication
+  abstractraction provided by the system (sockets, AM, etc.)
+\item Zero-data copy transfer
+\item Usable in shared and distributed memory systems
+\item Free libraries available (OpenMPI)
+\item Language independent communication protocol
+\end{itemize}
+
+\subsection{Parallel virtual machine (PVM)}
+\label{sec:pvm}
+\begin{itemize}
+\item Parallel Virtual Machine connects a collection of heterogeneous computers
+  to a single "parallel virtual machine"
+  (http://en.wikipedia.org/wiki/PVM)
+\item Support for communication and synchronization operations
+\item Configuration control
+\item synamic Spawning of pocressen
+\item PVM daemons are spawned on a set of nodes
+\item Local processes connect to PVM daemons and can 
+  communicate through this daemon to other PVM daemons
+\end{itemize}
+
+\subsection{Overlay / P2P networks}
+\section{Fault tolerance}
+\section{Load balancing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% PIConGPU - THE APPLICATION                                                   %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{PIConGPU - the application}
+\label{sec:picongpu}
+\begin{itemize}
+  \item A Many-GPGPU Particle-in-Cell Code
+  \item Electric and magnetic fields are interpolated on a physical
+    grid dividing the simulated volume into cells
+  \item Simulated volume divided in cubes / squares
+  \item Every GPU computes one of these cubes / squares
+  \item One MPI process per cube square
+  \item Offload of simulation data to GPUs
+  \item Communication based on MPI
+\end{itemize}
+
+\subsection{Requirements for the upcoming generation of super computers}
+\begin{itemize}
+\item Run picongpu on xeon phi in native mode
+\item Exchangeable communication layer to be portable / ready  for the upcoming
+  generation of acceleration devices
+\end{itemize}
+
+\subsection{Communication topologie}
+\begin{itemize}
+\item 3- or 2-dimensional mesh
+\item next neighbor communication
+\item Some collective operations (Allgather, Gather, GatherV, AllReduce, Reduce
+\item Offload of simulation data to GPU
+\end{itemize}
+
+
+\cleardoublepage
+
+%%% Local Variables:
+%%% TeX-master: "diplom"
+%%% End:
