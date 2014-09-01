@@ -20,6 +20,20 @@
 
 \section{A Graph-based communication layer}
 
+The during this thesis developed communication layer was leaded by the
+needs of PIConGPU as an example application for high performance
+computing on cluster systems.
+
+The implementation of PIConGPU has some lack of abstraction for their
+communication. Because there is no abstraction layer which hides the
+MPI communication calls, which makes it impossible to exchange it.
+
+Also the communication topology of the simulations is not be modeled
+satisfying. Neighboring subdomains are directly adressed by their
+ranks, thus changing the communication topology also leads to a lot of
+changes in the algorithm.
+
+
 \cleardoublepage
 
 %%% Local Variables:

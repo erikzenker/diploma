@@ -42,7 +42,6 @@
 % HIGH PERFORMANCE COMPUTING                                                   %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\todo{Search for more sources, but content should be enought}
 \section{Cluster computing}
 Parallel computers are not anymore specialized traditional
 supercomputing platforms, instead low cost off-the-shelf commodity
@@ -51,40 +50,77 @@ computers form so called compute clusters \cite{ref:hpcc1}.
 A compute cluster is in principle a distributed memory architecture
 and forms a homogeneous network of individual compute entities, which
 will be called nodes. Each node is equipped with one or more central
-processing units (CPUs) and with a crowing popularity also with one or
-more accelerator devices.
-
-Accelerator devices are some kind of coprocessor which are usually
-able to execute operations in a massively parallel manner.
-General-purpose computing on graphics processing units (GPGPU) enters
-with its high speedups the world of compute clusters.  These graphics
-processing units (GPUs) are mainly from AMD or
-Nvidia. OpenCL\cite{ref:opencl} is the currently dominant open
-general-purpose GPU computing language. The dominant proprietary
-framework is Nvidia's CUDA\cite{ref:cuda}.
-
-Also the many core archtitectures xeon phi\cite{ref:xeon_phi} from
-intel tries to establish iself in the compute cluster marked. It
-should be programmed by OpenMP and tries to accelerate mainly existing
-OpenMP code without any further changes in the programm.
-
-Usually, the accelerator devices need a CPUs to manage the memory
-transfer between main memory and device memory and also for internode
-communication between the nodes. In this so called offload mode the
-CPU is called host and the accelerator device just device.
-
-But accelerator devices have in the future the objective to run in a
-standalone or native mode, where a host is not needed anymore.  The
-Xeon Phi is allready able to run in native mode.
-
-The first places in the TOP500 list of supercomputers are all
-accelerated by accelerator devices, that shows the developement of
-compute clusters to a heterogeneous system archtitecture.
+processing units (CPUs) and with a growing popularity also with one or
+more accelerator devices (e.g. GPUs) \cite{ref:accel}.
 
 The memory between the nodes is not shared, thus usually every node
 has its own local memory. To exchange data between the local memorys
 of the nodes, the nodes are interconnected via a high-speed network
 connection with small-latency and high-bandwidth.
+
+\todo{search for applications of compute clusters}
+The calculation power of a high performance computing cluster
+is used where time to solution is important. These are
+physical simulations\cite{ref:picongpu}, weather simulations.
+
+\begin{itemize}
+  \item Source: Grids, Clouds and Virtualization Cafaro, Massimo Aloisio, Giovanni
+  \item Source: High-Performance Computing on Complex Environments
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% MANY-CORE ARCHITECTURES AND ACCELERATORS                                     %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Many-core architectures and accelerators}
+\label{sec:accel}
+
+Traditional clusters, grids, and cloud systems are adding more and
+more state-of-the-art many-core architectures or accelerator devices
+to their compute nodes to exploit high peak performance for their applications.
+
+Accelerator devices are some kind of coprocessor which are usually
+able to execute operations in a massively parallel manner.  The
+devices are commonly optimized for a handful of operations (e.g
+floating point operations) in which they can outperform traditional
+CPU hardware. But, this devices do also require special treatment in
+regard to programming.
+
+Particularly, General-purpose computing on graphics processing units
+(GPGPU), mainly manifactured from AMD or Nvidia, enter the world of
+compute clusters. Nvidia has pushed forward CUDA\cite{ref:cuda} as the
+prefered model and language to programm their
+GPUs. OpenCL\cite{ref:opencl} adopts a more general approach as a
+common model for heterogeneous programming for a wide range of
+accelerator devices.
+
+Another member of the accelerator device familie is the xeon
+phi\cite{ref:xeon_phi} from intel. The xeon phi is a many-core
+coprocessor based on interconntected legacy x86 cores on a single chip.
+
+Usually, the accelerator devices need a CPU to manage the memory
+transfer between main memory and device memory and also for internode
+communication between the nodes. In this so called offload mode the
+CPU is called host and the accelerator device just device.
+
+But accelerator devices have the future objective to run in a
+standalone or native mode, where a host is not needed anymore.  The
+Xeon Phi is allready able to run in native mode.
+
+Supercomputers of the TOP500 are allready populated by accelerator
+devices, which demonstrated the developement of compute clusters to
+heterogeneous systems.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% DOMAIN DECOMPOSITION                                                         %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Domain decomposition}
+\label{sec:domain_decomposition}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -93,13 +129,18 @@ connection with small-latency and high-bandwidth.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Traditional communication mechanisms in cluster systems}
 \label{sec:communication}
-Communication plays an important role in complex simulation
-applications. It is not possible anymore that these complex simulation
-applications fit on a single compute device, because they are memory
-bounded. Thus the simulation need to be decomposed in subdomains and
-distributed to more compute devices.  The Subdomains are usually not
-independent from each other, they need to exchange data. There are
-several methods to exchange data between the nodes.
+Communication plays a central role in complex simulation
+applications.
+\todo{Examples for communication intensive
+  simulations}
+
+That is because simulations come with large datasets, which
+are not possible to fit on a single compute device anymore.
+
+ Thus the simulation need to be decomposed in
+subdomains and distributed to more compute devices.  The Subdomains
+are usually not independent from each other, they need to exchange
+data. There are several methods to exchange data between the nodes.
 
 The most simple way is to let the nodes communicate directly with each
 other.  This can be done by low level protocols like TCP, UDP, IP
@@ -108,14 +149,14 @@ in the UNIX way; everything is a file or file descriptor. But Sockets
 where not designed for the usage in a high performance computing
 environment in mind.
 
-Active messages \cite{ref:am} is a slight departute from the classical
+Active messages \cite{ref:am} is a slight departure from the classical
 send-receive model. It is based on one-sided communication operations,
 which transfer messages regardless of the current activity of the
 receiver process. It was designed to reduce the impact of
 communication overhead on application performance.
 
 A more modern and abstract model is the Message Passing Interface,
-which will be explained in section \ref{sec:mpi}.
+what is described in section \ref{sec:mpi}.
 
 An other way is to let the compute cluster look like a single large
 parallel computer. The operating system MOSIX \cite{ref:mosix} is a
@@ -124,12 +165,14 @@ image\cite{ref:single_system_image} as if using one computer with
 multiple CPUs. The Parallel Virtual Machine\cite{ref:pvm} is a
 software package that permits a heterogeneous collection of Unix
 and/or Windows computers hooked together by a network to be used as a
-single computer.  These distributed shared architectures make it
-possible to use standard and simple parallization schemas like
-Pthreads or OpenMP.  Communication between the nodes does not have to
-be modeld explicitly, thus it is easy to use for non computer
-scientiest. But with this kind of higher abstraction allways comes a
-loose of control and therefore also efficiency.
+single computer.
+
+These distributed shared architectures make it possible to use
+standard and simple parallization schemas like Pthreads or OpenMP.
+Communication between the nodes does not have to be modeld explicitly,
+thus it is easy to use for non computer scientiest. But with this kind
+of higher abstraction allways comes a loose of control and therefore
+also efficiency.
 
 \subsection{Message passing intferface (MPI)}
 \label{sec:mpi}
@@ -142,6 +185,10 @@ The specification is language independent and its implementations are
 available on virtually every parallel computer system.  Popular
 implementations are MPICH and OpenMPI. MPICH2 implements the MPI-2.1
 specification. OpenMPI has the goal to be full MPI-3 standard conform.
+
+The MPI implementations are implemented on top of existing communication
+abstractraction provided by the underlying cluster system (sockets,
+AM, etc.)
 
 The first version of the specification, known as MPI-1, was completed
 in 1994 making use of the most attractive features of allready
@@ -156,7 +203,7 @@ the following the key features of the varying MPI versions are listed:
 \begin{itemize}
   \item MPI-1 (1994)
     \begin{itemize}
-      \item Basix point-to-point communication
+      \item Basic point-to-point communication
       \item Collectives
       \item Derived datatypes
     \end{itemize}
@@ -180,9 +227,9 @@ communication primitives with other processes in the same MPI
 programm.
 
 Processes are identified according to their relative rank in a group
-by consecutive integers from 0 to groupsizie-1. Which the initial
+by consecutive integers from 0 to groupsize minus 1. Which the initial
 group compromises the full set of processes with ranks in the range 0
-to the number of processes. A typical MPI program run is composed from
+to number of processes minus one. A typical MPI program run is composed from
 the following steps:
 
 \begin{enumerate}
@@ -208,12 +255,51 @@ sucessfully execute the collective operation.  The result of the
 operation is either received by one process, the so called root, or by
 all processes of a group.
 
-The MPI communication is implemented on top of existing communication
-abstractraction provided by the underlying cluster system (sockets,
-AM, etc.)
 
-\section{Fault tolerance}
-\section{Load balancing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% JUNGLE COMPUTING                                                             %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Jungle computing}
+
+Jungle computing can be seen as a further evolution step after
+grid computing. The initial intention of grid computing was
+the request to bundle the tremendous compute power of hpc
+systems over the internet\cite{ref:grid}. It was meant to an
+easy to use system over a set of distributed ressources, which
+delivers potentially efficient computing, even at a worldwide scale.
+The hook with grid computing is, that every compute systems has its
+own administration environment, submit system, communication middleware,
+and programming interface. 
+
+Even though every system viewed in isolation is programmable by using
+platform specific code, write applications that interconects several
+compute systems can be a hard challange. And with the increasing
+desire for speed, sclability and flexibility in many scientific research
+domains, there is demand for easy end-user access to multiple and potentially
+very diverse platforms.
+
+``A true computing jungle'' where the words by which F. J. Seinastra
+introduced such hetergeneous systems as jungle computing
+systems\cite{ref:jungle}. It is defined as simultaneously using a
+combination of heterogeneous, hierarchical and distributed computing
+ressources.
+
+This definition describes the undergoing revolutionary change in 
+hpc area very well. On one hand, computations will be distributed
+to several compute clusters and on the other hand the underlying
+hardware of compute nodes will change to heterogeneous hardware in
+the years to come. The efficient programming by scientist of such systems, 
+und thereby the efficient mapping of computational problems onto
+the jungle has become enormously difficult to maintain an overview.
+
+
+\begin{itemize}
+  \item Jungle computing requirements
+\end{itemize}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -225,44 +311,31 @@ AM, etc.)
 PIConGPU is a relativistic particle-in-cell (PIC) code designed for
 simulating laser-plasma interactions \cite{ref:picongpu}. The
 application is optimized for the execution on cluster systems with
-NVIDIA GPU-accelerated nodes, whereby the host CPUs are only utilized
-for memory transfers between CPU and GPU and for internode
-communication via MPI (Section \ref{sec:mpi}).
+NVIDIA GPU-accelerated\ref{sec:accel} nodes, whereby the host CPUs are
+only utilized for memory transfers between CPU and GPU and for
+internode communication via MPI (Section \ref{sec:mpi}).
 
 The Computational power of a single GPU is limited in regard of clock
 frequency and memory size by physical laws.
 
 Therefore, The simulation volume need to be divided into
-subdomains. Each subdomain is mapped to its own GPU. Particles, fields
-etc. can cross the border of the subdomain and therfore data between
-subdomains has to be exchanged. The Data will be copied onto the host
-memory and is then transfered to the host of the neighboring
-subdomain. The Communication between the nodes of PIConGPU is handled by MPI.
-After that the memory is copied to the GPU memory of the
-neighboring subdomain host. The data transfer between CPU and GPU is
-also called offload.
+subdomains\ref{sec:domain_decomposition}. Each subdomain is mapped to
+its own GPU. Particles, fields etc. can cross the border of the
+subdomain and therfore data between subdomains has to be
+exchanged. The Data will be copied onto the host memory and is then
+transfered to the host of the neighboring subdomain. The Communication
+between the nodes of PIConGPU is handled by MPI.  After that the
+memory is copied to the GPU memory of the neighboring subdomain
+host. The data transfer between CPU and GPU is also called offload.
 
 
-
-The during this thesis developed communication layer was leaded
-by the needs of PIConGPU as an example application for
-high performance computing on cluster systems.
-
-The implementation of PIConGPU has some lack of abstraction for their
-communication. Because there is no abstraction layer which hides the
-MPI communication calls, which makes it impossible to exchange it.
-
-Also the communication topology of the simulations is not be modeled
-satisfying. Neighboring subdomains are directly adressed by their
-ranks, thus changing the communication topology also leads to a lot of
-changes in the algorithm.
 
 \subsection{Communication topologie}
 The simulation volume of the PIC algorithm is decomposed into a 2- or
 3- dimensional mesh structured depending on the kind of simulation.
 Individual mesh cells are communicating mainly with the next
-neighboring cells. To decouple communication and computation, nonblocking variant
-of this basic operations are used.
+neighboring cells. To decouple communication and computation,
+nonblocking variant of this basic operations are used.
 
 \todo{find out why collective operations are used} There are also some
 collective operations like allgather, gather gatherv, allreduce and
@@ -275,6 +348,20 @@ reduce used.
   upcoming generation of acceleration devices
 \end{itemize}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% RELATED WORK                                                                 %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Related work}
+
+\begin{itemize}
+  \item ibis
+  \item ProActive
+  \item Constellation
+  \item European grid initiative (EGI)
+  \item ComplexHPC: Open European Network for High-Performance Computing in Complex Environments (COST)
+\end{itemize}
 
 
 \cleardoublepage
