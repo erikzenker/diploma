@@ -18,7 +18,233 @@
 % wohl mindestens 8 Seiten haben, mehr als 20 können ein Hinweis darauf
 % sein, daß das Abstraktionsniveau verfehlt wurde.
 
-\section{A Graph-based communication layer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% MOTIVATION AND REQUIREMENTS                                                  %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Motivation}
+\begin{itemize}
+\item Parallel computers are stricly necessary in scientific community
+\item Parallel computers are compute clusters \ref{sec:cluster}
+\item In a nutshel very homogeneous compute architecture
+\item Compute nodes connected by abitrary network
+\item Domain decomposition \ref{sec:domain_decomposition} of physic simulation 
+and static mapping to compute architecture
+\item Simulation is changing over time and load may be not distributed anymore
+\item PIConGPU \ref{sec:picongpu} is even harder because of an hierarchicle
+memory architecture. 
+\item NUMA architecture will crow even harder
+\end{itemize}
+
+\subsection{Requirements}
+To be able to model such complex and heterogeneous topologies
+  the following components are required:
+
+\begin{itemize}
+\item Communication abstraction layer, which introduce an abstraction from existig
+  communication layers.
+\item Description of the communication topology
+\item Possibility to communicate inside the physical domain
+\item Mapping of communiation topology onto the hardware topology
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% ANALYSIS OF PIConGPU CODE                                                    %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Analysis of PIConGPU code}
+\begin{itemize}
+  \item How does the communication topologie looks like ?
+  \item What are the different levels of communication ?
+  \item What kind of communcation layer is used ?
+  \item How is Communication implemented in PIConGPU ?
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% COMMUNICATOR                                                                 %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Abstraction from existing communication layers - Communicator}
+The abstraction from existing communication layers is a fundamental
+property for a flexibel and portable application. Compute clusters
+are not the same in general. Indeed, there are existing standards
+for communication in cluster system, but the world of computer
+science is subject to constant changes. Thus the possibility to
+exchange the underlying communication layer without changing the
+interface to the communication inside the application, is a prerequisite
+for future applications in distributed computing.
+
+The challange is to provide a very general interface, that is able to
+map varying communication libraries onto it. This interface should
+remind the programmer on known communication schemas, which does
+not need a rethink.
+
+The communicator is the connection to a network of an existing 
+communication layer. The user can create several communicators
+with varying communication layers underneath. Or it is also 
+possible to create several communicators pointing into the
+same network.
+
+Every communicator is identifiable through identifier, that is
+unique inside the network in which the communicator is connected to.
+
+In first place the communicator provides peer-to-peer communications. That
+are basic communication operations to send and receive abitrary data between 
+two communicators. These operations are available blocking and also non-blocking.
+The interface is influenced by existing communication libraries, that
+share some common interface.
+
+\begin{itemize}
+  \item Data \\
+    Usually, this is a pointer to some memory.
+    But can also be implemented with references and c++ templates.
+    This makes it possible to send some abitrary datatypes
+  \item DataSize\\
+    Has to be transmitted when only a pointer is given. In the
+    case that some stl container like vector or arrays is 
+    handed over, the size can be determined by the size() function
+  \item Destination / Source
+    This is a adress of the receiving or sending process.
+    
+\end{itemize}
+
+To support also MPI as backend, the following information have to be
+added to the communication interface:
+
+\begin{itemize}
+  \item Tag
+    Is used in MPI to seperate messages from the process and give them
+    meaning without the need of an message header or something similar
+  \item Context
+    This gives MPI the information which processes are able to communicate
+    with each other.
+    
+\end{itemize}
+
+Hint: Context and tag could be removed, thus some default tag and a global
+      context would be choosen for the operations.
+
+
+
+\begin{itemize}
+\item There are many communication libraries
+\item The challange is to provide a very general interface
+\item Comparing several communication libraries like MPI, ZMQ, boost::asio and boost::mpi
+  there is some common interface for peer-to-peer communication.
+\item send(data, dataSize, destination)
+\item recv(data, dataSize, source)
+\item It provides also collective operations known from MPI
+\end{itemize}
+
+\begin{itemize}
+\item Peer to peer operations
+  \begin{itemize}
+  \item send
+  \item recv
+  \item asyncSend
+  \item asyncRecv
+  \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+\item Collective operations
+  \begin{itemize}
+    \item gather
+    \item gather2
+    \item allGather
+    \item allGather2
+    \item reduce
+    \item allReduce
+    \item broadcast
+    \item syncronize
+    \item createContext
+  \end{itemize}
+
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% GRAPH                                                                        %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Description of the communication topologie}
+The considerations started with the analysis of the domain composition
+of the PIConGPU simulation volume. The PIC code has several levels
+of decompositions. First there is the partitioning into small cells, which
+is the real partitioning of the physical volume. These cells are the smallest
+entities of the simulation. 
+
+Further cells are combined to supercells, which is a memory optimized set
+of cells.
+
+And finally are supercells combined to a cluster of supercells which than 
+are calculated by a single compute device. So the first considerations
+where to model exactly these three levels: physical topologie, memory topologie,
+communication topologie.
+
+But the mentioned topologie follow all the same principles. They connect some
+entities. Therefore every topologie is possible to map onto a graph.
+So a graph can be used to describe several levels of doman decomposition
+with a single language.
+
+Properties of the graph 
+\begin{itemize}
+  \item Directed graph
+  \item Multiple edges (multi graph)
+  \item Allows loops
+\end{itemize}
+
+
+\section{Communication on physical domain - GraphCommunicator}
+
+\begin{itemize}
+\item Communication on the graph level
+\item Vertices are peers of the communication network and can be adressed directly
+\item Vertices of a graph are able to exchange data with each other
+\item All vertices of a graph can execute collective operations
+
+\item Direct connection Relatively stupid, just connection of communicator and nameService
+\begin{itemize}
+\item 
+\end{itemize}
+
+\item More logic in collective operations
+  \begin{itemize}
+    \item Gather\\
+      Vertices on the same host collect data local first and then use
+      the collective gather provided by the communicator
+    \item Reduce\\
+      Vertices on the same host reduce data local first and then use
+      reduce provided by the communicator.
+    \item Synchronize\\
+      This is a barrier function which lets the host wait for all others host
+      that are contributing to a special graph. 
+    \item There is some problem with these collective operations when a host
+      forgets to call the collective on all its hosted vertices of an graph.
+      Then the collective operation can not be finished and the application 
+      is therefore locked. This problem is passed wo wise programmers which
+      do not forget this issue.
+  \end{itemize}
+  
+
+\item Implemented on top of communicator as overlay network
+\item Location information of vertices retrieved from nameService
+
+
+\end{itemize}
+
+\section{Mapping onto the hardware topologie}
+
+\subsection{Requirements for the upcoming generation of super computers}
+\begin{itemize}
+\item Run picongpu on xeon phi in native mode
+\item Exchangeable communication layer to be portable / ready for the
+  upcoming generation of acceleration devices
+\end{itemize}
+
 
 The during this thesis developed communication layer was leaded by the
 needs of PIConGPU as an example application for high performance
@@ -32,6 +258,7 @@ Also the communication topology of the simulations is not be modeled
 satisfying. Neighboring subdomains are directly adressed by their
 ranks, thus changing the communication topology also leads to a lot of
 changes in the algorithm.
+
 
 
 \cleardoublepage

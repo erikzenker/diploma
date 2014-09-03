@@ -43,6 +43,7 @@
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Cluster computing}
+\label{sec:cluster}
 Parallel computers are not anymore specialized traditional
 supercomputing platforms, instead low cost off-the-shelf commodity
 computers form so called compute clusters \cite{ref:hpcc1}.
@@ -60,7 +61,8 @@ connection with small-latency and high-bandwidth.
 
 \todo{search for applications of compute clusters}
 The calculation power of a high performance computing cluster
-is used where time to solution is important. These are
+is used where time to solution is important and the memory
+of a single computer does not cover the demand of an application. These are
 physical simulations\cite{ref:picongpu}, weather simulations.
 
 \begin{itemize}
@@ -105,12 +107,15 @@ communication between the nodes. In this so called offload mode the
 CPU is called host and the accelerator device just device.
 
 But accelerator devices have the future objective to run in a
-standalone or native mode, where a host is not needed anymore.  The
-Xeon Phi is allready able to run in native mode.
+standalone or native mode, where a host is not needed anymore. 
+Which also implies that these devices are connected directly to
+a network connection, what gives them to possibility to communicate
+directly with each other. The Xeon Phi is allready able to run in native mode.
 
 Supercomputers of the TOP500 are allready populated by accelerator
 devices, which demonstrated the developement of compute clusters to
-heterogeneous systems.
+heterogeneous systems and it also shows that the hpc community should
+be able to programm such systems.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -120,6 +125,27 @@ heterogeneous systems.
 \section{Domain decomposition}
 \label{sec:domain_decomposition}
 
+Domain decomposition is a very popular method to seperate
+computational problem in smaller chunks of work, which are solveable
+independent from each other. This gives an application the chance to
+exploit the tremendous performace gain of parallel computers.
+
+In The simplest form of domain decomposition each subdomain lies on
+its own process. Usually we do not live in a perfect parallel world in
+such communication or coordinatin between the processes is needed
+\ref{sec:communication}.
+
+Decomposition of domains can be seen in three levels: the set of
+subdomains which make some local computations, the communication with
+neighboring cells and global communication operations which include
+concurrent communication of several or all subdomains.
+
+The challange of domain decomposition mehtods is to map these three
+levels efficiently onto a parallel computer.
+
+\begin{itemize}
+\item 
+\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -129,13 +155,11 @@ heterogeneous systems.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Traditional communication mechanisms in cluster systems}
 \label{sec:communication}
+\todo{Examples for communication intensive simulations}
 Communication plays a central role in complex simulation
-applications.
-\todo{Examples for communication intensive
-  simulations}
-
-That is because simulations come with large datasets, which
-are not possible to fit on a single compute device anymore.
+applications. The calculation of large datasets in a
+acceptable amount of time is not possible on a single compute
+device anymore.
 
  Thus the simulation need to be decomposed in
 subdomains and distributed to more compute devices.  The Subdomains
@@ -143,11 +167,13 @@ are usually not independent from each other, they need to exchange
 data. There are several methods to exchange data between the nodes.
 
 The most simple way is to let the nodes communicate directly with each
-other.  This can be done by low level protocols like TCP, UDP, IP
+other in a peer to peer manner.  This can be done by low level protocols like TCP, UDP, IP
 using Berkeley sockets (\ref{sec:tcp_udp_ip}), which is communication
 in the UNIX way; everything is a file or file descriptor. But Sockets
 where not designed for the usage in a high performance computing
 environment in mind.
+
+\todo{boost::asio, ZMQ}
 
 Active messages \cite{ref:am} is a slight departure from the classical
 send-receive model. It is based on one-sided communication operations,
@@ -172,7 +198,9 @@ standard and simple parallization schemas like Pthreads or OpenMP.
 Communication between the nodes does not have to be modeld explicitly,
 thus it is easy to use for non computer scientiest. But with this kind
 of higher abstraction allways comes a loose of control and therefore
-also efficiency.
+also efficiency. Also the underlying compute cluster has to provide
+such an architecture, which limits the application to this
+kind of clusters.
 
 \subsection{Message passing intferface (MPI)}
 \label{sec:mpi}
@@ -293,7 +321,7 @@ to several compute clusters and on the other hand the underlying
 hardware of compute nodes will change to heterogeneous hardware in
 the years to come. The efficient programming by scientist of such systems, 
 und thereby the efficient mapping of computational problems onto
-the jungle has become enormously difficult to maintain an overview.
+the jungle has become enormously difficult to maintain and overview.
 
 
 \begin{itemize}
@@ -320,20 +348,17 @@ frequency and memory size by physical laws.
 
 Therefore, The simulation volume need to be divided into
 subdomains\ref{sec:domain_decomposition}. Each subdomain is mapped to
-its own GPU. Particles, fields etc. can cross the border of the
-subdomain and therfore data between subdomains has to be
-exchanged. The Data will be copied onto the host memory and is then
-transfered to the host of the neighboring subdomain. The Communication
-between the nodes of PIConGPU is handled by MPI.  After that the
-memory is copied to the GPU memory of the neighboring subdomain
-host. The data transfer between CPU and GPU is also called offload.
+its own GPU. One can imagine that the simulation volume is a cuboid
+and the subdomains are filling up that cube with smaller cuboids,
+also called cells.
 
+Particles, fields etc. can cross the border of the
+cells and therfore data between cells has to be
+exchanged. The data still is not transfered directly between 
+the GPUs, thus it has to take the detour via host and network, instead
+of just the network.
 
-
-\subsection{Communication topologie}
-The simulation volume of the PIC algorithm is decomposed into a 2- or
-3- dimensional mesh structured depending on the kind of simulation.
-Individual mesh cells are communicating mainly with the next
+Individual cells are communicating mainly with the next
 neighboring cells. To decouple communication and computation,
 nonblocking variant of this basic operations are used.
 
@@ -341,12 +366,6 @@ nonblocking variant of this basic operations are used.
 collective operations like allgather, gather gatherv, allreduce and
 reduce used.
 
-\subsection{Requirements for the upcoming generation of super computers}
-\begin{itemize}
-\item Run picongpu on xeon phi in native mode
-\item Exchangeable communication layer to be portable / ready for the
-  upcoming generation of acceleration devices
-\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
