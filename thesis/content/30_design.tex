@@ -29,21 +29,22 @@
 \item Parallel computers are compute clusters \ref{sec:cluster}
 \item In a nutshel very homogeneous compute architecture
 \item Compute nodes connected by abitrary network
-\item Domain decomposition \ref{sec:domain_decomposition} of physic simulation 
-and static mapping to compute architecture
-\item Simulation is changing over time and load may be not distributed anymore
-\item PIConGPU \ref{sec:picongpu} is even harder because of an hierarchicle
-memory architecture. 
+\item Domain decomposition \ref{sec:domain_decomposition} of physic
+  simulation and static mapping to compute architecture
+\item Simulation is changing over time and load may be not distributed
+  anymore
+\item PIConGPU \ref{sec:picongpu} is even harder because of an
+  hierarchicle memory architecture.
 \item NUMA architecture will crow even harder
 \end{itemize}
 
 \subsection{Requirements}
-To be able to model such complex and heterogeneous topologies
-  the following components are required:
+To be able to model such complex and heterogeneous topologies the
+following components are required:
 
 \begin{itemize}
-\item Communication abstraction layer, which introduce an abstraction from existig
-  communication layers.
+\item Communication abstraction layer, which introduce an abstraction
+  from existig communication layers.
 \item Description of the communication topology
 \item Possibility to communicate inside the physical domain
 \item Mapping of communiation topology onto the hardware topology
@@ -69,45 +70,42 @@ To be able to model such complex and heterogeneous topologies
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Abstraction from existing communication layers - Communicator}
 The abstraction from existing communication layers is a fundamental
-property for a flexibel and portable application. Compute clusters
-are not the same in general. Indeed, there are existing standards
-for communication in cluster system, but the world of computer
-science is subject to constant changes. Thus the possibility to
-exchange the underlying communication layer without changing the
-interface to the communication inside the application, is a prerequisite
-for future applications in distributed computing.
+property for a flexibel and portable application. Compute clusters are
+not the same in general. Indeed, there are existing standards for
+communication in cluster system, but the world of computer science is
+subject to constant changes. Thus the possibility to exchange the
+underlying communication layer without changing the interface to the
+communication inside the application, is a prerequisite for future
+applications in distributed computing.
 
 The challange is to provide a very general interface, that is able to
 map varying communication libraries onto it. This interface should
-remind the programmer on known communication schemas, which does
-not need a rethink.
+remind the programmer on known communication schemas, which does not
+need a rethink.
 
-The communicator is the connection to a network of an existing 
-communication layer. The user can create several communicators
-with varying communication layers underneath. Or it is also 
-possible to create several communicators pointing into the
-same network.
+The communicator is the connection to a network of an existing
+communication layer. The user can create several communicators with
+varying communication layers underneath. Or it is also possible to
+create several communicators pointing into the same network.
 
-Every communicator is identifiable through identifier, that is
-unique inside the network in which the communicator is connected to.
+Every communicator is identifiable through identifier, that is unique
+inside the network in which the communicator is connected to.
 
-In first place the communicator provides peer-to-peer communications. That
-are basic communication operations to send and receive abitrary data between 
-two communicators. These operations are available blocking and also non-blocking.
-The interface is influenced by existing communication libraries, that
-share some common interface.
+In first place the communicator provides peer-to-peer
+communications. That are basic communication operations to send and
+receive abitrary data between two communicators. These operations are
+available blocking and also non-blocking.  The interface is influenced
+by existing communication libraries, that share some common interface.
 
 \begin{itemize}
-  \item Data \\
-    Usually, this is a pointer to some memory.
-    But can also be implemented with references and c++ templates.
-    This makes it possible to send some abitrary datatypes
-  \item DataSize\\
-    Has to be transmitted when only a pointer is given. In the
-    case that some stl container like vector or arrays is 
-    handed over, the size can be determined by the size() function
-  \item Destination / Source
-    This is a adress of the receiving or sending process.
+  \item Data \\ Usually, this is a pointer to some memory.  But can
+    also be implemented with references and c++ templates.  This makes
+    it possible to send some abitrary datatypes
+  \item DataSize\\ Has to be transmitted when only a pointer is
+    given. In the case that some stl container like vector or arrays
+    is handed over, the size can be determined by the size() function
+  \item Destination / Source This is a adress of the receiving or
+    sending process.
     
 \end{itemize}
 
@@ -115,25 +113,25 @@ To support also MPI as backend, the following information have to be
 added to the communication interface:
 
 \begin{itemize}
-  \item Tag
-    Is used in MPI to seperate messages from the process and give them
-    meaning without the need of an message header or something similar
-  \item Context
-    This gives MPI the information which processes are able to communicate
-    with each other.
+  \item Tag Is used in MPI to seperate messages from the process and
+    give them meaning without the need of an message header or
+    something similar
+  \item Context This gives MPI the information which processes are
+    able to communicate with each other.
     
 \end{itemize}
 
-Hint: Context and tag could be removed, thus some default tag and a global
-      context would be choosen for the operations.
+Hint: Context and tag could be removed, thus some default tag and a
+global context would be choosen for the operations.
 
 
 
 \begin{itemize}
 \item There are many communication libraries
 \item The challange is to provide a very general interface
-\item Comparing several communication libraries like MPI, ZMQ, boost::asio and boost::mpi
-  there is some common interface for peer-to-peer communication.
+\item Comparing several communication libraries like MPI, ZMQ,
+  boost::asio and boost::mpi there is some common interface for
+  peer-to-peer communication.
 \item send(data, dataSize, destination)
 \item recv(data, dataSize, source)
 \item It provides also collective operations known from MPI
@@ -170,34 +168,104 @@ Hint: Context and tag could be removed, thus some default tag and a global
 % GRAPH                                                                        %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Description of the communication topologie}
+\section{Description of the communication topologie - Graph}
 The considerations started with the analysis of the domain composition
-of the PIConGPU simulation volume. The PIC code has several levels
-of decompositions. First there is the partitioning into small cells, which
-is the real partitioning of the physical volume. These cells are the smallest
-entities of the simulation. 
+of the PIConGPU simulation volume. The PIC code has several levels of
+decompositions. First there is the partitioning into small cells,
+which is the real partitioning of the physical volume. These cells are
+the smallest entities of the simulation.
 
-Further cells are combined to supercells, which is a memory optimized set
-of cells.
+Further cells are combined to supercells, which is a memory optimized
+set of cells.
 
-And finally are supercells combined to a cluster of supercells which than 
-are calculated by a single compute device. So the first considerations
-where to model exactly these three levels: physical topologie, memory topologie,
-communication topologie.
+And finally are supercells combined to a cluster of supercells which
+than are calculated by a single compute device. So the first
+considerations where to model exactly these three levels: physical
+topologie, memory topologie, communication topologie.
 
-But the mentioned topologie follow all the same principles. They connect some
-entities. Therefore every topologie is possible to map onto a graph.
-So a graph can be used to describe several levels of doman decomposition
-with a single language.
+But the mentioned topologie follow all the same principles. They
+connect some entities. Therefore every topologie is possible to map
+onto a graph.  So a graph can be used to describe several levels of
+doman decomposition with a single language.
 
-Properties of the graph 
+Properties of the graph
 \begin{itemize}
   \item Directed graph
   \item Multiple edges (multi graph)
   \item Allows loops
 \end{itemize}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% NAMESERVICE                                                                  %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Mapping onto the hardware}
 
+%% Requirements
+Fact is, that the communication hardware layout is fixed. The hardware
+is represented by communicators and these are connected in the
+simplest case by an fully connected network. Therefore a network on
+top of the communicators has to be established.
+
+It is a very important property to be able to explicitly map the
+communication topologie of the application onto the communication
+hardware.
+
+In the first place it should gives the application the possibility to
+be optimized on special charakteristics of the compute cluster. For
+example could vertices that need to communicate very intensively with
+each other can be mapped on neighboring nodes or even onto the same
+node. Which makes communication more efficient.
+
+Besides it should be possible to change the mapping of the
+communication topologie onto the communication hardware in
+runtime. This is important when thinking of occuring unbalanced load
+during the run of the application.
+
+%% Process
+The objective is to establish a communication overlay on top of the
+network provided by the communicators. This overlay network is based
+on a graph. Thus all communicators that want to take part on the
+communicatin in this overlay need to know this graph.
+
+This Graph can be constructed in parallel by all processes, delivered
+by a distributed file system or could even be delivered by some
+construction process by explicit communication operations. That is
+left open to the user of this library.
+
+The next phase is the distribution of the vertices of the graph to the
+processes. This has the meaning that a process responsible for the
+communication of this processes. The process will be called host of
+the vertices.
+
+The distribution can be done by several methods: randomized, round
+robin, dictated by some master process etc. This distribution is again
+left open to the user.
+
+The final phase the processes announce their hosted vertices as an
+collective operation to the network of the communicators.
+
+
+The NameService is the connection of the graph as the topology
+description instance and the communicator as communication hardware
+interface.
+
+It contains two mappings. Vertices of a graphs are mapped to
+Communicators and Graphs are mapped to contexts.
+
+
+%% Remapping
+
+\begin{itemize}
+
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% GRAPHCOMMUNICATOR                                                            %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Communication on physical domain - GraphCommunicator}
 
 \begin{itemize}
@@ -232,11 +300,15 @@ Properties of the graph
 
 \item Implemented on top of communicator as overlay network
 \item Location information of vertices retrieved from nameService
-
-
 \end{itemize}
 
-\section{Mapping onto the hardware topologie}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% ETC                                                                          %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Requirements for the upcoming generation of super computers}
 \begin{itemize}
