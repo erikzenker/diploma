@@ -69,6 +69,8 @@ following components are required:
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Abstraction from existing communication layers - Communicator}
+\todo{mention policy based design}
+\todo{Wie trägt komponente bei motivation zu erfüllen}
 The abstraction from existing communication layers is a fundamental
 property for a flexibel and portable application. Compute clusters are
 not the same in general. Indeed, there are existing standards for
@@ -203,10 +205,12 @@ Properties of the graph
 \section{Mapping onto the hardware}
 
 %% Requirements
-Fact is, that the communication hardware layout is fixed. The hardware
-is represented by communicators and these are connected in the
-simplest case by an fully connected network. Therefore a network on
-top of the communicators has to be established.
+Fact is, that the communication hardware layout is fixed. The access
+to the hardware is represented by communicators and these are
+connected in the simplest case by an fully connected network, thus
+every communicator can send messages to every other
+communicator. Therefore a network on top of the communicators has to
+be established.
 
 It is a very important property to be able to explicitly map the
 communication topologie of the application onto the communication
@@ -223,7 +227,7 @@ communication topologie onto the communication hardware in
 runtime. This is important when thinking of occuring unbalanced load
 during the run of the application.
 
-%% Process
+%% Process of announce
 The objective is to establish a communication overlay on top of the
 network provided by the communicators. This overlay network is based
 on a graph. Thus all communicators that want to take part on the
@@ -243,8 +247,12 @@ The distribution can be done by several methods: randomized, round
 robin, dictated by some master process etc. This distribution is again
 left open to the user.
 
-The final phase the processes announce their hosted vertices as an
-collective operation to the network of the communicators.
+Every communicator hosts zero, one or more vertices, so to speak it is
+also possible that one communicator host all vertices and communicates
+in the end with itself.  Thus the processes announce their hosted
+vertices to all other communicators, which will register this
+information into their Vertex->Communicators map.  This can be done by
+the collective operation allGatherV to the network of communicators.
 
 
 The NameService is the connection of the graph as the topology
@@ -254,8 +262,29 @@ interface.
 It contains two mappings. Vertices of a graphs are mapped to
 Communicators and Graphs are mapped to contexts.
 
+%% Remapping of vertices
+Because the communication hardware and topolgie is seperated,
+it is also possible to change the mapping from vertices to 
+communicators on runtime. That can be necessary when load
+of an application is getting inbalanced during the runtime.
 
-%% Remapping
+The application can perform a global load balancing step, which
+is very similar to static load balancing in the beginning
+of the application. Thus vertices are seperated by some rule
+and then announced. The difference is, that the communicators
+have to send the data of their once hosted vertices to the
+new hosts of the vertices.
+
+Another possibility is to do a kind of local load balancing.
+This means that communicators hand over vertices to communicators
+of adjacent vertices. This might not require a global synchronization
+step.
+
+
+
+
+
+
 
 \begin{itemize}
 
