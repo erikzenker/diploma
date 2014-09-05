@@ -25,19 +25,37 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Motivation}
 \begin{itemize}
+% Overall motivation of a communication layer
 \item Parallel computers are stricly necessary in scientific community
-\item Parallel computers are compute clusters \ref{sec:cluster}
-\item In a nutshel very homogeneous compute architecture
-\item Compute nodes connected by abitrary network
-\item Domain decomposition \ref{sec:domain_decomposition} of physic
-  simulation and static mapping to compute architecture
-\item Simulation is changing over time and load may be not distributed
-  anymore
+\item On one side parallel computers are compute clusters
+  \ref{sec:cluster} with a very homogeneous layout, in which the nodes
+  are connected by a abitrary network.  Usually applications are
+  domain decomposed \ref{sec:domain_decomposition} in smaller chunks
+  of work and then distributed onto the homogenous network of nodes on
+  the cluster.  So to speak a very heterogeneous phyisical simulation
+  is mapped onto a homogeneous compute architecture.
+
+  This is fine as long the simulation is not changing to much. Thus
+  every node stays utilized. But real world simulations are changing
+  over time. The workload could increase globally or only locally on
+  some subdomains of the simulation volume.
+
+  This leads to an unbalanced load during the simulation and therefore
+  to unutilized ressource of the compute cluster. In this cases it
+  could make sense to start some new domain decomposition or it could
+  also make sense to move whole subdomains from one node to another.
+
+  This all needs a powerful communication layer which is flexibel
+  enough to support such rebalancing. Common cluster communication
+  frameworks are not able to fullfill these requirements. They are
+  usually static in their distribution and do not satisfy our needs.
+
 \item PIConGPU \ref{sec:picongpu} is even harder because of an
   hierarchicle memory architecture.
 \item NUMA architecture will crow even harder
 \end{itemize}
 
+% Requirements
 \subsection{Requirements}
 To be able to model such complex and heterogeneous topologies the
 following components are required:
@@ -278,17 +296,8 @@ new hosts of the vertices.
 Another possibility is to do a kind of local load balancing.
 This means that communicators hand over vertices to communicators
 of adjacent vertices. This might not require a global synchronization
-step.
-
-
-
-
-
-
-
-\begin{itemize}
-
-\end{itemize}
+step, instead only local communication with all communicators
+that are involved in this local load balancing.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -296,39 +305,56 @@ step.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Communication on physical domain - GraphCommunicator}
+The communication was abstracted from the actual communication layer
+and the communicaiton topologie was modeled with a graph and then
+maped onto communicators.
+
+The next step is to use the graph as a kind of overlay network and
+offer standard communication operations on base of the communicators.
+
+The user should have the feeling, that he really is exchaning messages
+between the vertices of the graph and the library is taking care, that
+the messages are reaching the correct vertex. Thus this is the level
+of abstraction with which the user interacts.
+
+% Communication schemas
+Communication on base of a graph is an interaction of the NameService
+and the graph on which should be communicated. The Graph represents
+connected communication partners and therefore also determines which
+vertices are able to communicate with each other. The NameService
+delivers the information on which Communicator the vertices are
+located.
+
+Vertices are peers of the communication network and can be adressed
+directly.
+
+Thus the interface for direct communication involves the graph in
+which context is communicated, the vertex which is receiver or sender
+of data and the transmited data itself. An overlay based on Graphs
+with multiedge support also needed to add the according edge between
+two communicating vertices.
+
+Operations between all vertices of a graph can be performed as
+collective operations on the graph.  In the case some collective
+operation should be performed, a communicator is responsible to start
+the collective operation for its hosted vertices otherwise it blocks
+all other communicators.
+
+Collective operations add some more arguments to the communication
+interface.
 
 \begin{itemize}
-\item Communication on the graph level
-\item Vertices are peers of the communication network and can be adressed directly
-\item Vertices of a graph are able to exchange data with each other
-\item All vertices of a graph can execute collective operations
-
-\item Direct connection Relatively stupid, just connection of communicator and nameService
-\begin{itemize}
-\item 
-\end{itemize}
-
-\item More logic in collective operations
-  \begin{itemize}
-    \item Gather\\
-      Vertices on the same host collect data local first and then use
-      the collective gather provided by the communicator
-    \item Reduce\\
-      Vertices on the same host reduce data local first and then use
-      reduce provided by the communicator.
-    \item Synchronize\\
-      This is a barrier function which lets the host wait for all others host
-      that are contributing to a special graph. 
-    \item There is some problem with these collective operations when a host
-      forgets to call the collective on all its hosted vertices of an graph.
-      Then the collective operation can not be finished and the application 
-      is therefore locked. This problem is passed wo wise programmers which
-      do not forget this issue.
-  \end{itemize}
-  
-
-\item Implemented on top of communicator as overlay network
-\item Location information of vertices retrieved from nameService
+\item Gather - Vertices on the same host collect data local first and
+  then use the collective gather provided by the communicator
+\item Reduce - Vertices on the same host reduce data local first and
+  then use reduce provided by the communicator.
+\item Synchronize - This is a barrier function which lets the host
+  wait for all others host that are contributing to a special graph.
+\item There is some problem with these collective operations when a
+  host forgets to call the collective on all its hosted vertices of an
+  graph.  Then the collective operation can not be finished and the
+  application is therefore locked. This problem is passed wo wise
+  programmers which do not forget this issue.
 \end{itemize}
 
 
