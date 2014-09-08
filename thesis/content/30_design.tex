@@ -27,18 +27,19 @@
 \begin{itemize}
 % Overall motivation of a communication layer
 \item Parallel computers are stricly necessary in scientific community
-\item On one side parallel computers are compute clusters
+\item Parallel computers are compute clusters
   \ref{sec:cluster} with a very homogeneous layout, in which the nodes
-  are connected by a abitrary network.  Usually applications are
-  domain decomposed \ref{sec:domain_decomposition} in smaller chunks
+  are connected by a abitrary network.  Usually application domain is
+  decomposed \ref{sec:domain_decomposition} in smaller chunks
   of work and then distributed onto the homogenous network of nodes on
   the cluster.  So to speak a very heterogeneous phyisical simulation
   is mapped onto a homogeneous compute architecture.
 
-  This is fine as long the simulation is not changing to much. Thus
-  every node stays utilized. But real world simulations are changing
-  over time. The workload could increase globally or only locally on
-  some subdomains of the simulation volume.
+  This is fine as long the simulation is not changing to much during
+  runtime. Thus every node stays utilized. But instead real world
+  simulations are changing over time. The workload could increase
+  globally or only locally on some subdomains of the simulation
+  volume.
 
   This leads to an unbalanced load during the simulation and therefore
   to unutilized ressource of the compute cluster. In this cases it
@@ -46,9 +47,12 @@
   also make sense to move whole subdomains from one node to another.
 
   This all needs a powerful communication layer which is flexibel
-  enough to support such rebalancing. Common cluster communication
-  frameworks are not able to fullfill these requirements. They are
-  usually static in their distribution and do not satisfy our needs.
+  enough to support such rebalancing of workload. Common cluster
+  communication frameworks are not able to fullfill these
+  requirements. They are usually static in their distribution and do
+  not satisfy our needs.
+
+  \todo{State out that communication layer should be exchangeable}
 
 \item PIConGPU \ref{sec:picongpu} is even harder because of an
   hierarchicle memory architecture.
@@ -89,84 +93,107 @@ following components are required:
 \section{Abstraction from existing communication layers - Communicator}
 \todo{mention policy based design}
 \todo{Wie trägt komponente bei motivation zu erfüllen}
+
+% Motivation for communication abstraction
 The abstraction from existing communication layers is a fundamental
-property for a flexibel and portable application. Compute clusters are
-not the same in general. Indeed, there are existing standards for
-communication in cluster system, but the world of computer science is
-subject to constant changes. Thus the possibility to exchange the
-underlying communication layer without changing the interface to the
-communication inside the application, is a prerequisite for future
-applications in distributed computing.
+property for a flexibel and portable application. Because there is a
+large number of communication libraries used to interconnect
+applications, it can not be assumed that every cluster system
+supports every communication library.
+
+Even though, that there are existing standards for communication in
+cluster systems, the world of computer science is subject to constant
+change. Thus the possibility to exchange the used communication layer
+without changing the interface to this layer, is a precondition for
+future applications in distributed computing.
 
 The challange is to provide a very general interface, that is able to
-map varying communication libraries onto it. This interface should
-remind the programmer on known communication schemas, which does not
-need a rethink.
+map varying communication libraries onto it. This interface should not
+be modeled from the scratch, instead it should remind the interface
+user on known communication methods. It can be deployed into existing
+applications by replacing the actual communication library without
+changing the understanding of the fundamental way to communicate in
+this application.
 
-The communicator is the connection to a network of an existing
-communication layer. The user can create several communicators with
-varying communication layers underneath. Or it is also possible to
-create several communicators pointing into the same network.
+% Brief CAL description
+The \textit{Communication Abstraction Layer}, shortly \textit{CAL}, is
+a generic interface that provides access to a varity of communication
+libraries. The libraries are available as adapters, which can be
+pluged into the CAL at compile time.
 
-Every communicator is identifiable through identifier, that is unique
-inside the network in which the communicator is connected to.
+The CAL only provides the interface, thus it forwards communication
+operations to the adapters.  The adapters perform the communcation
+operation and return possible result back to the CAL. 
 
-In first place the communicator provides peer-to-peer
-communications. That are basic communication operations to send and
-receive abitrary data between two communicators. These operations are
-available blocking and also non-blocking.  The interface is influenced
-by existing communication libraries, that share some common interface.
+Using the CAL instead of a concrete communication library has the
+advantage that in the case of a changing communication environment
+(e.g migrating to another cluster) only the adapter has to be
+exchanged, the CAL stays the same.
 
-\begin{itemize}
-  \item Data \\ Usually, this is a pointer to some memory.  But can
+Unifying several communication libraries under the hood of one CAL
+induces also several adress schemas, that can be quite different.
+Socket based systems for example adress their peers by ip addresses,
+where MPI based systems adress their processes by ranks. These peers
+and processes still need to stay clearly adressable. Therefore each
+CAL provides a virtual adress which is an unique identifier for the
+peers.
+
+% CAL interface
+In the first place the CAL provides peer-to-peer communication. That
+are basic communication operations to send and receive abitrary data
+between two peers. These operations are available
+bost blocking and non-blocking. The interface is influenced by
+existing communication libraries that all share a common interface (
+e.g.boost::mpi, boost::asio, ZMQ).
+
+\begin{description}
+  \item[Data] Usually, this is a pointer to some memory.  But can
     also be implemented with references and c++ templates.  This makes
     it possible to send some abitrary datatypes
-  \item DataSize\\ Has to be transmitted when only a pointer is
+  \item[DataSize] Has to be transmitted when only a pointer is
     given. In the case that some stl container like vector or arrays
     is handed over, the size can be determined by the size() function
-  \item Destination / Source This is a adress of the receiving or
+  \item[Destination]  Source This is a adress of the receiving or
     sending process.
     
-\end{itemize}
+\end{description}
 
 To support also MPI as backend, the following information have to be
 added to the communication interface:
 
-\begin{itemize}
-  \item Tag Is used in MPI to seperate messages from the process and
+\begin{description}
+  \item[Tag] Is used in MPI to seperate messages from the process and
     give them meaning without the need of an message header or
-    something similar
-  \item Context This gives MPI the information which processes are
-    able to communicate with each other.
-    
+    something similar.
+  \item[Context] This gives MPI the information which processes are
+    able to communicate with each other. Hint: Context and tag could
+    be removed, thus some default tag and a global context would be
+    choosen for the operations.
+
+\end{description}
+
+It is not planed that the CAL provides routing abilities. Peers have
+to be connected directly by the network of the adapter. No routing
+makes it also impossible to forward data between different adapters of
+the CAL. Thus a specific CAL only provides a single adapter. But
+several CALs can be used with different adapters to communcate on
+several networks. In such a scenario the routing can be implemented on
+top of the CAL by the library user. future work could implement an
+routing underneath the CAL to reach also not directly connected peers
+automatically.
+
+% Collectives
+The CAL also supports a grouping of peers of the same adapter. Such a
+group of peers will be called context. A context is the base for
+algorithms based on algorithms with more than 2 participating
+peers.These operations where introduced as collective
+operations\ref{sec:collectives}.
+
+future work will be the support of collective operations over the borders
+of different adapters in the case that the CAL supports more than one adapter
+being instanciated.
+
 \end{itemize}
-
-Hint: Context and tag could be removed, thus some default tag and a
-global context would be choosen for the operations.
-
-
-
-\begin{itemize}
-\item There are many communication libraries
-\item The challange is to provide a very general interface
-\item Comparing several communication libraries like MPI, ZMQ,
-  boost::asio and boost::mpi there is some common interface for
-  peer-to-peer communication.
-\item send(data, dataSize, destination)
-\item recv(data, dataSize, source)
-\item It provides also collective operations known from MPI
-\end{itemize}
-
-\begin{itemize}
-\item Peer to peer operations
-  \begin{itemize}
-  \item send
-  \item recv
-  \item asyncSend
-  \item asyncRecv
-  \end{itemize}
-\end{itemize}
-
 \begin{itemize}
 \item Collective operations
   \begin{itemize}
