@@ -20,7 +20,7 @@ DOC_TEX_ADD ?= preamble/packages.tex \
 DOC_BIB     ?= own.bib
 
 # images
-DOC_IMG_JPG  = images/squirrel.jpg # you can specify multiple images here
+DOC_IMG_JPG  = $(wildcard graphics/*.pdf) #images/squirrel.jpg # you can specify multiple images here
 DOC_IMG_PNG  =
 DOC_IMG_PDF  = images/diplom-aufgabe.pdf
 

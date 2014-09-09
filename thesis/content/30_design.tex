@@ -77,7 +77,7 @@ following components are required:
 % ANALYSIS OF PIConGPU CODE                                                    %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Analysis of PIConGPU code}
+\section{Analysis of PIConGPU-Code}
 \begin{itemize}
   \item How does the communication topologie looks like ?
   \item What are the different levels of communication ?
@@ -90,16 +90,16 @@ following components are required:
 % COMMUNICATOR                                                                 %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Abstraction from existing communication layers - Communicator}
+\section{Abstraction from Existing Communication Layers}
 \todo{mention policy based design}
 \todo{Wie trägt komponente bei motivation zu erfüllen}
 
 % Motivation for communication abstraction
-The abstraction from existing communication layers is a fundamental
-property for a flexibel and portable application. Because there is a
-large number of communication libraries used to interconnect
-applications, it can not be assumed that every cluster system
-supports every communication library.
+Applications can be interconnected by vast variety of communication
+libraries. But it can not be assumed that every cluster system
+supports every communication library on the market.  Thus, the
+abstraction from existing communication libraries is a fundamental
+property for a flexibel and portable application.
 
 Even though, that there are existing standards for communication in
 cluster systems, the world of computer science is subject to constant
@@ -110,105 +110,147 @@ future applications in distributed computing.
 The challange is to provide a very general interface, that is able to
 map varying communication libraries onto it. This interface should not
 be modeled from the scratch, instead it should remind the interface
-user on known communication methods. It can be deployed into existing
+user on known communication methods. It should be deployable into existing
 applications by replacing the actual communication library without
 changing the understanding of the fundamental way to communicate in
 this application.
 
+This section presents the design of a generic communication layer
+which fulfils the before discussed requirements.
+
 % Brief CAL description
+\subsection{Communication Abstraction Layer (CAL)}
 The \textit{Communication Abstraction Layer}, shortly \textit{CAL}, is
 a generic interface that provides access to a varity of communication
 libraries. The libraries are available as adapters, which can be
-pluged into the CAL at compile time.
+configured at compile time (Figure \ref{fig:cal}).
 
-The CAL only provides the interface, thus it forwards communication
-operations to the adapters.  The adapters perform the communcation
-operation and return possible result back to the CAL. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{graphics/cal}
+  \caption{Communication Abstraction Layer (CAL)}
+  \label{fig:cal}
+\end{figure}
 
 Using the CAL instead of a concrete communication library has the
 advantage that in the case of a changing communication environment
 (e.g migrating to another cluster) only the adapter has to be
-exchanged, the CAL stays the same.
+exchanged and the application has to be recompiled, but the CAL does
+not change.
 
-Unifying several communication libraries under the hood of one CAL
-induces also several adress schemas, that can be quite different.
-Socket based systems for example adress their peers by ip addresses,
-where MPI based systems adress their processes by ranks. These peers
-and processes still need to stay clearly adressable. Therefore each
-CAL provides a virtual adress which is an unique identifier for the
-peers.
+\subsection{Addressing of Peers}
+% CAL virtual addressing
+Communication libraries come with their own address schema, which can
+be quiete different. Socket based systems address their peers by ip
+addresses, where MPI based systems address their processes by ranks.
+These diverse ways to address peers in a network need to be translated
+to an unified address space. Each CAL provides a virtual address
+which is an unique identifier for its peer in the adapters network.
+
+The address space of the virtual address are natural numbers in 
+the range from 0 to the number of peers minus one. This addressing
+schema is the simplest way and satifies the needs of the actual design.
 
 % CAL interface
+\subsection{Communication Interface}
+
+% Peer2Peer Operations
+\subsubsection{Peer to Peer Operations}
 In the first place the CAL provides peer-to-peer communication. That
 are basic communication operations to send and receive abitrary data
-between two peers. These operations are available
-bost blocking and non-blocking. The interface is influenced by
-existing communication libraries that all share a common interface (
-e.g.boost::mpi, boost::asio, ZMQ).
+between two peers. These operations are available both blocking and
+non-blocking. The interface is influenced by existing communication
+libraries that all share a common interface ( e.g.boost::mpi,
+boost::asio, ZMQ). The core interface for sending and receiving data:
+
+\begin{itemize}
+  \item send(destination, tag, data)
+  \item recv(source, tag, data)
+\end{itemize}
 
 \begin{description}
-  \item[Data] Usually, this is a pointer to some memory.  But can
-    also be implemented with references and c++ templates.  This makes
-    it possible to send some abitrary datatypes
-  \item[DataSize] Has to be transmitted when only a pointer is
-    given. In the case that some stl container like vector or arrays
-    is handed over, the size can be determined by the size() function
-  \item[Destination]  Source This is a adress of the receiving or
-    sending process.
-    
+\item[Data] \hfill \\
+  The data that should be transmitted to
+  another peer or that should be received from another peer.  The data
+  object should provide a function data() that returns the pointer to a
+  contigiuous memory area and a function size() that returns the size
+  of the object. The STL sequence containers std::vector and
+  std::array allready support these functions at least since C++ version
+  C++11.
+\item[Destination / Source] \hfill \\
+  This is the virtual address of the sending or receiving peer.
+\item[Message Tag] \hfill \\
+  The message tag is an unsigned interger that gives
+  a message a meaning similar to headers of communication
+  protocols. Thus, it helps a peer to distinguish between messages of
+  the same sending peer.
 \end{description}
 
-To support also MPI as backend, the following information have to be
-added to the communication interface:
+It is not planed in the actual design that the CAL provides routing
+abilities. Peers have to be connected directly by the network of the
+adapter. No routing makes it also impossible to forward data between
+different adapters of the CAL. Thus a specific CAL only provides a
+single adapter. But several CALs can be used with different adapters
+to communcate on several networks. In such a scenario the routing can
+be implemented on top of the CAL by the library user.future work could
+also implement an routing underneath the CAL to reach also not
+directly connected peers automatically. This kind of routing
+could also connect two different adatpers with each other.
 
-\begin{description}
-  \item[Tag] Is used in MPI to seperate messages from the process and
-    give them meaning without the need of an message header or
-    something similar.
-  \item[Context] This gives MPI the information which processes are
-    able to communicate with each other. Hint: Context and tag could
-    be removed, thus some default tag and a global context would be
-    choosen for the operations.
-
-\end{description}
-
-It is not planed that the CAL provides routing abilities. Peers have
-to be connected directly by the network of the adapter. No routing
-makes it also impossible to forward data between different adapters of
-the CAL. Thus a specific CAL only provides a single adapter. But
-several CALs can be used with different adapters to communcate on
-several networks. In such a scenario the routing can be implemented on
-top of the CAL by the library user. future work could implement an
-routing underneath the CAL to reach also not directly connected peers
-automatically.
-
-% Collectives
+% Collectives Operations
+\subsubsection{Collective Operations}
 The CAL also supports a grouping of peers of the same adapter. Such a
 group of peers will be called context. A context is the base for
-algorithms based on algorithms with more than 2 participating
-peers.These operations where introduced as collective
-operations\ref{sec:collectives}.
+algorithms with more than 2 participating peers. These operations
+where introduced as collective operations\ref{sec:collectives}. A
+collective operation can only be successful, when all peers of a
+context are participating. If only one peer does not execute the
+operation then the application is stuck. It will only continue when
+this peer also executes this collective operation.
 
-future work will be the support of collective operations over the borders
+There is a large number of collective operations known to the
+parallel computation commmunity. The CAL only provides the most
+important ones with respect to its objective platform PIConGPU \ref{sec:picongpu}
+
+\begin{itemize}
+\item gather(root, context, send, recv)\\
+  This operation collects data of the same size from
+  every peer in the context. The collected data will be
+  received from the root peer.
+  %\item gatherUnequal(root, context, send, recv, recvCount)
+\item allGather(context, send, recv)
+  %\item allGatherUnequal(context, send, recv, recvCount)
+\item scatter(root, context, send, recv)
+  This operation distributes varying data of the same size from the root peer to
+  all other peers of the context.
+\item allScatter(context, send, recv)
+
+\item reduce(root, context, operation, send, recv)
+  This operation reduces the data from every peer of a context by
+  a binary operation.
+\item allReduce(context, operation, send, recv)
+
+\item broadcast(root, context, data)
+  This operation distributes data from the root peer to
+  all other peers of the context.
+\item syncronize(context)
+  This operation synchronizes the control flow of all peers of the context.
+\item createContext(peers, context)
+  This operation creates a new context from the context. Such a smaller
+  group of peers can be created.
+\end{itemize}
+
+\begin{description}
+\item[Root Peer] \hfill \\
+  The root peer receives the result of a collective operation. For some
+  collective operations (e.g allGather, allScatter, allReduce) all peers
+  of a context receive the result of the operation.
+\end{description}
+
+Future work will be the support of collective operations over the borders
 of different adapters in the case that the CAL supports more than one adapter
 being instanciated.
 
-\end{itemize}
-\begin{itemize}
-\item Collective operations
-  \begin{itemize}
-    \item gather
-    \item gather2
-    \item allGather
-    \item allGather2
-    \item reduce
-    \item allReduce
-    \item broadcast
-    \item syncronize
-    \item createContext
-  \end{itemize}
-
-\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -352,7 +394,7 @@ vertices are able to communicate with each other. The NameService
 delivers the information on which Communicator the vertices are
 located.
 
-Vertices are peers of the communication network and can be adressed
+Vertices are peers of the communication network and can be addressed
 directly.
 
 Thus the interface for direct communication involves the graph in
@@ -409,7 +451,7 @@ communication. Because there is no abstraction layer which hides the
 MPI communication calls, which makes it impossible to exchange it.
 
 Also the communication topology of the simulations is not be modeled
-satisfying. Neighboring subdomains are directly adressed by their
+satisfying. Neighboring subdomains are directly addressed by their
 ranks, thus changing the communication topology also leads to a lot of
 changes in the algorithm.
 
