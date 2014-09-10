@@ -87,7 +87,7 @@ following components are required:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
-% COMMUNICATOR                                                                 %
+% COMMUNICATION ABSTRACTION LAYER                                              %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Abstraction from Existing Communication Layers}
@@ -126,8 +126,7 @@ libraries. The libraries are available as adapters, which can be
 configured at compile time (Figure \ref{fig:cal}).
 
 \begin{figure}[H]
-  \centering
-  \includegraphics[width=0.8\textwidth]{graphics/cal}
+  \centering \includegraphics[width=0.8\textwidth]{graphics/30_cal}
   \caption{Communication Abstraction Layer (CAL)}
   \label{fig:cal}
 \end{figure}
@@ -202,15 +201,11 @@ could also connect two different adatpers with each other.
 The CAL also supports a grouping of peers of the same adapter. Such a
 group of peers will be called context. A context is the base for
 algorithms with more than 2 participating peers. These operations
-where introduced as collective operations\ref{sec:collectives}. A
-collective operation can only be successful, when all peers of a
-context are participating. If only one peer does not execute the
-operation then the application is stuck. It will only continue when
-this peer also executes this collective operation.
+where introduced as collective operations (Section \ref{sec:collectives}). 
 
 There is a large number of collective operations known to the
 parallel computation commmunity. The CAL only provides the most
-important ones with respect to its objective platform PIConGPU \ref{sec:picongpu}
+important ones with respect to its objective platform PIConGPU \ref{sec:picongpu}:
 
 \begin{itemize}
 \item gather(root, context, send, recv)\\
@@ -240,13 +235,8 @@ important ones with respect to its objective platform PIConGPU \ref{sec:picongpu
   group of peers can be created.
 \end{itemize}
 
-\begin{description}
-\item[Root Peer] \hfill \\
-  The root peer receives the result of a collective operation. For some
-  collective operations (e.g allGather, allScatter, allReduce) all peers
-  of a context receive the result of the operation.
-\end{description}
 
+\todo{future work}
 Future work will be the support of collective operations over the borders
 of different adapters in the case that the CAL supports more than one adapter
 being instanciated.
@@ -257,32 +247,64 @@ being instanciated.
 % GRAPH                                                                        %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Description of the communication topologie - Graph}
-The considerations started with the analysis of the domain composition
-of the PIConGPU simulation volume. The PIC code has several levels of
-decompositions. First there is the partitioning into small cells,
-which is the real partitioning of the physical volume. These cells are
-the smallest entities of the simulation.
+\section{Modeling of the Application Domain}
+Domain decomposed applications are seperated into a set of
+subdomains. The decomposition method also defines the relationship
+between subdomains. Often this relationship is hardcoded into the
+applications source code. A Change of the decomposition method or the
+applications domain therefore also implies a change in the
+applications algorithm. This reduces the flexibilty of application.
 
-Further cells are combined to supercells, which is a memory optimized
-set of cells.
+A more elegant way is to explicitly model the relationships between
+the subdomains. The most general method to model such correlations is
+a graph \cite{ref:graph}. It has the advantage that a algorithm can
+be implemented on top of the graph domain description. Thus a change
+in the application domain only implies a different graph, but not
+necessarily an adapted algorithm.
 
-And finally are supercells combined to a cluster of supercells which
-than are calculated by a single compute device. So the first
-considerations where to model exactly these three levels: physical
-topologie, memory topologie, communication topologie.
+From the mathematical background, a graph is a pair of vertices and
+edges. Edges are pairs of vertices. So to speak, a graph represents a
+set of objects, where some of these objects are connected by links.
 
-But the mentioned topologie follow all the same principles. They
-connect some entities. Therefore every topologie is possible to map
-onto a graph.  So a graph can be used to describe several levels of
-doman decomposition with a single language.
+Keeping in mind that a wide range of application should be possible to
+model, the graph is not very restricted. Vertices are connected by
+directed edges. Loops and multiple edges between two vertices are
+allowed. The mathematical expression for this kind of graph is quiver
+\cite{ref:quiver}
 
-Properties of the graph
-\begin{itemize}
-  \item Directed graph
-  \item Multiple edges (multi graph)
-  \item Allows loops
-\end{itemize}
+\subsection{Graph Properties}
+A graph alone is just the representation of the connected vertices,
+but has no correlation to the domain. The correlation usually only
+exists in the head of the programmer.
+
+For this purpose the concept of graph properties is introduced. A
+property provides abitrary subdomain information and can be bound to
+vertices and edges. A graph annoted with properties is significantly
+more meaningful and thus helps to keep the correleation of the domain
+and the graph.
+
+\subsection{Modeling Game of Life as graph}
+To give a little example figure \ref{fig:gol} models the Game of Life
+(GoL) \cite{ref:gol} world by a graph. GoL simulates the evolution of
+a set of cells for unlimited timesteps. A cell has a status which is
+either alive or not alive and the status of the next evolution step is
+calculated by rules including the status information of the
+neighboring cells.
+
+GoL was modeled straight forward.  Every cell of the GoL world is
+represented by a vertex and neighboring cells are connected by an
+edge. Each vertex has the property cell which only contains the status
+of the cell.
+
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_gol}
+  \caption{Cut-out of a Game of Life world (on the left) was modeled as a graph (on
+    the right). Each Vertex is described by the vertex property cell, 
+    containing the status information of the cell.}
+  \label{fig:gol}
+\end{figure}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %

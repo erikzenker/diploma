@@ -277,13 +277,24 @@ of the parallel programming community. At its most basic, MPI has
 functions for sending and receiving a message.  These functions are
 available both blocking and nonblocking.
 
-\todo{Describe collective in own section}
+\todo{Describe collective in own section!}
 Further a variaty of collective operations that involve a group of
 processes are defined. All members of the group have to paticipate to
 sucessfully execute the collective operation.  The result of the
 operation is either received by one process, the so called root, or by
 all processes of a group.
 
+A collective operation can only be successful, when all peers of a
+context are participating. If only one peer does not execute the
+operation then the application is stuck. It will only continue when
+this peer also executes this collective operation.
+
+\begin{description}
+\item[Root] \hfill \\
+  The root peer receives the result of a collective operation. For some
+  collective operations (e.g allGather, allScatter, allReduce) all peers
+  of a context receive the result of the operation.
+\end{description}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
