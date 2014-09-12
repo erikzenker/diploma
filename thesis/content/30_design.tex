@@ -59,6 +59,27 @@
 \item NUMA architecture will crow even harder
 \end{itemize}
 
+Fact is, that the communication hardware layout is fixed. The access
+to the hardware is represented by CALs (See \ref{sec:cal}) and these
+are connected in the simplest case by an fully connected network, thus
+every peer can send messages to every other peer. Therefore a network
+on top of the CALs has to be established.
+
+It is a very important property to be able to explicitly map the
+communication topologie of the application onto the communication
+hardware.
+
+In the first place it should gives the application the possibility to
+be optimized on special charakteristics of the compute cluster. For
+example could vertices that need to communicate very intensively with
+each other can be mapped on neighboring nodes or even onto the same
+node. Which makes communication more efficient.
+
+Besides it should be possible to change the mapping of the
+communication topologie onto the communication hardware in
+runtime. This is important when thinking of occuring unbalanced load
+during the run of the application.
+
 % Requirements
 \subsection{Requirements}
 To be able to model such complex and heterogeneous topologies the
@@ -248,6 +269,7 @@ being instanciated.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Modeling of the Application Domain}
+\label{sec:graph}
 Domain decomposed applications are seperated into a set of
 subdomains. The decomposition method also defines the relationship
 between subdomains. Often this relationship is hardcoded into the
@@ -257,54 +279,114 @@ applications algorithm. This reduces the flexibilty of application.
 
 A more elegant way is to explicitly model the relationships between
 the subdomains. The most general method to model such correlations is
-a graph \cite{ref:graph}. It has the advantage that a algorithm can
-be implemented on top of the graph domain description. Thus a change
-in the application domain only implies a different graph, but not
+a graph \cite{ref:graph}. It has the advantage that a algorithm can be
+implemented on top of the graph domain description. Thus a change in
+the application domain only implies a different graph, but not
 necessarily an adapted algorithm.
 
 From the mathematical background, a graph is a pair of vertices and
 edges. Edges are pairs of vertices. So to speak, a graph represents a
 set of objects, where some of these objects are connected by links.
 
+% directed cycle multi graph
 Keeping in mind that a wide range of application should be possible to
 model, the graph is not very restricted. Vertices are connected by
 directed edges. Loops and multiple edges between two vertices are
-allowed. The mathematical expression for this kind of graph is quiver
-\cite{ref:quiver}
+allowed (Figure \ref{fig:graph}. The mathematical expression for this
+kind of graph is quiver \cite{ref:quiver}
+
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_graph}
+  \caption{ A directed cycle multi graph with vertices A, B and edges
+    1, 2, 3.  }
+  \label{fig:graph}
+\end{figure}
+
+\todo{Is an interface to the graph needed here?}
 
 \subsection{Graph Properties}
 A graph alone is just the representation of the connected vertices,
-but has no correlation to the domain. The correlation usually only
-exists in the head of the programmer.
+but has no connection to the application domain. The connection
+usually only exists in the head of the programmer.
 
 For this purpose the concept of graph properties is introduced. A
 property provides abitrary subdomain information and can be bound to
-vertices and edges. A graph annoted with properties is significantly
-more meaningful and thus helps to keep the correleation of the domain
-and the graph.
+vertices and edges (Figure \ref{fig:property}). Vertices and Edges of
+the same graph share respecively the same type of property. A graph
+annoted with properties is significantly more meaningful and thus
+helps to keep the connection of the application domain and the graph.
+
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_property}
+  \caption{A graph with both vertex and edge properties. The vertex
+    property primarily describe a subdomain. the edge property
+    describe the relationship between subdomains.}
+  \label{fig:property}
+\end{figure}
+
+A Property can also be used to create a connection between a pair of
+graphs. Thus a modeling of hiararchical domains is also possible.  A
+later example will make use of this hierarchical modelation (Section
+\ref{sec:gol}).
+
 
 \subsection{Modeling Game of Life as graph}
-To give a little example figure \ref{fig:gol} models the Game of Life
-(GoL) \cite{ref:gol} world by a graph. GoL simulates the evolution of
-a set of cells for unlimited timesteps. A cell has a status which is
-either alive or not alive and the status of the next evolution step is
+\label{sec:gol}
+To give an example figure \ref{fig:gol} models the Game of Life (GoL)
+\cite{ref:gol} world by a graph. GoL simulates the evolution of a set
+of cells for unlimited timesteps. A cell has a status which is either
+alive or not alive and the status of the next evolution step is
 calculated by rules including the status information of the
-neighboring cells.
-
-GoL was modeled straight forward.  Every cell of the GoL world is
-represented by a vertex and neighboring cells are connected by an
-edge. Each vertex has the property cell which only contains the status
-of the cell.
+neighboring cells.GoL was modeled straight forward.  Every cell of the
+GoL world is represented by a vertex and neighboring cells are
+connected by an edge. Each vertex has the property cell which only
+contains the status of the cell.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol}
-  \caption{Cut-out of a Game of Life world (on the left) was modeled as a graph (on
-    the right). Each Vertex is described by the vertex property cell, 
-    containing the status information of the cell.}
+  \caption{Cut-out of a Game of Life world (on the left) was modeled
+    as a graph (on the right). Each Vertex is described by the vertex
+    property cell, containing the status information of the cell.}
   \label{fig:gol}
 \end{figure}
 
+% Partitioned graph
+The graph in figure \ref{fig:gol} models the relationship of the
+smallest entities of GoL, the cells itself. It is a unification of the
+data representation of the cells and the communication dependencies
+between the cells. This might be not very efficient when this graph is
+the foundation for a distributed computing application. To take it to
+extremes, a single cell could be calculated by its own process and the
+cell status could be exchanged by inter-process communication
+(IPC). This might not be the most efficient implementation of GoL,
+because a single process can compute considerably more cells by its
+own.
 
+Figure \ref{fig:gol_bundle} partitions the GoL graph by bundling
+multiple vertices together and models a new graph. Bundles are
+connected by edges when the cells inside the bundles where connected
+before. While the GoL graph represents the GoL cells in detail, the
+partitioned graph represents dependencies of bundled cells.
+
+
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_gol_bundle}
+  \caption{The GoL graph is partitioned by bundling multiple
+    cells. The properties of the partioned graph have changed, such
+    that the vertex property contains the cells of a bundle, while The
+    edge property contains information about neighboring cells.}
+  \label{fig:gol_bundle}
+\end{figure}
+
+The partitioned graph could be used as foundation to distribute GoL to
+multiple devices on a cluster. Each bundle could be computed by an own
+device. 
+
+% Graph partitioning optimitsation
+The creation of bundles that are optimized to a minimum of connections
+and a maximum of ressource utilization is the topic graph partitioning
+algorithms. But the modeling of optimal partitioned graphs is not part
+of this work.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -314,73 +396,76 @@ of the cell.
 \section{Mapping onto the hardware}
 
 %% Requirements
-Fact is, that the communication hardware layout is fixed. The access
-to the hardware is represented by communicators and these are
-connected in the simplest case by an fully connected network, thus
-every communicator can send messages to every other
-communicator. Therefore a network on top of the communicators has to
-be established.
+%% Motivation stinkt !
+The Domain of an application was modeled with the help of graphs in
+the previous section \ref{sec:graph}. A graph serves as the basis
+for communication or data exchange within the domain.
 
-It is a very important property to be able to explicitly map the
-communication topologie of the application onto the communication
-hardware.
+Thus edges of the graph can be interpreted as communication links
+between peers
 
-In the first place it should gives the application the possibility to
-be optimized on special charakteristics of the compute cluster. For
-example could vertices that need to communicate very intensively with
-each other can be mapped on neighboring nodes or even onto the same
-node. Which makes communication more efficient.
 
-Besides it should be possible to change the mapping of the
-communication topologie onto the communication hardware in
-runtime. This is important when thinking of occuring unbalanced load
-during the run of the application.
+The graph does only provide
+domain specific information. 
 
-%% Process of announce
-The objective is to establish a communication overlay on top of the
-network provided by the communicators. This overlay network is based
-on a graph. Thus all communicators that want to take part on the
-communicatin in this overlay need to know this graph.
+But the graph can be
+used as the foundation for communication or data exchange within the
+domain.
 
-This Graph can be constructed in parallel by all processes, delivered
-by a distributed file system or could even be delivered by some
-construction process by explicit communication operations. That is
-left open to the user of this library.
-
-The next phase is the distribution of the vertices of the graph to the
-processes. This has the meaning that a process responsible for the
-communication of this processes. The process will be called host of
-the vertices.
-
-The distribution can be done by several methods: randomized, round
-robin, dictated by some master process etc. This distribution is again
-left open to the user.
-
-Every communicator hosts zero, one or more vertices, so to speak it is
-also possible that one communicator host all vertices and communicates
-in the end with itself.  Thus the processes announce their hosted
-vertices to all other communicators, which will register this
-information into their Vertex->Communicators map.  This can be done by
-the collective operation allGatherV to the network of communicators.
-
+This section introduces a graph based overlay network creates an overlay network on top.
 
 The NameService is the connection of the graph as the topology
-description instance and the communicator as communication hardware
+description instance and the peers of the CAL as communication
 interface.
 
 It contains two mappings. Vertices of a graphs are mapped to
-Communicators and Graphs are mapped to contexts.
+peers and graphs are mapped to contexts.
+
+
+
+
+%% Process of announce
+\subsection{Announce hosting peers}
+The objective is to establish a communication overlay on top of the
+network provided by the CAL. This overlay network is based on the
+graphs introduced in section \ref{sec:graph}. 
+
+This Graph can be constructed in parallel by all peers, loaded from a
+distributed file system or could even be delivered by a master
+peer. However, it is important that all peers that want to take part
+on the communication on this overlay network need to know the same
+graph.
+
+The next phase is the distribution of the vertices of the graph to the
+peers. This has the meaning that a peer is responsible for the
+communication of these vertices. The peer will be called host of
+the vertices.
+
+There are a varity of methods to distribute the vertices of a graph
+to the peers of a network. It could be done totally randomized, round
+robin or even dictated by some master peer. The distribution behavior
+is defined be the user of the library and might be object for
+further optimization.
+
+Every peer hosts zero, one or more vertices, so to speak it is
+also possible that one peer host all vertices and communicates
+finally always with itself.  
+
+Thus the peers announce their hosted vertices to all other peers,
+which will store this information. This is done by the collective
+operation allGather.
 
 %% Remapping of vertices
+\subsection{Reannounce}
 Because the communication hardware and topolgie is seperated,
 it is also possible to change the mapping from vertices to 
-communicators on runtime. That can be necessary when load
-of an application is getting inbalanced during the runtime.
+peers at runtime. That can be necessary when load
+of an application is getting inbalanced during runtime.
 
 The application can perform a global load balancing step, which
 is very similar to static load balancing in the beginning
 of the application. Thus vertices are seperated by some rule
-and then announced. The difference is, that the communicators
+and then announced. The difference is, that the peers
 have to send the data of their once hosted vertices to the
 new hosts of the vertices.
 
@@ -390,12 +475,7 @@ of adjacent vertices. This might not require a global synchronization
 step, instead only local communication with all communicators
 that are involved in this local load balancing.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                              %
-% GRAPHCOMMUNICATOR                                                            %
-%                                                                              %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Communication on physical domain - GraphCommunicator}
+\subsection{Communication on the modled domain}
 The communication was abstracted from the actual communication layer
 and the communicaiton topologie was modeled with a graph and then
 maped onto communicators.
