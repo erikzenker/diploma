@@ -80,6 +80,10 @@ communication topologie onto the communication hardware in
 runtime. This is important when thinking of occuring unbalanced load
 during the run of the application.
 
+The communication is abstracted from the actual communication layer by
+the CAL and the communicaiton topologie is modeled with a graph and
+then maped onto the CAL.
+
 % Requirements
 \subsection{Requirements}
 To be able to model such complex and heterogeneous topologies the
@@ -141,13 +145,14 @@ which fulfils the before discussed requirements.
 
 % Brief CAL description
 \subsection{Communication Abstraction Layer (CAL)}
+\label{sec:cal}
 The \textit{Communication Abstraction Layer}, shortly \textit{CAL}, is
 a generic interface that provides access to a varity of communication
 libraries. The libraries are available as adapters, which can be
 configured at compile time (Figure \ref{fig:cal}).
 
 \begin{figure}[H]
-  \centering \includegraphics[width=0.8\textwidth]{graphics/30_cal}
+  \centering \includegraphics[width=\textwidth]{graphics/30_cal}
   \caption{Communication Abstraction Layer (CAL)}
   \label{fig:cal}
 \end{figure}
@@ -216,14 +221,15 @@ be implemented on top of the CAL by the library user.future work could
 also implement an routing underneath the CAL to reach also not
 directly connected peers automatically. This kind of routing
 could also connect two different adatpers with each other.
-
-% Collectives Operations
-\subsubsection{Collective Operations}
+\subsubsection{Grouping of peers}
+\label{sec:context}
 The CAL also supports a grouping of peers of the same adapter. Such a
 group of peers will be called context. A context is the base for
 algorithms with more than 2 participating peers. These operations
 where introduced as collective operations (Section \ref{sec:collectives}). 
 
+% Collectives Operations
+\subsubsection{Collective Operations}
 There is a large number of collective operations known to the
 parallel computation commmunity. The CAL only provides the most
 important ones with respect to its objective platform PIConGPU \ref{sec:picongpu}:
@@ -255,7 +261,6 @@ important ones with respect to its objective platform PIConGPU \ref{sec:picongpu
   This operation creates a new context from the context. Such a smaller
   group of peers can be created.
 \end{itemize}
-
 
 \todo{future work}
 Future work will be the support of collective operations over the borders
@@ -292,7 +297,7 @@ set of objects, where some of these objects are connected by links.
 Keeping in mind that a wide range of application should be possible to
 model, the graph is not very restricted. Vertices are connected by
 directed edges. Loops and multiple edges between two vertices are
-allowed (Figure \ref{fig:graph}. The mathematical expression for this
+allowed (Figure \ref{fig:graph}). The mathematical expression for this
 kind of graph is quiver \cite{ref:quiver}
 
 \begin{figure}[H]
@@ -330,7 +335,7 @@ later example will make use of this hierarchical modelation (Section
 \ref{sec:gol}).
 
 
-\subsection{Modeling Game of Life as graph}
+\subsection{Modeling Game of Life as a graph}
 \label{sec:gol}
 To give an example figure \ref{fig:gol} models the Game of Life (GoL)
 \cite{ref:gol} world by a graph. GoL simulates the evolution of a set
@@ -358,22 +363,23 @@ between the cells. This might be not very efficient when this graph is
 the foundation for a distributed computing application. To take it to
 extremes, a single cell could be calculated by its own process and the
 cell status could be exchanged by inter-process communication
-(IPC). This might not be the most efficient implementation of GoL,
-because a single process can compute considerably more cells by its
-own.
+. This might not be the most efficient implementation of GoL,
+because a single process can compute considerably more cells.
 
 Figure \ref{fig:gol_bundle} partitions the GoL graph by bundling
-multiple vertices together and models a new graph. Bundles are
+multiple vertices together and models a partioned graph. These Bundles are
 connected by edges when the cells inside the bundles where connected
 before. While the GoL graph represents the GoL cells in detail, the
-partitioned graph represents dependencies of bundled cells.
-
+partitioned graph represents dependencies of bundled cells. Thus
+the properties of the partioned graph changed such that bundles
+have store the cells they bundle and edges refer to neighboring
+cells.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_bundle}
   \caption{The GoL graph is partitioned by bundling multiple
     cells. The properties of the partioned graph have changed, such
-    that the vertex property contains the cells of a bundle, while The
+    that the vertex property contains the cells of a bundle, while the
     edge property contains information about neighboring cells.}
   \label{fig:gol_bundle}
 \end{figure}
@@ -388,131 +394,136 @@ and a maximum of ressource utilization is the topic graph partitioning
 algorithms. But the modeling of optimal partitioned graphs is not part
 of this work.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                              %
-% NAMESERVICE                                                                  %
-%                                                                              %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Mapping onto the hardware}
+\todo{subgraphs}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% GON                                                                          %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Graph-Based Virtual Overlay Network (GVON)}
 %% Requirements
-%% Motivation stinkt !
-The Domain of an application was modeled with the help of graphs in
-the previous section \ref{sec:graph}. A graph serves as the basis
-for communication or data exchange within the domain.
+The objective is to establish a communication layer within the
+applications domain. Such that communication between subdomains of the
+application can be represented. Therefore, this section introduces a
+graph-based virtual overlay network (GVON), that is based on the graphs and the
+CAL introduced in the previous sections (\ref{sec:graph},
+\ref{sec:cal}). 
 
-Thus edges of the graph can be interpreted as communication links
-between peers
+The graph does only provide domain specific information.  It can be
+used as a blueprint for the virtual network topologie.  Thus
+communication operations are provided by the CAL and the virtual
+network is described by a graph (Figure \ref{fig:gon})
 
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_gon}
+  \caption{The Graph-based virtual overlay network provides communication
+    functionality based on the CAL}
+  \label{fig:gon}
+\end{figure}
 
-The graph does only provide
-domain specific information. 
-
-But the graph can be
-used as the foundation for communication or data exchange within the
-domain.
-
-This section introduces a graph based overlay network creates an overlay network on top.
-
-The NameService is the connection of the graph as the topology
-description instance and the peers of the CAL as communication
-interface.
-
-It contains two mappings. Vertices of a graphs are mapped to
-peers and graphs are mapped to contexts.
-
-
-
+It is important that all peers that want to take part on the
+communication of the GVON need to know the same graph. In order to
+ensure that, the graph can be constructed in parallel by all peers,
+loaded from the same file of a distributed file system or could even
+be delivered by a master peer.
 
 %% Process of announce
-\subsection{Announce hosting peers}
-The objective is to establish a communication overlay on top of the
-network provided by the CAL. This overlay network is based on the
-graphs introduced in section \ref{sec:graph}. 
+\subsection{Mapping of the GVON onto the CAL}
+\label{sec:mapping}
+The connection between the CAL and a graph is maintained through a
+mapping of vertices to peers (vertex map). In the context of an
+overlay network, a vertex is interpreted as a virtual peer of the GVON,
+edges between adjacent vertices indicate that the virtual peers are
+able to communicate with each other. The mapping of vertices to peers
+is a joint process of all peers that want to take part at the
+communication based on a specific graph.
 
-This Graph can be constructed in parallel by all peers, loaded from a
-distributed file system or could even be delivered by a master
-peer. However, it is important that all peers that want to take part
-on the communication on this overlay network need to know the same
-graph.
+The first phase is the distribution of the vertices of the graph to
+the peers (Figure \ref{fig:gon_mapping}). This has the meaning that a
+peer is responsible for the communication of these vertices. The peer
+will be called host of the its hosted vertices. A peer is responsible
+either for zero, one or more vertices, so to speak it is also possible
+that one peer hosts all vertices and communicates finally always with
+itself.
 
-The next phase is the distribution of the vertices of the graph to the
-peers. This has the meaning that a peer is responsible for the
-communication of these vertices. The peer will be called host of
-the vertices.
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_gon_mapping}
+  \caption{All vertices of a graph are distributed onto 3 peers. The vertices
+  are not distributed evenly, thus one peer is host for 2 vertices.}
+  \label{fig:gon_mapping}
+\end{figure}
 
-There are a varity of methods to distribute the vertices of a graph
-to the peers of a network. It could be done totally randomized, round
+There are a varity of methods to distribute the vertices of a graph to
+the peers of a network. It could be done totally randomized, round
 robin or even dictated by some master peer. The distribution behavior
-is defined be the user of the library and might be object for
-further optimization.
+is defined be the user of the library and might be object for further
+optimization.
 
-Every peer hosts zero, one or more vertices, so to speak it is
-also possible that one peer host all vertices and communicates
-finally always with itself.  
+In the next phase the peers announce their hosted vertices to all
+other peers. This is done by the collective operation allGather, that
+means that every peer receives from every other peer a list of its
+hosted vertices. This mapping acts as a kind of a nameservice. It can
+be queried for the hosting peer of a vertex. Furthermore the GVON
+maps the announced graph to a context \ref{sec:context} containing
+all peers attended to the announcement process (graph map). Communication can now
+be established on basis of this mappings.
 
-Thus the peers announce their hosted vertices to all other peers,
-which will store this information. This is done by the collective
-operation allGather.
+% Communication
+\subsection{Communication within the GVON}
+The application has the view, that it really is exchaning messages
+between the vertices of the graph and the GVON is taking care, that
+the messages are reaching the correct vertex host. Thus this is
+finally the level of abstraction that the application interacts with.
 
-%% Remapping of vertices
-\subsection{Reannounce}
-Because the communication hardware and topolgie is seperated,
-it is also possible to change the mapping from vertices to 
-peers at runtime. That can be necessary when load
-of an application is getting inbalanced during runtime.
+The GVON provides similar functionality like the introduced operations
+in the CAL. Thus both peer to peer and collective operations are
+provided.
 
-The application can perform a global load balancing step, which
-is very similar to static load balancing in the beginning
-of the application. Thus vertices are seperated by some rule
-and then announced. The difference is, that the peers
-have to send the data of their once hosted vertices to the
-new hosts of the vertices.
 
-Another possibility is to do a kind of local load balancing.
-This means that communicators hand over vertices to communicators
-of adjacent vertices. This might not require a global synchronization
-step, instead only local communication with all communicators
-that are involved in this local load balancing.
+\paragraph*{}
+% GVON P2P
 
-\subsection{Communication on the modled domain}
-The communication was abstracted from the actual communication layer
-and the communicaiton topologie was modeled with a graph and then
-maped onto communicators.
+A peer to peer operations within the GVON involves exchanging data
+between adjacent vertices over a specific edge of a specific graph.
+Thus the function interface looks like the following.
 
-The next step is to use the graph as a kind of overlay network and
-offer standard communication operations on base of the communicators.
+\begin{itemize}
+  \item send(graph, destination vertex, edge, data)
+  \item recv(graph, source vertex, edge, data)
+\end{itemize}
 
-The user should have the feeling, that he really is exchaning messages
-between the vertices of the graph and the library is taking care, that
-the messages are reaching the correct vertex. Thus this is the level
-of abstraction with which the user interacts.
+The GVON has the task to resolv both the context of a graph and the
+host of the source or the destination vertex. This information are
+quieried from the vertex and graph map. When this information is
+resolved the programm flow is handed over to the CAL, that trasmits or
+receives data.
 
-% Communication schemas
-Communication on base of a graph is an interaction of the NameService
-and the graph on which should be communicated. The Graph represents
-connected communication partners and therefore also determines which
-vertices are able to communicate with each other. The NameService
-delivers the information on which Communicator the vertices are
-located.
-
-Vertices are peers of the communication network and can be addressed
-directly.
-
-Thus the interface for direct communication involves the graph in
-which context is communicated, the vertex which is receiver or sender
-of data and the transmited data itself. An overlay based on Graphs
-with multiedge support also needed to add the according edge between
-two communicating vertices.
-
+% GVON collectives
 Operations between all vertices of a graph can be performed as
-collective operations on the graph.  In the case some collective
-operation should be performed, a communicator is responsible to start
-the collective operation for its hosted vertices otherwise it blocks
-all other communicators.
+collective operations \ref{sec:collectives}. A host needs to
+perform the collective operation for all its hosted vertices,
+otherwise it blocks the execution of the operation. Yet again
+the result of the collective is reveived by some root vertex
+or by all vertices of the graph.
 
-Collective operations add some more arguments to the communication
-interface.
+The collective operation is first executed locally for all hosted
+vertices of each peer. Then it is further handled by the CAL and
+transmitted to the receiver(s). Figure \ref{fig:gon_collective} shows
+a gather operation on the same graph and mapping of figure
+\ref{fig:gon_mapping}. For each vertex of the graph a gather operation
+is executed.
+
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_gon_collective}
+  \caption{Gather operation of the GVON. Data is first locally for
+    each peer and then globally collected. Finally the collected data
+    is transmitted to the root vertex.}
+  \label{fig:gon_collective}
+\end{figure}
+
+Further collective operations provided by the GVON are the 
+following :
 
 \begin{itemize}
 \item Gather - Vertices on the same host collect data local first and
@@ -521,13 +532,26 @@ interface.
   then use reduce provided by the communicator.
 \item Synchronize - This is a barrier function which lets the host
   wait for all others host that are contributing to a special graph.
-\item There is some problem with these collective operations when a
-  host forgets to call the collective on all its hosted vertices of an
-  graph.  Then the collective operation can not be finished and the
-  application is therefore locked. This problem is passed wo wise
-  programmers which do not forget this issue.
 \end{itemize}
 
+%% Remapping of vertices
+\subsection{Reannounce Vertices}
+The communication hardware and communication topolgie is now
+seperated, therefor it is possible to change the mapping from
+vertices to peers at runtime. That can be necessary when load of an
+application is getting inbalanced during runtime.
+
+Like in section \ref{sec:mapping}, it is again necessary to perform two steps for the remapping;
+distributing and announncing. Thus vertices are distributed by some
+rule and then announced. Depending on the application, also 
+vertex data has to be transfered to hosts with new vertices.
+
+The remapping can be done both local and global. For local remapping
+only peers that host a vertex that is connected to a remapped vertex
+are involved. A global remapping is very similar to an inital mapping
+and involves all peers (or even more).
+
+\todo{remapping figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
