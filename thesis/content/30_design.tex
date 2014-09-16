@@ -184,7 +184,9 @@ schema is the simplest way and satifies the needs of the actual design.
 In the first place the CAL provides peer-to-peer communication. That
 are basic communication operations to send and receive abitrary data
 between two peers. These operations are available both blocking and
-non-blocking. The interface is influenced by existing communication
+non-blocking. Non-blocking operations return an event, that can be
+queried whether it has finished or it can be waited until it has
+finished. The interface is influenced by existing communication
 libraries that all share a common interface ( e.g.boost::mpi,
 boost::asio, ZMQ). The core interface for sending and receiving data:
 
