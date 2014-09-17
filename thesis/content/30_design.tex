@@ -178,9 +178,10 @@ schema is the simplest way and satifies the needs of the actual design.
 
 % CAL interface
 \subsection{Communication Interface}
-
+\label{sec:cal_comm}
 % Peer2Peer Operations
 \subsubsection{Peer to Peer Operations}
+
 In the first place the CAL provides peer-to-peer communication. That
 are basic communication operations to send and receive abitrary data
 between two peers. These operations are available both blocking and
@@ -223,15 +224,19 @@ be implemented on top of the CAL by the library user.future work could
 also implement an routing underneath the CAL to reach also not
 directly connected peers automatically. This kind of routing
 could also connect two different adatpers with each other.
+
+% Context
 \subsubsection{Grouping of peers}
-\label{sec:context}
+\label{sec:cal_context}
 The CAL also supports a grouping of peers of the same adapter. Such a
 group of peers will be called context. A context is the base for
 algorithms with more than 2 participating peers. These operations
 where introduced as collective operations (Section \ref{sec:collectives}). 
+\todo{create context + get global context + context interface}
 
 % Collectives Operations
 \subsubsection{Collective Operations}
+\label{sec:cal_collective}
 There is a large number of collective operations known to the
 parallel computation commmunity. The CAL only provides the most
 important ones with respect to its objective platform PIConGPU \ref{sec:picongpu}:
@@ -251,7 +256,28 @@ important ones with respect to its objective platform PIConGPU \ref{sec:picongpu
 
 \item reduce(root, context, operation, send, recv)
   This operation reduces the data from every peer of a context by
-  a binary operation.
+  a binary function.
+
+\begin{itemize}
+  \item Binary Function
+    A binary function in general, takes two arguments of abitrary type and
+    returns a value of abitrary type. Usually bost input arguments and
+    return value have the same type. The C++ STL allready provides
+    a handfull of binary functions in the functional header. Not provides
+    functions can be easily created (See \ref{list:binary_functions}
+    as example).
+
+    \begin{lstlisting}[language=C++, breaklines=false]
+      \label{list:binary_function}
+      template<typename T>
+      struct add : public std::binary_function<T, T, T>
+      {
+        const T& operator()(const T& x, const T& y) const
+        {
+          return x + y;
+    \end{lstlisting}
+  \end{itemize}
+
 \item allReduce(context, operation, send, recv)
 
 \item broadcast(root, context, data)
@@ -396,7 +422,7 @@ and a maximum of ressource utilization is the topic graph partitioning
 algorithms. But the modeling of optimal partitioned graphs is not part
 of this work.
 
-\todo{subgraphs}
+\todo{subgraphs!}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -467,7 +493,7 @@ other peers. This is done by the collective operation allGather, that
 means that every peer receives from every other peer a list of its
 hosted vertices. This mapping acts as a kind of a nameservice. It can
 be queried for the hosting peer of a vertex. Furthermore the GVON
-maps the announced graph to a context \ref{sec:context} containing
+maps the announced graph to a context \ref{sec:cal_context} containing
 all peers attended to the announcement process (graph map). Communication can now
 be established on basis of this mappings.
 
