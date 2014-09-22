@@ -116,7 +116,6 @@ following components are required:
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Abstraction from Existing Communication Layers}
-\todo{mention policy based design}
 \todo{Wie trägt komponente bei motivation zu erfüllen}
 
 % Motivation for communication abstraction
@@ -255,6 +254,7 @@ important ones with respect to its objective platform PIConGPU \ref{sec:picongpu
 \item allScatter(context, send, recv)
 
 \item reduce(root, context, operation, send, recv)
+  \todo{more about reduce}
   This operation reduces the data from every peer of a context by
   a binary function.
 
@@ -489,13 +489,13 @@ is defined be the user of the library and might be object for further
 optimization.
 
 In the next phase the peers announce their hosted vertices to all
-other peers. This is done by the collective operation allGather, that
-means that every peer receives from every other peer a list of its
-hosted vertices. This mapping acts as a kind of a nameservice. It can
-be queried for the hosting peer of a vertex. Furthermore the GVON
-maps the announced graph to a context \ref{sec:cal_context} containing
-all peers attended to the announcement process (graph map). Communication can now
-be established on basis of this mappings.
+other peers. This means that every peer receives from every other peer
+a list of its hosted vertices. This mapping acts as a kind of a
+nameservice. It can be queried for the hosting peer of a
+vertex. Furthermore the GVON maps the announced graph to a context
+\ref{sec:cal_context} containing all peers attended to the
+announcement process (graph map). Communication can now be established
+on basis of this mappings.
 
 % Communication
 \subsection{Communication within the GVON}
