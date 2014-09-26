@@ -35,7 +35,10 @@ The library started from the need of PIConGPU (Section
 layer. PIConGPU is implemented in C++98 with additional usage of boost
 \cite{ref:boost} libraries. Thus the communication library is also
 implemented in C++. To make use of a richer feature set of the c++
-language, C++11 is used \cite{ref:c++11}.
+language, C++11 is used \cite{ref:c++11}. Implementation details are
+highlighted by small source code snippets, hence, a basic knowledge of
+the C++ programming language and the dealing with templates is
+assumed.
 
 \section{The CAL with Policy Based Design}
 
@@ -94,6 +97,12 @@ inheritance (Figure \ref{fig:cal_uml}).
 
 \subsection{The MPI Adapter as Reference Implementation}
 \label{sec:cal_mpi_adapter}
+\begin{itemize}
+\item MPI adapter first implementation
+\item Insight in the developement of adapter
+\item Guideline for additional adapter implementations
+\end{itemize}
+
 The reference adapter implementation is based on MPI as existing
 communication layer.  MPI (Section \ref{sec:mpi}) was as choosen,
 because it already provides a lot of functionality required by the CAL
@@ -119,7 +128,6 @@ defined a very general binary operator in section
 binary operator is supported by every adapter, thus, it has to be
 specialized to a binary operator the adapter can handle.
 
-
 MPI has built-in support for binary operations, but they need to be
 transformed by two possible approaches.  The simplest approach, is the
 direct usage of binary MPI operators.  These can be defined in a
@@ -129,10 +137,12 @@ user could select from these binary operations depending on the
 reduction operation.
 
 \begin{lstlisting}[language=C++, caption={A small collection of binary operators by transformed MPI operations to static constexpression }, label=lst:mpi_bin]
-  struct BinaryOperations { static constexpr BinaryOperation MAX =
-    MPI_MAX; static constexpr BinaryOperation MIN = MPI_MIN; static
-    constexpr BinaryOperation SUM = MPI_SUM; static constexpr
-    BinaryOperation PROD = MPI_PROD; };
+  struct BinaryOperations { 
+    static constexpr BinaryOperation MAX = MPI_MAX; 
+    static constexpr BinaryOperation MIN = MPI_MIN; 
+    static constexpr BinaryOperation SUM = MPI_SUM; 
+    static constexpr BinaryOperation PROD = MPI_PROD; 
+  };
 \end{lstlisting}
 
 The downside of the this approach is that only the predefined
@@ -167,94 +177,130 @@ adopting their source code would solve this problem without any
 further effort.
 
 The primitive C++ data types can be mapped directly to primitive MPI
-data types. The conversation is implemented by the concept of traits
-\cite{ref:trait}.  The function of the trait is the transformation of
-primitive C++ data types to predefined MPI data types.  First, a
-template struct defines the default behaviour of the trait (Listing
-\ref{lst:mpi_trait1}). The struct defines a static const expression
-with name type, which is set to a fixed MPI data type. The template
-argument is the primitive data type that should be transformed. The
-default struct will transform undefined data types to the MPI\_CHAR
-data type.
+data types. By the fact, that MPI data types are defined by C macros,
+a C++ data types need to be converted to integer numbers. The
+conversation is implemented by the concept of traits \cite{ref:trait}.
+The function of the trait is the transformation of primitive C++ data
+types to predefined MPI data types.  First, a template struct defines
+the default behaviour of the trait (Listing \ref{lst:mpi_trait1}). The
+struct defines a static const expression with name type, which is set
+to a fixed MPI data type. The template argument is the primitive data
+type that should be transformed. The default struct will transform
+undefined data types to the MPI\_CHAR data type.
 
 \begin{lstlisting}[language=C++, label=lst:mpi_trait1]
-  template<typename T> struct MPIDatatypes{ static constexpr
-    MPI_Datatype type = MPI_CHAR; };
+  template<typename T> struct MPIDatatypes { 
+    static constexpr MPI_Datatype type = MPI_CHAR; 
+  };
 \end{lstlisting}
 
-The following template is a explicit specialisation of the first
-template, in this case for the C++ primitive data type int, which will
-be transformed to the MPI\_INT data type (Listing
-\ref{lst:mpi_trait2}). Thus, each transformation of a primitive C++
-data type need to be defined.
+The template in listing \ref{lst:mpi_trait2} is a explicit
+specialisation of the default template in listing
+\ref{lst:mpi_trait1}. In this case, a specialisation for the C++ data
+type int, which will be transformed to the MPI\_INT data type.  Thus,
+each transformation of a primitive C++ data type need to be defined
+by its own specialisation template, assumed that a corresponding
+MPI data type exists.
 
 \begin{lstlisting}[language=C++, label=lst:mpi_trait2]
-  template<> struct MPIDatatypes<int>{ static constexpr MPI_Datatype
-    type = MPI_INT; };
-
+  template< > struct MPIDatatypes<int> { 
+    static constexpr MPI_Datatype type = MPI_INT; 
+  };
 \end{lstlisting}
 
 The communication operations within the adapter use the trait to
 tranform the data types of the input and output data, by querying the
-trait through MPIDataType<C++Datatype>::type.
+trait. Listing \ref{lst:mpi_trait3} gives an example for the conversion 
+of the C++ data type int.
 
-\begin{itemize}
-\item MPI specific Context \todo{MPI specific Context}
+\begin{lstlisting}[language=C++, label=lst:mpi_trait3]
+  MPI_Datatype type = MPIDataType<int>::type;
+\end{lstlisting}
+
+\paragraph*{MPI specific context and event}
   
-
-\item MPI specific Event
-
-  Non-blocking communication operations return event objects.  MPI
-  functions returns a request, which is the the event equivalent in
-  the MPI world. A request is processed by MPI\_Wait to wait until the
-  operation of the request has finished and MPI\_Test to check whether
-  the operation has already finished.
-
-\end{itemize}
+While the MPI adapter context is implemented with no further MPI
+function calls and therefore not adapter specific, an event makes use
+of MPI non-blocking communication features. In the MPI world, a
+non-blocking function returns a request object, which is the handle to
+verify the status of the function. The wait method is implemented by a
+MPI\_Wait on the request. The ready methods checks with MPI\_Test
+whether the function has already finished.
 
 \section{Graph Based on the Boost Graph Library}
 
-BGL as backend The graph introduced in section \ref{sec:graph} was not
-written from the scratch. There are a varity of libraries providing
-graph implementations \todo{List some graph libaries}. Because of the
-closeness of the boost library to the C++ STL, the boost graph library
-\cite{ref:boost::bgl}, short BGL, was choosen. While the BGL provides
-a lot of functionality, just a small subset is really needed for the
-purposes of this work. Thus the BGL is wrapped inside a graph class
-just providing standard graph funcionality.
+Section introduced \ref{sec:graph} a graph interface.  This graph
+interface is implemented on basis of an existing graph library as
+backend like the following
+\cite{ref:lemon,ref:bgl,ref:igraph,ref:ogdf}.  The closeness of the
+boost libraries to the C++ standard template library (STL) is the
+reason for the selection of the boost graph library
+\cite{ref:boost::bgl}, short BGL, as graph backend.  While the BGL
+provides a lot of functionality, just a small subset is really
+necessary for the purposes of this work. Thus the BGL is wrapped
+inside a graph class just providing common graph funcionality.
 
 \subsection{Vertices identified by Properties}
 
 % Properties
-Like in section \ref{sec:graph} discussed, a graph has so called
-properties that can be used to describe its vertices and edges. The
-BGL itself refers to vertices by integer numbers, whereby properties
-of this integer vertices can be queried from so called property
-maps. In this Graph, the vertices and edges are represented by its
-property itself and are configured at compile time.  The properties
-are structs or classes with abitrary content. However the properties
+A graph is characterized through properties that can be used to
+describe vertices and edges, like discussed in section
+\ref{sec:graph}.The BGL refers to vertices by indexes of integer
+numbers, whereby properties of this vertices can be queried from so
+called property maps.  In this Graph, vertices and edges are
+represented by property itself. Vertices and edges are configured by
+properties at compile time through template parameter.  The properties
+are structs or classes with abitrary content. However, the properties
 need to provide an id member variable to create an internal connection
-of vertices to properties.  Thus asking for the vertices of the graph,
-returns a vector of vertices. That vector is a list of vertex
-properties in the context of the BGL, whereby every property is
-connected by its id to the graph.
+of vertices indexes to property mpas of the BGL.  Thus asking for the
+vertices of the graph, returns a vector of vertices. That vector is a
+list of vertex properties in the context of the BGL, whereby every
+property is connected by its index to the graph. The most simple
+property is a struct only containing the id, like presented in listing
+\ref{lst:property}. This property is predefined in the graph
+header. It is used as default when the graph is configured without any
+declaration of a property.
 
-\subsection{Configuration of a Graph}
-The configuration of the graph requires two classes to define both
-vertex and edge property as template arguments.  If the graph should
-not contain any further information then the properties will be filled
-by default with a property only containing the id.
+\begin{lstlisting}[language=C++, label=lst:property]
+struct SimpleProperty {
+    typedef unsigned ID;
+    SimpleProperty() : id(0) {}
+    SimpleProperty(ID id) : id(id) {}
+
+    ID id;
+};
+\end{lstlisting}
+
+%\subsection{Configuration of a Graph}
+%The configuration of the graph requires two classes or structs to define both
+%vertex and edge property as template arguments.  If the graph should
+%not contain any further information then the properties will be filled
+%by default with a property only containing the id.
 
 \subsection{Creation of a Graph}
-A graph can be created by a list of edge descriptors and a list of
-vertices, while an edge descriptor is tuple of source vertex,
-destination vertex and the connecting edge. The vertices and edges can
-allready be filled with property information.  This list of edge
-descriptors can also generated by one of the several provided graph
-generators. These allow a generation of commonly used graph
-topologies.
+A graph is created by a list of edge descriptors and a list of
+corresponding vertices. An edge descriptor is tuple of source vertex, destination
+vertex and the connecting edge. The vertices and edges can already be
+filled with property specific information.  The list of edge descriptors can
+also be generated by a graph generator. A set generators for commonly used
+graph topologies is provided.
 
-\todo{explain graph generators?}
+\begin{itemize}
+\item fully connected Topologie
+\item star topologie
+\item n dimensional hypecube topologie
+\item n dimensional grid topologie
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{graphics/40_topologies}
+  \caption{}
+  \label{fig:topologies}
+\end{figure}
+
+
+\todo{Think about composition of graphs, graph composition, graph operations}
 
 \subsection{Operations on the graph / vertices}
 % Operations
