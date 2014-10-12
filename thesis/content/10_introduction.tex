@@ -20,6 +20,37 @@ between other nodes. Thus each node has the challange to retrieve all
 the data, that is needed to calculate the next step of its
 computation.
 
+% New 
+\begin{itemize}
+\item State of the art
+  \begin{itemize}
+  \item Homogeneous compute cluster (vertical and horizontal) with
+    fixed hardware configuration and network topologie
+  \item Simulation need to be domain decomposed in subdomains
+  \item one-to-one mapping from simulation onto hardware
+  \end{itemize}
+
+\item But modern simulations and cluster are not that homogeneous
+  \begin{itemize}
+  \item Simulation horizontal heterogenety by unbalanced load
+  \item Simulation vertical heterogenety by multiscale effect (varying communication topologies)
+  \item hardware vertical heterogenety by komplex compute architecture per node
+  \end{itemize}
+
+\item Mapping should be explicit from simulation domain onto hardware
+
+\item Developed system that does exactly this mapping
+
+\item first design of such an system
+
+\item implementation of an prototype
+
+\item evaluation of the prototype in contrast to classic MPI implementation
+\end{itemize}
+
+
+
+% Old
 \begin{itemize}
 \item Computational power of single computer are limited by phsical
   laws

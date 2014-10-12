@@ -63,7 +63,8 @@ connection with small-latency and high-bandwidth.
 The calculation power of a high performance computing cluster
 is used where time to solution is important and the memory
 of a single computer does not cover the demand of an application. These are
-physical simulations\cite{ref:picongpu}, weather simulations.
+physical simulations\cite{ref:picongpu}, weather simulations, astronomy,
+multimedia, medical imaging and biobanking.
 
 \begin{itemize}
   \item Source: Grids, Clouds and Virtualization Cafaro, Massimo Aloisio, Giovanni
@@ -303,7 +304,7 @@ this peer also executes this collective operation.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Jungle computing}
-
+\label{sec:jungle}
 Jungle computing can be seen as a further evolution step after
 grid computing. The initial intention of grid computing was
 the request to bundle the tremendous compute power of hpc
@@ -374,7 +375,10 @@ Individual cells are communicating mainly with the next
 neighboring cells. To decouple communication and computation,
 nonblocking variant of this basic operations are used.
 
-\todo{find out why collective operations are used} There are also some
+\todo{find out why collective operations are used} 
+
+\todo{Analysis of code later}
+There are also some
 collective operations like allgather, gather gatherv, allreduce and
 reduce used.
 
@@ -386,13 +390,123 @@ reduce used.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Related work}
 
+% Introduction
 \begin{itemize}
-  \item boost::mpi Graph Communicator
-  \item ibis
-  \item ProActive
-  \item Constellation
-  \item European grid initiative (EGI)
-  \item ComplexHPC: Open European Network for High-Performance Computing in Complex Environments (COST)
+\item Application modeling
+\item Related to workflow systems, many task computing systems
+\item Modeling task dependencies
+\item Division of application in tasks
+\item automatic task scheduling, load balancing
+\item Ressource mapping 
+\item Task anda data parallel systems
+\item 
+\end{itemize}
+
+% Related
+\begin{itemize}
+
+  % MPI Topologies
+\item MPI Topologies
+\item virtual topologies independent from physical structure
+\item Describing communication pattern of a set of prcesses in a group
+\item topologie describeable through cartesian (grid) or graph 
+\item MPI optimizes mapping from topologies to MPI processes,
+  such that, reordering of MPI processes
+
+  % Boost MPI with graph communicator ...like MPI Topologies
+\item boost::mpi Graph Communicator
+  \begin{itemize}
+  \item MPI communicator with graph topology based on BGL
+  \item Same functionality as intracommunicators
+  \item query relationships among processors, relationship is expressed via a BGL graph
+  \item Specific for MPI
+  \item graph\_communicator can be created from communicator, graph and MPI can reorder process ranks cause of MPI optimization
+  \item graph includes less or equal vertices as ranks
+  \item reorder
+  \end{itemize}
+
+  % Ibis
+\item Ibis \cite{ref:ibis}
+  \begin{itemize}
+  \item Offers two logically independent subsystems
+  \item Programming system (programming language, communication
+    library)
+
+    Provides several programming models (MPI, RMI, Satin)
+    implemented on same communication library (Ibis Portability
+    Layer - IPL).
+
+    IPL provides range of communication primitives including
+    point-to-point.  multicast, streaming, serialization,
+    deserialization.
+
+    IPL uses several adaptors like SmartScokets, TCP, UDP,
+    Bluetooth, MX(Myrinet), MPI.
+
+  \item Deployment system (Java Grid Application Toolkit (JavaGAT)
+  \item Philosophy: developement and compilation on local
+    workstation and deployment from there onto the distributed
+    system.
+  \item System based on Java. All subsystem come as jar file and do
+    not need any libary installation. Easily applicable for
+    application written in java. Non-java applications can make use
+    of ibis through JNI, but it is complicated.
+  \end{itemize}
+
+
+  % Constellation
+\item Constellation \cite{ref:constellation}
+  \begin{itemize}
+  \item Software platform for distributed, heterogeneous and hierachical computing
+    systems
+  \item Applications consist of several distinct activities
+  \item Activities represents distinct action
+  \item Activities implemented independently by MPI, CUDA, OpenMP 
+  \item Activities are somehow related to each other
+  \item Activities are labbeled with tags defining execution conditions
+    (CPU, GPU, Data locality). Thus executed in suitable computing
+    environment.
+  \item similar to task computing system / workflow systems
+  \item Compute ressources represented by executors
+  \item Automatic mapping of activities onto available executors taking
+    data locality, tags and heterogeneity into account.
+  \item implementd in java
+  \item on top of ibis as communication and deployment framework
+  \end{itemize}
+  
+  % Charm++
+\item Charm++
+
+  % Pegasus
+\item Pegasus \cite{ref:pegasus}
+  \begin{itemize}
+  \item Map complex scientific workflows onto distributed resources
+  \item abstract representation of workflows as directed acyclic graph (DAG)
+    composition of tasks and data dependencies
+  \item Tasks are submitted to the queuing systems of the grid
+  \end{itemize}
+
+  % StarPu
+\item StarPu 
+  \begin{itemize}
+  \item Unified execution model of tasks
+  \item Execution of parallel task on heterogeneous hardware
+  \item Task is implemented in accelerator specific code (CUDA, OpenMP)
+  \item Task does not care about load balancingg or task offloading
+  \item Accelerator driver provides memory transfer and execution functionality
+  \item implemented on multi-core, CUDA GPUs, CELL
+  \item Driver for accelerator
+  \end{itemize}
+
+  % ULL_calibrate_lib
+\item ULL\_calibrate\_lib \cite{ref:ull_calibrate_lib}
+  \begin{itemize}
+  \item Dynamic load balancing library for heterogeneous system
+  \item Critical section enclosed by load balancing calls to ull\_calibrate\_lib
+  \item Compare task runtime, exceeding threshhold lead to rebalancing
+  \item Load balancing on MPI level 
+  \end{itemize}
+
 \end{itemize}
 
 

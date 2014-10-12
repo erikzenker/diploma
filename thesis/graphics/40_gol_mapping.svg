@@ -14,7 +14,7 @@
    id="svg6031"
    version="1.1"
    inkscape:version="0.48.5 r10040"
-   sodipodi:docname="40_gol_mapping.svg">
+   sodipodi:docname="08_gol_mapping.svg">
   <defs
      id="defs3">
     <marker
@@ -1603,9 +1603,9 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="376.42729"
-     inkscape:cy="147.12068"
-     inkscape:current-layer="layer4"
+     inkscape:cx="238.61508"
+     inkscape:cy="271.2177"
+     inkscape:current-layer="layer5"
      showgrid="false"
      inkscape:window-width="1678"
      inkscape:window-height="1029"
@@ -1613,7 +1613,7 @@
      inkscape:window-y="19"
      inkscape:window-maximized="1"
      units="mm"
-     showguides="true"
+     showguides="false"
      inkscape:guide-bbox="true"
      borderlayer="true">
     <sodipodi:guide
@@ -2748,7 +2748,7 @@
          sodipodi:cy="-150.9261"
          sodipodi:rx="90.661194"
          sodipodi:ry="90.661194"
-         d="m 254.05338,-150.9261 c 0,50.07079 -40.5904,90.661192 -90.6612,90.661192 -50.07079,0 -90.661192,-40.590402 -90.661192,-90.661192 0,-50.0708 40.590402,-90.6612 90.661192,-90.6612 50.06831,0 90.65768,40.58652 90.6612,90.65483"
+         d="m 254.05338,-150.9261 a 90.661194,90.661194 0 1 1 0,-0.006"
          sodipodi:start="0"
          sodipodi:end="6.2831151"
          transform="matrix(1.0126022,0,0,1.0206467,267.63671,267.49225)"

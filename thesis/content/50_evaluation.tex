@@ -10,9 +10,98 @@
 % bezüglich der Ergebnisse zu erläutern und anschließend eventuell
 % festgestellte Abweichungen zu erklären.
 
-\ldots evaluation \ldots
 
-\todo{write evaluation}
+\begin{itemize}
+
+\item What should be evaluated
+  \begin{itemize}
+  \item Performance evaluation
+  \item Design evaluation (lines of code, reusability)
+  \item Flexibility evaluation
+  \end{itemize}
+
+\item On which System the implementation was tested
+  \begin{itemize}
+  \item hypnos with Linux Ubuntu 12.04.4 LTS
+  \item Laser queue
+    \begin{itemize}
+    \item 4 sockets x 8 core AMD Opteron = 32 (+ 2 threads pro core)
+    \item 256 GB main memory
+    \end{itemize}
+  \item k20 queue
+    \begin{itemize}
+    \item 2 sockets x 4 core Xeon
+    \end{itemize}
+  \item Network: Infiniband and Ethernet
+  \item Communication library
+  \end{itemize}
+
+\item What was implemented
+  \begin{itemize}
+  \item Objective is not to implement efficient simulation, but
+    it should demonstrate the developed system in its functionality
+    and in comparison with MPI.
+    
+  \item Simple Game of Life
+    \begin{itemize}
+    \item Single cell per vertex design
+    \item Peer hosts several vertices
+    \item Common GoL rules
+    \item Next neighbor communication in a 2D Grid with diagonal connections
+    \item Just a simple example
+    \item But cells can be even more complex
+    \end{itemize}
+
+  \item Simple Game of Life MPI 
+    \begin{itemize}
+    \item Each cell ny one MPI process
+    \end{itemize}
+
+  \item Simple N-Body
+    \begin{itemize}
+    \item http://physics.princeton.edu/~fpretori/Nbody/intro.htm
+    \item direct gravitational n-body simulations
+    \item compare to mpi n-body simulation
+    \end{itemize}
+
+  \item Simple N-Body MPI
+    \begin{itemize}
+      \item Each body by one MPI process
+    \end{itemize}
+  \end{itemize}
+
+\item Own expectations
+  \begin{itemize}
+  \item Not much overhead compared to MPI implementation
+  \item Expect the usual communication behavior
+  \item less communication over network means less delay
+  \item the more local calculation the more performance
+  \item The software should perform as fast as the
+    underlying adapter
+  \end{itemize}
+
+\item Measurements
+  \begin{itemize}
+  \item Configuration of the developed system (CAL, GRAPH, GVON)
+  \item simulations steps per minute
+  \item Idea Axel: Delay calculation of some cells
+    Remap peers such that execution time of all peers
+    will be the same again.
+  \item Varying cluster node konfigurations
+    \begin{itemize}
+      \item Use different amounts of nodes
+      \item Use different cluster queues
+      \item Use different mapping methods
+      \item Evaluate the methods and whether they
+        behave like expected.
+    \end{itemize}
+  \end{itemize}
+
+\item Conclusion about evaluation points. What can
+  be done better, where can the system be changed.
+  Give reason for behavior of the system.
+
+\end{itemize}
 
 \cleardoublepage
 

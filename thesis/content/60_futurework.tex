@@ -1,9 +1,55 @@
 \chapter{Future Work}
 \label{sec:futurework}
 
-\ldots future work \ldots
+\begin{itemize}
 
-\todo{write future work}
+\item Implementation of further adapters
+  \begin{itemize}
+  \item Adapter for CUDA
+  \item Adapter for ZMQ
+  \item Adapter for Boost:asio
+  \end{itemize}
+
+\item Implementation of multiadapter design
+  
+  Is maybe not the best idea. GVON should be maybe by design
+  bounded to only a single adapter. Discussion about such
+  a system is okay, but should not to be future work by need.
+  \begin{itemize}
+  \item Implementing grid system on basis of multiadapterdesign
+  \item Support of collective operations over the borders
+    of different adapters in the case that the CAL supports more than one adapter
+    being instanciated.
+  \item implement routing between multiadapters
+  \end{itemize}
+
+\item Thread safe implementation of the gvon collectives
+
+\item Deployment in real world applications like PIConGPU
+
+\item Fault tolerance through multi vertex map
+
+\item Graph description of adapter hardware topologie
+  \begin{itemize}
+  \item Graph would describe physical connections between peers
+  \item Properties could describe bandwidth, latency etc. 
+  \item Instead mapping drom vertex to independent peers, mapping
+    from vertex to peers related to a graph
+  \item Usage of graph partitioning algorithm (metis, parmetis etc.)
+  \item static, dynamic, autotuning of mapping
+  \item basis for load balancing
+  \end{itemize}
+
+\item Deployment in real world application
+  \begin{itemize}
+  \item PIConGPU
+  \item HASEonGPU
+  \end{itemize}
+
+\item Compile time generation of static graphs
+
+
+\end{itemize}
 
 \cleardoublepage
 
