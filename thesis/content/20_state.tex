@@ -392,120 +392,101 @@ reduce used.
 
 % Introduction
 \begin{itemize}
-\item Application modeling
-\item Related to workflow systems, many task computing systems
-\item Modeling task dependencies
-\item Division of application in tasks
-\item automatic task scheduling, load balancing
-\item Ressource mapping 
-\item Task anda data parallel systems
-\item 
-\end{itemize}
+\item The developed system is related to systems that
+  make it possible to decompose an application into smaller
+  chunks of work and describe the relationship between this chunks.
+  Thus, there is some relationship to workflow and many task
+  computing systems. These systems divide the applicaion in tasks
+  and perfrom a ressource mapping or scheduling of this tasks
+  onto the available computing ressources. The scheduling 
+  algorithm considers thereby the depedencies among tasks.
 
-% Related
-\begin{itemize}
+% Pegasus
+  \item The Pegasus system \cite{ref:pegasus} maps complex scientific
+  workflows onto distributed resources. Whereby, workflows are
+  directed acyclic graphs representing the composition of task and
+  data dependencies. Tasks are submitted to the queuing system, that
+  schedules these tasks onto the grid of compute ressources.
 
-  % MPI Topologies
-\item MPI Topologies
-\item virtual topologies independent from physical structure
-\item Describing communication pattern of a set of prcesses in a group
-\item topologie describeable through cartesian (grid) or graph 
-\item MPI optimizes mapping from topologies to MPI processes,
-  such that, reordering of MPI processes
+% StarPU
+\item A similar approach is apllied by the StarPU system
+  \ref{ref:starpu}.  It is a unified execution model for tasks, that
+  manages the execution of parallel tasks on heterogeneous hardware.
+  Each task is implemented by a platform specific code, and the system
+  takes care about task offloading and load balancing. Each target
+  platform has to provide a driver that provides methods for memory
+  transfer and task execution. StarPU already implements drivers for
+  multi-core CPUs, the CUDA platform and the CELL processor.
 
-  % Boost MPI with graph communicator ...like MPI Topologies
-\item boost::mpi Graph Communicator
-  \begin{itemize}
-  \item MPI communicator with graph topology based on BGL
-  \item Same functionality as intracommunicators
-  \item query relationships among processors, relationship is expressed via a BGL graph
-  \item Specific for MPI
-  \item graph\_communicator can be created from communicator, graph and MPI can reorder process ranks cause of MPI optimization
-  \item graph includes less or equal vertices as ranks
-  \item reorder
-  \end{itemize}
+% ULL_calibrate_lib
+\item A library focusing on the balancing load among heterogeneous
+  systems is the ULL\_calibrate\_lib \cite{ref:ull_calibrate_lib}. It
+  allows dynamic load balancing by enclosing critical section of the
+  source code by library methods calls. The library compares the rumtime
+  of the enclosed tasks, does the task exceeds a predefined threshold
+  then the library starts to rebalance the tasks. The load balancing
+  and communication is based on MPI platform.
 
-  % Ibis
-\item Ibis \cite{ref:ibis}
-  \begin{itemize}
-  \item Offers two logically independent subsystems
-  \item Programming system (programming language, communication
-    library)
+% Charm++
+\item An approach wich is embedded into the C++ programming language
+  is Charm++ \cite{ref:charm++}. Charm++ has the concept of describing
+  the application through so called charmes which describe data and
+  work units. The units are over-decomposited, thus, multiple work and
+  data units are assinged to each processing element. These units are
+  not strictly boundes to processing elements. Instead, they can be
+  migrated onto each processing element during execution. Charmes
+  interact among each other with asynchronous method innvocation.
 
-    Provides several programming models (MPI, RMI, Satin)
-    implemented on same communication library (Ibis Portability
-    Layer - IPL).
+% Ibis
+\item Ibis \cite{ref:ibis} provides two logically independent
+  subsystems.  On one hand the programming system and on the other
+  hand the deployment system. The programming system provides several
+  programming models (MPI, RMI, Satin) that are implemented on the
+  same communication library, the Ibis Portability Layer (IPL).  The
+  IPL provides a range of communicatin primitives including
+  point-to-point, multicast, streaming, serialization and
+  deserialization. These primitives are implemented by adaptors,
+  adapting existing communication libraries like SmartSockets, TCP
+  UDP, Bluetooth, MX and MPI.
 
-    IPL provides range of communication primitives including
-    point-to-point.  multicast, streaming, serialization,
-    deserialization.
+  The deployment system is based on the Java Grid Application Toolkit
+  (JavaGAT).  It has the philosophy, that the developement and
+  compilation is done locally on a workstation and is then deplayed
+  from there onto the distributed computing system.
 
-    IPL uses several adaptors like SmartScokets, TCP, UDP,
-    Bluetooth, MX(Myrinet), MPI.
-
-  \item Deployment system (Java Grid Application Toolkit (JavaGAT)
-  \item Philosophy: developement and compilation on local
-    workstation and deployment from there onto the distributed
-    system.
-  \item System based on Java. All subsystem come as jar file and do
-    not need any libary installation. Easily applicable for
-    application written in java. Non-java applications can make use
-    of ibis through JNI, but it is complicated.
-  \end{itemize}
-
+  The Ibis platform is based on Java technologie.All subsystem come as
+  jar file and do not need any libary installation. It is easily
+  applicable for application written in java. Non-java applications
+  can make use of ibis through JNI, but it is complicated. 
 
   % Constellation
-\item Constellation \cite{ref:constellation}
-  \begin{itemize}
-  \item Software platform for distributed, heterogeneous and hierachical computing
-    systems
-  \item Applications consist of several distinct activities
-  \item Activities represents distinct action
-  \item Activities implemented independently by MPI, CUDA, OpenMP 
-  \item Activities are somehow related to each other
-  \item Activities are labbeled with tags defining execution conditions
-    (CPU, GPU, Data locality). Thus executed in suitable computing
-    environment.
-  \item similar to task computing system / workflow systems
-  \item Compute ressources represented by executors
-  \item Automatic mapping of activities onto available executors taking
-    data locality, tags and heterogeneity into account.
-  \item implementd in java
-  \item on top of ibis as communication and deployment framework
-  \end{itemize}
-  
-  % Charm++
-\item Charm++
+\item A software platform for distributed, heterogeneous and
+  hierarchical computing is the Constellation \cite{ref:constellation}
+  framework. An application is modeled by distinc activities and each
+  activity represents a distinct action on the application.
+  Activities can be realated among each other by dependencies and are
+  labbeled with tags that define execution conditions like target
+  system and data locality.  Activities are implemented independely
+  for their specific target system (MPI, CUDA, OpenMP) and then
+  scheduled to execution units on the target system. This mapping onto
+  the available executors is performed automatically with respect to
+  tags and heterogeneity. Constellation is implemented in Java on top
+  of Ibis, but is not restricted to Ibis. 
 
-  % Pegasus
-\item Pegasus \cite{ref:pegasus}
-  \begin{itemize}
-  \item Map complex scientific workflows onto distributed resources
-  \item abstract representation of workflows as directed acyclic graph (DAG)
-    composition of tasks and data dependencies
-  \item Tasks are submitted to the queuing systems of the grid
-  \end{itemize}
+% MPI Topology
+\item An approach wich is directly embedded in MPI are MPI virtual
+  topologies \cite{ref:mpi_topology}. A MPI topology describes the
+  communication pattern of a set of MPI processes in a group through a
+  cartesian grid or a graph.  This topology is independent from the
+  physical network structure and therefore the mapping from
+  MPI processes onto the hardware topology can be optimized by MPI process
+  reordering. Thereby, is the number of vertices of the graph less or equal
+  to the number of MPI processes, so that a one-to-one mapping is possible.
 
-  % StarPu
-\item StarPu 
-  \begin{itemize}
-  \item Unified execution model of tasks
-  \item Execution of parallel task on heterogeneous hardware
-  \item Task is implemented in accelerator specific code (CUDA, OpenMP)
-  \item Task does not care about load balancingg or task offloading
-  \item Accelerator driver provides memory transfer and execution functionality
-  \item implemented on multi-core, CUDA GPUs, CELL
-  \item Driver for accelerator
-  \end{itemize}
-
-  % ULL_calibrate_lib
-\item ULL\_calibrate\_lib \cite{ref:ull_calibrate_lib}
-  \begin{itemize}
-  \item Dynamic load balancing library for heterogeneous system
-  \item Critical section enclosed by load balancing calls to ull\_calibrate\_lib
-  \item Compare task runtime, exceeding threshhold lead to rebalancing
-  \item Load balancing on MPI level 
-  \end{itemize}
+  The Boost MPI provides the possibility to describe the topologiy by
+  then Boost Graph Library (BGL)\cite{ref:boost_bgl}.  The resulting
+  Graph Communicator \cite{ref:boost_graph_communicator} gives the
+  possibility to communicate based on the graph topology.
 
 \end{itemize}
 

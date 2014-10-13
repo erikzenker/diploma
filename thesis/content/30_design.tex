@@ -27,11 +27,10 @@
 
   Parallel computers are stricly necessary in scientific community
   where time to solution and the computation of big simulations
-  is important. 
-
-  \sitem { Simulations do not fit on a single node }
-  \sitem { Simulation need to be distributed }
-  \sitem { Distributed parts need to communicated }
+  is important. These simulation applications do not fit anymore
+  on a single compute device. Thus they need to be distributed
+  onto distributed compute environment and exchanging data by
+  communication over a network.
 
   Assume, a parallel computer, a compute clusters (Section
   \ref{sec:cluster}), with a very homogeneous vertical and horizontal
@@ -40,11 +39,16 @@
   ressources of this cluster. Usually, the simulation domain is
   decomposed (Section \ref{sec:domain_decomposition}) by a fixed
   algorithm in smaller chunks of work, subdomains, and then mapped
-  onto the homogenous network of nodes on the cluster. So to speak a
-  simulation domain is mapped one-to-one onto a
-  homogeneous compute architecture. 
+  onto the homogenous network of nodes on the
+  cluster. Figure~\ref{fig:state_of_the_art} shows how the simulation
+  domain is mapped one-to-one onto a homogeneous compute architecture.
 
-  \todo{Graphic one-to-one mapping}
+  \begin{figure}[H]
+    \centering \includegraphics[width=\textwidth]{graphics/30_state_of_the_art}
+    \caption{State of the art: the simulation domain is decomposed in subdomains. Subdomains 
+    are mapped one-to-one onto the homogeneous compute cluster.}
+    \label{fig:state_of_the_art}
+  \end{figure}
 
   Simulation subdomains then communicate through predefined paths with
   each other to exchange simulation data. In concrete terms of MPI,
@@ -85,9 +89,17 @@
   consist of varying node types for different task in the simulation
   application. Therfore, the simulation domain can not be mapped
   one-to-one on such a cluster configuration, but rather the mapping
-  should be configurable explicitly.
+  should be configurable explicitly. Figure~\ref{fig:heterogeneous_cluster_node}
+  shows such an explicitly mapping from the simulation domain onto
+  an heterogeneous compute system. This compute systems shows several
+  hierarchies by two sockets each equipped with a multi-core CPU
+  and additonal accelerator devices.
 
-  \todo{Graphic explicit mapping of simulation domain onto heterogeneous hardware}
+  \begin{figure}[H]
+    \centering \includegraphics[width=\textwidth]{graphics/30_heterogeneous_cluster_node}
+    \caption{}
+    \label{fig:heterogeneous_cluster_node}
+  \end{figure}
 
   A real world example for such heterogeneous behavior of simulations
   is the PIConGPU simulation (Section \ref{sec:picongpu}). While
@@ -112,10 +124,11 @@
   mapping of the simulation domain onto the communication library,
   while the library should be easily exchangeable. Such that, the
   mapping can be adjusted onto heterogeneous behavior of simulation
-  application and cluster hardware.
-
-  \sitem { Solve load balancing problem }
-  \sitem { Solve Fault tolerance problem }
+  application and cluster hardware. This layer solves in the same
+  breath problems like load balancing and fault tolerance. Both
+  problems should not be addressed by this system directly, but
+  should be possible to built load balancing and fault tolerant
+  application on basis of this system.
 
   It was designed an approach for a flexible mapping of communication
   processes onto abitrary communication libraries. This design will
@@ -133,31 +146,51 @@
 \subsection{Requirements}
 \label{sec:requirements}
 
+%Due to the fact, that the communication hardware layout is fixed. The access
+%to the hardware is represented by CALs (See \ref{sec:cal}) and these
+%are connected in the simplest case by an fully connected network, thus
+%every peer can send messages to every other peer. Therefore a network
+%on top of the CALs has to be established.
 
-\begin{itemize}
-\item Previous section described the state of the art of simulations on cluster systems and the problems of modern simulations
-\item An intermediate layer is required
-\item Layer should fullfill requirements
-\item Simulation domain and subdomain can be quite varying
-\item Algorithms on this domains also varying
-\item Communication topology required by algorithm also varying
-\item 3D Torus, N dimensional Grid, periodic boundary
-\item Need possibility to describe and model communication topology very general
-\item Communication not restricted to a single communication library
-\item Flexible mapping from modeled communication topology onto existing communication library
-\item The modeled communication topology and the abstraction from communication libraries
-  form a virtual data exchange topology for algorithms
-\end{itemize}
+%It is a very important property to be able to explicitly map the
+%communication topology of the application onto the communication
+%hardware.
 
-Summarising the described requirements results in the
-following requirements of the system:
+%In the first place it should gives the application the possibility to
+%be optimized on special charakteristics of the compute cluster. For
+%example could vertices that need to communicate very intensively with
+%each other can be mapped on neighboring nodes or even onto the same
+%node. Which makes communication more efficient.
 
-\begin{itemize}
+%Besides it should be possible to change the mapping of the
+%communication topology onto the communication hardware in
+%runtime. This is important when thinking of occuring unbalanced load
+%during the run of the application.
+
+%The communication is abstracted from the actual communication layer by
+%the CAL and the communicaiton topology is modeled with a graph and
+%then maped onto the CAL.
+
+The previous section described the state of the art of simulations on
+cluster systems and gave the motivation to solve the problems of
+modern simulations. It was claimed that an intermediate layer between
+application and communication library is required.  This Layer should
+give the possibility to describe the simulation domains communication
+topology in a very general manner. The modeled communication topology
+should be mapped explicit onto a abstract communication layer.  The
+abstraction does not restrict the system to a single communication
+library and makes it therefore more portable.  The modeled
+communication topology and the abstraction from communication
+libraries form a virtual data exchange topology for algorithms. In
+summary, the described requirements result in the following four
+requirements of the system:
+
+\begin{enumerate}
 \item Abstract data transfer method
 \item Description of the communication topology
 \item Virtual data exchange topology for algorithms
 \item Mapping of communiation topology onto the hardware topology
-\end{itemize}
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -179,8 +212,6 @@ plays as significant role in the design of the developed system.
   \item fields do next neighbor communication 
   \item particles need all to all communication
   \end{itemize}
-   
-
 
   \item What kind of communcation layer is used ?
     \begin{itemize}
@@ -192,9 +223,9 @@ plays as significant role in the design of the developed system.
 
   \item How is Communication implemented in PIConGPU ?
     \begin{itemize}
-      \item simulation data is stored in gridbuffer
-      \item gridbuffer does automatically offload to accelerator
-      \item gridbuffer knows its neighbor gridbuffers which
+      \item Simulation data is stored in gridbuffer
+      \item Gridbuffer does automatically offload to accelerator
+      \item Gridbuffer knows its neighbor gridbuffers which
         are calculated by a function
       \item Communication operations are handled by a communicator class
       \item Collective operations are directly implemented by
@@ -211,42 +242,36 @@ plays as significant role in the design of the developed system.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Design of the System}
 
-\todo{shortly describe state of the art system}
+A physical network like ethernet, infiniband or myrinet is the
+foundation for communication concepts like MPI, TCP or UDP.  State of
+the art simulation application are usually implemented directly on
+these existing communication layers. The developed system introduces
+an intermediate layer between application and communication library
+(Figure \ref{fig:design}). This layer fulfils als requirements claimed
+by section \ref{sec:requirements}. Figure \ref{fig:design} shows the
+individual components of the intermediate layer and which requirement
+they fulfil. The communication abstraction layer, on top of existing
+communication layer, abstracts the communication interface.  A graph
+describes or models the communication topology of the simulation
+domain and a graph-based virtual overlay network maps the
+communication topology onto the hardware topology of the communication
+abstraction layer.
 
-Due to the fact, that the communication hardware layout is fixed. The access
-to the hardware is represented by CALs (See \ref{sec:cal}) and these
-are connected in the simplest case by an fully connected network, thus
-every peer can send messages to every other peer. Therefore a network
-on top of the CALs has to be established.
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_design}
+  \caption{}
+  \label{fig:design}
+\end{figure}
 
-It is a very important property to be able to explicitly map the
-communication topology of the application onto the communication
-hardware.
-
-In the first place it should gives the application the possibility to
-be optimized on special charakteristics of the compute cluster. For
-example could vertices that need to communicate very intensively with
-each other can be mapped on neighboring nodes or even onto the same
-node. Which makes communication more efficient.
-
-Besides it should be possible to change the mapping of the
-communication topology onto the communication hardware in
-runtime. This is important when thinking of occuring unbalanced load
-during the run of the application.
-
-The communication is abstracted from the actual communication layer by
-the CAL and the communicaiton topology is modeled with a graph and
-then maped onto the CAL.
-
-\todo{add graphic for full system}
-
-This section present the design of a system that fulfils the previous
-discussed requirements (Section \ref{sec:comm_abstraction}). Therfore, the
-methods to exchange data are abstracted (Section \ref{sec:cal}). Then,
-an approach to describe the communication topology is described
-(Section \ref{sec:graph}) and finally a way to map the simulation
-domain onto the physical domain is presented (\ref{sec:gvon}).
-
+This section present the design of the system that fulfils the
+previous discussed requirements (Section~\ref{sec:requirements}).  It
+will discuss each component in detail, starting with the communication
+abstraction layer (Section~\ref{sec:comm_abstraction}). Then,
+describing the graph interface (Section~\ref{sec:graph}) and finally
+introducing a graph-based virtual overlay network
+(Section~\ref{sec:gvon}). Component interfaces will be described in
+some cases by pseudo-code which is strongly related to the C
+programming language.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -260,30 +285,34 @@ domain onto the physical domain is presented (\ref{sec:gvon}).
 Simulation applications can be interconnected by vast variety of
 communication libraries. Most simulations make use of exactly one
 possible libarary, but this reduces the simulation to compute systems
-supporting exactly the selected library. This section describes an
-approach to fulfil the previously discussed requirement of
-a abstract data transfer method.
+supporting exactly the selected library (Figure \ref{fig:design_state_of_the_art}).
 
-\todo{insert graphic of state of the art communication}
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_design_state_of_the_art}
+  \caption{}
+  \label{fig:design_state_of_the_art}
+\end{figure}
 
-Assume a simulation  implements its communication by sockets
-. Running this simulation on a local desktop machine can be quite
-inefficient, because communication based on sockets adds unnecesary
-overhead in a local environment. Replacing the communication library
-by a mechanism that maps communication operations to local copies of
-data or a hand over of memory addresses, would make communication in
-this simulation more efficient. But replacing one method for data
-exchange by another is not the solution of the problem. Rather
-varying communication libraries should by addressable by the same
-communication interface to make the application portable.
 
-Thus, the abstraction from
-this existing communication librariy is a fundamental property for a
-portable application.  Even though, that there are existing standards
-for communication in cluster systems, the world of computer science is
-subject to constant change. The possibility to exchange the underlying
-layer without changing the interface to this layer, is a precondition
-for future applications in distributed computing.
+Assume, a distributed simulation application implements its
+communication usually by TCP/IP sockets . Running this simulation on a
+local desktop machine can be quite inefficient, because communication
+based on sockets adds unnecesary overhead in a local
+environment. Replacing the communication library by a mechanism that
+maps communication operations to local copies of data or a hand over
+of memory addresses, would make communication in this simulation more
+efficient. But replacing one method for data exchange by another is
+not the solution of the problem. Rather, varying communication
+libraries should by addressable by the same communication interface to
+make the application portable.
+
+Thus, the abstraction from this existing communication librariy is a
+fundamental property for a portable application.  Even though, that
+there are existing standards for communication in cluster systems, the
+world of computer science is subject to constant change. The
+possibility to exchange the underlying layer without changing the
+interface to this layer, is a precondition for future applications in
+distributed computing.
 
 The challange is to provide a very general interface, that gives the
 possibility to address varying communication libraries through it.
@@ -291,7 +320,9 @@ This interface should be as transparent as possible, such that it
 reminds the interface user on his present communication library.  It
 should be easily deployable into existing applications by replacing
 the actual communication library without changing the fundamental
-understanding of the way to communicate within this application.
+understanding of the way to communicate within this application. The
+following section describes the design of such an abstract
+communication interface.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -302,38 +333,39 @@ understanding of the way to communicate within this application.
 \subsection{Communication Abstraction Layer (CAL)}
 \label{sec:cal}
 
-\sitem{Instances participating on communication in general are called peers subsequently}
-
 The \textit{Communication Abstraction Layer}, shortly \textit{CAL}, is
 a generic communication interface on top of an existing communication
-library. The libraries are addressable through adapters, which makes it
-possible to address varying communication libraries . By exchanging
-the adapter, the application based on the interface can be ported to
-varying communication libraries without changing interface function
-calls. The CAL is configured by an adapter at compile time, thus, by
-using this flexible approach no runtime overhead should occur by using
-the abstract interface instead of the original interface.
+library. The libraries are addressable through
+adapters, which makes it possible to address varying communication
+libraries. By exchanging the adapter, the application based on the
+interface can be ported to varying communication libraries without
+changing interface function calls. The CAL is configured by an adapter
+at compile time, thus, by using this flexible approach no runtime
+overhead should occur by using the abstract interface instead of the
+original interface. Instances participating on communication in general are
+called peers subsequently.
 
 While the CAL provides an abstract interface with common communication
-methods,  the adapter  implements the  interface demanded  by the  CAL
-through library  its particular communication  operations. 
+methods, the adapter implements the interface demanded by the CAL
+through library its particular communication operations.
 
-The  interface of
-the  CAL provides  basic direct  communication operations,  collective
-operations and  operation for  grouping of peers  Figure \ref{fig:cal}
-shows  the   communication  abstraction  layer  on   top  of  existing
-communication layers.  The CAL with  a specific adatper  could already
-replace a  specific communication library in  simulation applications,
-but the it is not meant to be the level of abstraction the simulation
-programmer will interact  with. Further layers of  abstraction will be
-discussed in later sections \ref{sec:graph} and \ref{sec:gvon}.
+The interface of the CAL provides basic direct communication
+operations, collective operations and operation for grouping of peers
+Figure \ref{fig:design_cal} shows the communication abstraction layer
+on top of existing communication layers.  The CAL with a specific
+adatper could already replace a specific communication library in
+simulation applications, but the it is not meant to be the level of
+abstraction the simulation programmer will interact with. Further
+layers of abstraction will be discussed in later sections
+\ref{sec:graph} and \ref{sec:gvon}.
 
 \begin{figure}[H]
-  \centering \includegraphics[width=\textwidth]{graphics/30_cal}
-  \caption{A part of the design with Communication Abstraction Layer
-    (CAL) on top of existing communication layers. Varying libraies
-    can be addressed through the CAL interface, when an according
-    adapter for this library is implemented.}
+  \centering
+  \includegraphics[width=\textwidth]{graphics/30_design_cal}
+  \caption{Communication Abstraction Layer (CAL) on top of existing
+    communication layers. Varying communication libraies can be
+    addressed through the CAL interface, when an according adapter for
+    this library is implemented.}
   \label{fig:cal}
 \end{figure}
 
@@ -375,7 +407,7 @@ and the adapter handles its particular address space.
 % MULTI ADAPTER                                                                %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Multiadapter}
+\subsection{Multiadapter Design}
 
 The possibility to exchange the adapter of the CAL also raises the
 question if a design with more than one adapter at the same time would
@@ -431,22 +463,21 @@ design and a multi adapter design is left open for future work.
 \subsection{Communication Interface}
 \label{sec:cal_comm}
 % Peer2Peer Operations
-\subsubsection{Peer to Peer Operations}
+\subsubsection{Peer to Peer Communication Methods}
 
 In the first place, the CAL provides peer-to-peer communication. That
 are basic communication methods to exchange abitrary data between two
 peers, like sending and receiving.  These operations are available
 both blocking and non-blocking.
 
-\sitem{Non-blocking operations return an event}
-\sitem{Events representing the state of the previously executed communication operation}
-\sitem{Operation is either still processing or has already finished}
-\sitem{Event provides a method to query the present state}
-\sitem{Event provides function to wait for the operation until it has finished}
-\sitem{CAL defines event interface}
-\sitem{Event is very adapter specific}
-\sitem{Each communication library treats non blocking communication differently}
-\sitem{Event need to be implemented by the adapter}
+Non-blocking communication methods return an event object that represents
+the state of the previously executed communication methods. The state
+of the method is either still processing or already finished. Thus, an
+event provides a function to request the current state and a function
+to to wait until the method has finished. The CAL only provides the
+the event interface, adapter implement the CAL interface for their
+particular communication library since each libary treats non-blocking
+communication differently.
 
 A direct communication operation is called with a triplet of
 arguments, including the virtual address of sender or receiver, the
@@ -461,12 +492,11 @@ to a contigiuous memory area. The following list describes the
 direction communication operations of the CAL interface:
 
 \begin{itemize}
-  \item void send(destination vaddr, tag, data)
-  \item void recv(source vaddr, tag, data)
-  \item Event asyncSend(destination vaddr, tag, data)
-  \item Event asyncSecv(source vaddr, tag, data)
+  \item [] \textbf{void send(destination vaddr, tag, data)}
+  \item [] \textbf{void recv(source vaddr, tag, data)}
+  \item [] \textbf{Event asyncSend(destination vaddr, tag, data)}
+  \item [] \textbf{Event asyncSecv(source vaddr, tag, data)}
 \end{itemize}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -485,7 +515,7 @@ A context stores the information about the peers virtual address , the
 amount of peers grouped and whether the context is valid for that
 peer. It is the base for communication algorithms with more than 2
 participating peers. These algorithm are introduced as collective
-operations (Section \ref{sec:collectives}).
+operations (Section \ref{sec:cal_collective}).
 
 The CAl provides always the global context of which a peer
 can retrieve its global virtual address. A new context can
@@ -520,57 +550,49 @@ A Collective is always executed in respect to a context and the result
 is either received by only one peer, the root, or by all peers.  While
 a large number of collectives is known to the parallel computation
 commmunity, the CAL only provides the most common ones with respect to
-the analysis of the PIConGPU source code (Section \ref{sec:picongpu_analysis}).
+the analysis of the PIConGPU source code (Section
+\ref{sec:picongpu_analysis}).  The following is a list of all provided
+collective operations of the CAL and its description:
 
-The following is a list of all provided collective operations of the
-CAL and its description:
+
 \begin{itemize}
-\item gather(root, context, send, recv)\\
-
+\item  \textbf{gather(root vAddr, context, send, recv)}\\
   Collection of data elements from every peer in the context. Each peer
   contributes the same number of data elements. The collected data will
   be received from the root peer.
 
-\item allGather(context, send, recv)\\
-
+\item \textbf{allGather(context, send, recv)}\\
   A gather collective, while all peers of the context receive the data.
 
-\item scatter(root, context, send, recv)\\
-
+\item  \textbf{scatter(root vAddr, context, send, recv)}\\
   Distribution of data elements from the root peer to all other peers of
   the context. The data will be divided into chunks of same
   size. Assuming the number of data elements is divisible by the number
   of peers, every peer will receive the same number of data
   elements. Thus, every peer receives different data elements.
 
-\item allScatter(context, send, recv)\\
-
+\item  \textbf{allScatter(context, send, recv)}\\
   A scatter collective, while all peers of the context receive the data.
 
-\item reduce(root, context, operation, send, recv)\\
-
+\item  \textbf{reduce(root, context, operation, send, recv)}\\
   Reduction of the data elements from every peer of a context by a
   binary function. A binary function, takes two arguments of abitrary
   type and returns a value of abitrary type. Usually both input
   arguments and return value have the same type.
 
-\item allReduce(context, operation, send, recv)\\
-
+\item  \textbf{allReduce(context, operation, send, recv)}\\
   A reduce collective, while all peers of the context receive the
   data.
 
-\item void broadcast(root, context, data)\\
-
+\item  \textbf{void broadcast(root, context, data)}\\
   Distributes data elements from the root peer to all other peers of
   the context. Every peer receives the same data elements.
 
-\item syncronize(context)\\
-
+\item  \textbf{syncronize(context)}\\
   This operation synchronizes the control flow of all peers of the
   context.
 
-\item createContext(peers, context)\\ 
-
+\item  \textbf{createContext(peers, context)}\\ 
   Creation of a new context from a subset of peers of an already
   present context.
 
@@ -590,15 +612,15 @@ each peer has contributed to the collective.
 % GRAPH                                                                        %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Modeling of the Application Domain}
+\section{Modeling of the Application Domain by a Graph}
 \label{sec:graph}
 The simulation application always implements a particular algorithm
 that describes a particular model. This Algorithm often requires a
-domain decomposition (Section \ref{sec:domain_decomposition} of the
+domain decomposition (Section \ref{sec:domain_decomposition}) of the
 simulation domain into a set of subdomains. Assume, subdomains need
 to interact with each other, communication between subdomains is
 necessary. Thus, the choosen algorithm of the simulation determines
-the communication topology .
+the communication topology.
 
 The communication and its underlying communication topology is often
 implemented in a implicit and static manner. The simulation domain is
@@ -606,6 +628,7 @@ mapped fixed onto the compute ressources.  Such that, a change of the
 simulation algorithm need to be translated into a change of the
 coresponding communication patterns, which can be quiete costly.
 
+\paragraph*{}
 A more elegant approach is to explicitly model the relationships
 between the subdomains and therefore the communication topology. The
 most general method to model a topology is a \textit{graph}
@@ -623,7 +646,6 @@ graph. Thus, algorithms can by implemented on top of the graph
 description.
 
 % directed cycle multi graph
-
 The graph has the property, that vertices are connected by directed edges. Loops
 and multiple edges between two vertices are allowed (Figure
 \ref{fig:graph}). The resulting graph is a directed multi graph with
@@ -632,18 +654,20 @@ loops. The mathematical expression for this kind of graph is quiver
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_graph}
-  \caption{ A directed cycle multi graph with vertices A, B and edges
-    1, 2, 3.  }
-  \label{fig:graph}
+  \caption{ A directed cycle multi graph with four vertices}
+    {fig:graph}
 \end{figure}
-\todo{Bigger, better looking graph}
 
-\sitem{Graph provides methods to retrieve information from it}
-\sitem{All vertices or specific vertex}
-\sitem{Adjacent vertices of a vertex}
-\sitem{Out edges of a vertex}
-\sitem{In edges of a vertex}
-\sitem{Creation of subgraphs}
+The graph interface provides the following methods:
+
+\begin{itemize}
+  \item [] \textbf{[Vertex] getVertices()}
+  \item [] \textbf{Vertex getVertex(index)}
+  \item [] \textbf{[Vertex] getAdjacentVertices(vertex)}
+  \item [] \textbf{[Edge] getOutEdges(vertex)}
+  \item [] \textbf{[Edge] getInEdges(vertex)}
+  \item [] \textbf{Graph createSubGraph(vertices)}
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -658,7 +682,7 @@ application. But, a graph can be interpreted as a container, wherby the
 objects of the container are in a relation to each other.
 
 The container object will be called property and is introduced as a
-concpet to annotate a graph. A property provides subdomain information
+concept to annotate a graph. A property provides subdomain information
 and can be bound to vertices and edges (Figure
 \ref{fig:property}). Vertices and Edges of the same graph share
 respecively the same type of property. A graph annoted with properties
@@ -683,21 +707,26 @@ later example will make use of this hierarchical modeling (Section
 % MODELING GAME OF LIFE AS A GRAPH                                             %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Modeling Game of Life as a graph}
+\subsection{Modeling Game of Life as a Graph}
 \label{sec:gol}
 To give an example for modeling a specific simulation application,
 Figure \ref{fig:gol} models the Game of Life (GoL) \cite{ref:gol}
 domain by a graph. GoL simulates the evolution of a set of cells for
 an abitrary amount of timesteps. The cells are arranged in a two-
-dimensional grid.  A cell has a state which is either alive or not
-alive and the state of the next time step is calculated by
-rules. The common set of rules determine the state of a cell for the
-next time step by the state information of the neighboring cells. One
-rule for example is, that a dead cell with exactly 3 living cells in
-the neighborhood will be reborn on the next time step. For the further
-description of GoL it is assumed the only this rule exists.
+dimensional grid (Figure \ref{fig:gol_simulation}).  A cell has a
+state which is either alive or not alive and the state of the next
+time step is calculated by rules. The common set of rules determine
+the state of a cell for the next time step by the state information of
+the neighboring cells. One rule for example is, that a dead cell with
+exactly 3 living cells in the neighborhood will be reborn on the next
+time step. For the further description of GoL it is assumed the only
+this rule exists.
 
-\todo{Game of life description graphic from status presentation}
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_gol_simulation}
+  \caption{}
+  \label{fig:gol_simulation}
+\end{figure}
 
 Modeling this common rule straight forward, ending up in a graph where
 every cell of the GoL world is represented by a vertex and neighboring
@@ -716,6 +745,8 @@ alive on the next time step.
     Vertex determines next state by state of neighboring cells}
   \label{fig:gol}
 \end{figure}
+
+\todo{Add life to graph}
 
 Now changing the rule slightly to a GoL where a cell needs some free
 area around itself, thus, a cell can be only alive if the living cells
@@ -772,6 +803,7 @@ communicate states of their border cells to adjacent bundles.
 \sitem{Used the same description tool; the graph}
 \sitem{Both graph were connected over its graph properties}
 
+\subsection{Modeling a N-Body Simulation as Graph}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %

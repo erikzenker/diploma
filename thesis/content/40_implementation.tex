@@ -155,6 +155,7 @@ struct add {
   }
 
 };
+\end{lstlisting}
 
 It can not be assumed that the general binary operator is supported by
 every adapter specific reduce operation.  Thus, it may exist cases in
@@ -411,7 +412,7 @@ void wait(){
 \end{lstlisting}
 
 The ready methods checks with \cpp{MPI\_Test} whether the function has
-already finished (Listing \ref:mpi_event_ready}).
+already finished (Listing \ref{lst:mpi_event_ready}).
 
 \begin{lstlisting}[language=C++, label=lst:mpi_event_ready]
 bool ready(){
