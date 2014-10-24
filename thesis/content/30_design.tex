@@ -494,10 +494,10 @@ to a contigiuous memory area. The following list describes the
 direction communication operations of the CAL interface:
 
 \begin{itemize}
-  \item [] \textbf{void send(destination vaddr, tag, data)}
-  \item [] \textbf{void recv(source vaddr, tag, data)}
-  \item [] \textbf{Event asyncSend(destination vaddr, tag, data)}
-  \item [] \textbf{Event asyncSecv(source vaddr, tag, data)}
+  \item  \textbf{void send(destination vaddr, tag, data)}
+  \item  \textbf{void recv(source vaddr, tag, data)}
+  \item  \textbf{Event asyncSend(destination vaddr, tag, data)}
+  \item  \textbf{Event asyncSecv(source vaddr, tag, data)}
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -660,15 +660,29 @@ loops. The mathematical expression for this kind of graph is quiver
   \label{fig:graph}
 \end{figure}
 
-The graph interface provides the following methods:
+The presented graph should be addressable by the following interface:
 
 \begin{itemize}
-  \item [] \textbf{[Vertex] getVertices()}
-  \item [] \textbf{Vertex getVertex(index)}
-  \item [] \textbf{[Vertex] getAdjacentVertices(vertex)}
-  \item [] \textbf{[Edge] getOutEdges(vertex)}
-  \item [] \textbf{[Edge] getInEdges(vertex)}
-  \item [] \textbf{Graph createSubGraph(vertices)}
+  \item \textbf{getVertices}()\\
+    Returns the list of all vertices of the graph.
+    
+  \item  \textbf{getVertex(index)}\\
+    Returns a particular vertex by vertex index.
+
+  \item  \textbf{getAdjacentVertices(vertex)}\\
+    Returns a list of all adjacent vertices of vertex.
+
+  \item  \textbf{getOutEdges(vertex)}\\
+    Returns a list of all outgoing edges from the vertex
+    paired with their target vertex.
+
+  \item  \textbf{getInEdges(vertex)}\\
+    Return a list of all incoming edges to the vertex 
+    paired with their source vertex.
+
+  \item  \textbf{createSubGraph(vertices)}\\
+    Returns a subgraph, that only contains the defined
+    vertices from the supergraph.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1005,7 +1019,7 @@ resolved the programm flow is handed over to the CAL. The Cal is then
 responsible for exchange data between the hosts.
 
 % GVON collectives
-\paragraph*{}
+\subsubsection*{GVON Collectives}
 Operations between all vertices of a graph can be performed as
 collective operations (Section \ref{sec:cal_collective}). A host needs
 to perform the collective operation for all its hosted vertices,
