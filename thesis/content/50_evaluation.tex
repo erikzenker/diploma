@@ -128,10 +128,10 @@ This experiment increases the number of consecutive send/recv
 operations $n$ from 1 to $10^3$ by a stepsize of 10. Thereby, the amount of
 sending and receiving data is set fixed to a 64 Bit integer.  The
 run-time for these consecutive send/recv operations is measured and
-then averaged to obtain the runtime for a single operation.  The
+then averaged to obtain the run-time for a single operation.  The
 experiment is limited on a single node, thus, no network latency is
 included in the results.  Figure \ref{fig:nsend_kepler} shows the
-averaged runtime on a single kepler node and the according runtime
+averaged run-time on a single kepler node and the according run-time
 ration in respect to MPI.
 
 \begin{figure}[H]
@@ -150,47 +150,47 @@ ration in respect to MPI.
   \label{fig:nsend_kepler}
 \end{figure}
 
-For both CAL and GVON, the relative overhead stabilizes with
+\noindent For both CAL and GVON, the relative overhead stabilizes with
 increasing operations.  Through virtual address and context
-translations, the CAL adds a constant average overhead of 10\% per
-send/recv operation in respect to MPI. Even worse is the situation for
-the GVON.  It adds a constant average overhead of 150\% per send/recv
-operation.  Since the communication topology of the GVON is described
-by a graph, including two nodes connected by a directed edge, the
-constantly lookup in this graph adds constant overhead to each
-send/recv operation.  Instead, CAL and MPI are sending and receiving
-from fixed peer addresses. So no lookup is necessary.  However, the
-graph is not changing during the experiment. Thus, it is sufficient to
-perform the graph lookup only once. This should reduce the GVON
-overhead to a similar level of the CAL. Figure
-\ref{fig:nsend_one_lookup_kepler} shows the same experiment, but the
-GVON performs only one lookup per $n$ send/recv operation.
+translations, the CAL adds a constant average overhead of around 10\%
+per send/recv operation in respect to MPI. The GVON adds a constant
+average overhead of around 150\% per send/recv operation.  Since the
+communication topology of the GVON is described by a graph, including
+two nodes connected by a directed edge, the constantly look up in this
+graph adds constant overhead to each send/recv operation.  Instead,
+CAL and MPI are sending and receiving from fixed peer addresses without the need of
+a look up.  However, the graph is not changing during the
+experiment. Thus, it is sufficient to perform the graph lookup only
+once. This should reduce the GVON overhead to a similar level of the
+CAL. Figure \ref{fig:nsend_one_lookup_kepler} shows the same
+experiment, but the GVON performs only one lookup per $n$ send/recv
+operation.
 
 \begin{figure}[H]
   \begin{minipage}[t]{0.5\textwidth} 
     \includegraphics[width=\textwidth]{plots/50_nsend_one_lookup_kepler}
-  \end{minipage}
+  \end{minipage}%
   \begin{minipage}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{plots/50_nsend_one_lookup_overhead_gvon_kepler}
-  \end{minipage}
-  \label{fig:nsend_one_lookup_kepler}
+  \end{minipage}%
   \caption{The amount of graph lookups is reduced to one lookup for
-    $n$ send/recv operations.  This also reduces the GVON overhead to
+    $n$ send/recv operations.  This reduces the GVON overhead to
     a similar level of the CAL.}
+  \label{fig:nsend_one_lookup_kepler}
 \end{figure}
 
 \todo{Name One graph lookup, OGL}
 
-The changed experiment reduces the GVON overhead to same level like
+\noindent Changing the experiment, has reduced the GVON overhead to same level like
 the CAL (around 13\%). Because the vertex and graph need to be
 translated to virtual address and context, a small overhead in respect
 to the CAL is still present. It shows that the graph implementation
 need to be optimized with regard to lookup of incoming and outgoing
 edges.
 
-\subsubsection*{Increase number of elements per send and receive operations}
+\subsubsection*{Increase number of elements per send/recv operations}
 This experiment increases the number of elements per send/receive
-operation from 1 to $10^3$ by a stepsize of 10. Thereby, one element is
+operation from 1 to $10^3$ by a step size of 10. Thereby, one element is
 a 64 Bit integer. A single experiment obtains the average runtime over
 1000 send/receive operations.  The experiment is limited to execution
 on a single node. Thus, no network latency is included in the
@@ -209,45 +209,49 @@ respect to MPI.
     \includegraphics[width=\textwidth]{plots/50_nsize_overhead_gvon_kepler}
     \includegraphics[width=\textwidth]{plots/50_nsize_one_lookup_overhead_gvon_kepler}
   \end{minipage}%
-  \label{fig:nsize_kepler}
   \caption{Increasing the number of elements per send/recv operations, reduces
   the relative overhead in respect to MPI.}
+  \label{fig:nsize_kepler}
 \end{figure}
 
-With increasing number of elements per send/recv operations the
-runtime of CAL and GVON converges with MPI. The average CAL overhead
-is and negligible and the average GVON overhead is reduced to only
+\noindent With increasing number of elements per send/recv operations the
+run-time of CAL and GVON converges with MPI. The average CAL overhead
+is and negligible and the average GVON overhead is reduced to around
 18\% per send/recv operation. Changing the GVON experiment to a one
-graph lookup variant, drops the runtime overhead even further.
+graph look up variant, drops the run-time overhead even
+further. 
 
-\subsubsection*{Include network}
-The synthetic benchmark was performed only locally on a single node
-without the influence of network latency until now. The experiments
-will be changed to a configuration with two nodes, whereby the peers
-are not located on the same node. It is expected, that the relative
-overhead of CAL and GVON decreases even more in contrast to the
-previous experiments, while the overall runtime will increase.  A
-setup with 8 laser nodes is used. The number of peers per node is
-incremented for each experiment to a maximum of 64.
-
-Figure
-\ref{fig:nsend_network} shows the average runtime of GVON and CAL in
-respect to MPI for a single send/recv operation including network
-latency.
+\subsubsection*{Including network}
+The synthetic benchmarks was performed only locally on a single node
+until now. No network latency influenced the run-time
+results. The experiments is changed to a configuration with two
+nodes, whereby the peers are not located on the same node. It is
+expected, that the relative overhead of CAL and GVON decreases even
+more in contrast to the previous experiments, while the overall
+run-time will increase.  A setup of two kepler nodes, each hosting one
+peer, was selected.  Figure \ref{fig:nsend_network} shows the average
+run-time of GVON and CAL in respect to MPI for a single send/recv
+operation including network latency.
 
 \begin{figure}[H]
   \begin{minipage}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{plots/50_nsend_network_cal_kepler}
     \includegraphics[width=\textwidth]{plots/50_nsend_network_gvon_kepler}
+    \includegraphics[width=\textwidth]{plots/50_nsize_network_cal_kepler}
+    \includegraphics[width=\textwidth]{plots/50_nsize_network_gvon_kepler}
   \end{minipage}%
   \begin{minipage}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{plots/50_nsend_network_overhead_cal_kepler}
     \includegraphics[width=\textwidth]{plots/50_nsend_network_overhead_gvon_kepler}
   \end{minipage}%
-  \caption{ }
+  \caption{Synthetic benchmark including network latency}
   \label{fig:nsend_network}
-
 \end{figure}
+
+\noindent Because real world simulation usually send more than a single 64 Bit
+integer per communication operation and are using network, this
+experiment resembles more with real world simulation. Therefore, the
+CAL and GVON overhead is in an acceptable range.
 
 
 
@@ -257,25 +261,14 @@ latency.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Synthetic Collective Benchmark}
-This benchmark compares the runtime of MPI collective operations with
-collevtives of CAL and GVON.  Thereby, to determine the runtime for a
+This benchmark compares the run-time of MPI collective operations with
+collectives of CAL and GVON.  Thereby, to determine the run-time for a
 single collective execution, it is executed 1000 times and then
 averaged. Since, the overhead in respect to MPI should be determined,
-only the gather and reduce collective were chosen for comparison.
+only the gather and reduce collective were chosen for comparison. Other
+collective operations should behave in an analog manner.
 
-\begin{itemize}
-\item Synthetic Collective Tests
-  \begin{itemize}
-  \item GVON only implements gather and reduce
-  \item N collective operations
-  \item average runtime of one collective operation
-  \item Increase amount of data to send
-  \item Varying data types
-  \item Compare MPI, CAL, GVON
-  \end{itemize}
-
-\end{itemize}
-
+\todo{increase amount of data to send}
 
 \subsubsection*{Gather Collective}
 
@@ -283,31 +276,71 @@ only the gather and reduce collective were chosen for comparison.
   \item CAL and MPI collectives are quiete similar
   \item GVON executes collective operations locally first
   \item GVON does reordering of collective results
-  \item Big relative overhead is expected
+  \item Big relative overhead is expected to MPI
+  \item Could introduce switch for reordering
+  \item Thus, reordering only executed when necessary
 \end{itemize}
 
 Figure \ref{fig:collective_npeers} shows the average runtime of a
-gather collective for increasing number of peers.
+gather collective for increasing number of peers with and without network.
 
 \begin{figure}[H]
   \begin{minipage}[t]{0.5\textwidth}
-  \includegraphics[width=\textwidth]{plots/50_collective_npeers_cal_laser}
-  \includegraphics[width=\textwidth]{plots/50_collective_npeers_gvon_laser}
+    %\includegraphics[width=\textwidth]{plots/50_collective_npeers_cal_laser}
+    %\includegraphics[width=\textwidth]{plots/50_collective_npeers_gvon_laser}
+    \includegraphics[width=\textwidth]{plots/50_collective_network_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_collective_network_gvon_laser}
   \end{minipage}%
   \begin{minipage}[t]{0.5\textwidth}
-  \includegraphics[width=\textwidth]{plots/50_collective_npeers_overhead_cal_laser}
-  \includegraphics[width=\textwidth]{plots/50_collective_npeers_overhead_gvon_laser}
+    %\includegraphics[width=\textwidth]{plots/50_collective_npeers_overhead_cal_laser}
+    %\includegraphics[width=\textwidth]{plots/50_collective_npeers_overhead_gvon_laser}
+    \includegraphics[width=\textwidth]{plots/50_collective_network_overhead_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_collective_network_overhead_gvon_laser}
   \end{minipage}%
   \caption{ }
   \label{fig:collective_npeers}
 \end{figure}
 
 
-\todo{include network}
-
 \subsubsection*{Reduce Collective}
+\begin{itemize}
+  \item Reduce collective performs local reduce on the GVON first
+  \item Then forward of reduce to the CAL
+  \item same runtime expected
+  \item setup with 8 laser nodes
+  \item increasing number of peers 
+\end{itemize}
+
+\begin{figure}[H]
+  \begin{minipage}[t]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{plots/50_reduce_network_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_reduce_network_gvon_laser}
+  \end{minipage}%
+  \begin{minipage}[t]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{plots/50_reduce_network_overhead_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_reduce_network_overhead_gvon_laser}
+  \end{minipage}%
+  \caption{ }
+  \label{fig:reduce_laser}
+\end{figure}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% GAME OF LIFE BENCHMARK                                                       %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Real World Simulation Benchmark}
+The previous benchmarks evaluated the developed system in a very
+synthetic and unreal manner. But, real world simulation perform
+calculations in between communication operations. Furthermore, it is
+usual to overlap calculations and communication by non blocking
+operations. A Game of Life and n body Simulation were chosen as
+examples for such a real world simulation. The implementations based
+on GVON from section \ref{sec:impl} are compared to equivalent MPI
+implementations.  Equivalent refers the same amount of communication
+operations and the same functions are used to calculate simulation
+states.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -316,37 +349,32 @@ gather collective for increasing number of peers.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Game of Life Benchmark}
-The previous benchmarks evaluated the developed system in a very
-synthetic and unreal manner. But, real world simulation perform
-calculations in between communication operations. The Game of Life
-simulation should be an example for such an real world
-simulation. Therefore, this benchmark compares the presented GoL
-implementation with an equivalent MPI implementation. Equivalent
-refers to the same set of rules, the same amount of communication
-operations and the same functions are used to update the cell states.
-The GoL domain is square field with $n^2$ cells and the state of every
-cell is calculated by a peer.  Figure \ref{fig:gol_laser} shows the
-average run-time of a time-step for $n$ in range from 1 to 8. The
-Experiment is limited to a single laser node.
+This experiment compares the GVON implementation of Game of Life from
+section \ref{sec:gol} with an equivalent MPI implementation. The GoL
+domain is a rectangular field and the state of every cell is
+calculated by its own peer. The average run-time for a time-step with
+increasing number of cells is measured. The run-time is measured with
+and without network influence. A setup with 8 laser nodes is used in
+the network case. The number of peers per node is incremented for each
+experiment to a maximum of 64. The peers are equally distributed to
+the nodes.  Figure \ref{fig:gol_laser} shows the average run-time of a
+time-step with and without network.
 
 \begin{figure}[H]
   \begin{minipage}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{plots/50_gol_ncells_laser}
-    \label{fig:gol_laser}
-    \caption{ }
   \end{minipage}%
   \begin{minipage}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{plots/50_gol_network_laser}
-    \label{fig:gol_network_laser}
-    \caption{ }
   \end{minipage}%
+  \label{fig:gol_laser}
+  \caption{Average run-time of GoL simulation with increasing number
+    of cells. The simulation is executed with and without network.}
 \end{figure}
 
-The peers are equally distributed to 8 laser nodes. Figures
-\ref{fig:gol_network_laser} shows the average run-time of a time-step
-for $n$ in range from 1 to 22.
+The GVON implementation shows no overhead in comparison to the MPI
+implementation. 
 
-\subsubsection*{Including Network}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -356,46 +384,45 @@ for $n$ in range from 1 to 22.
 \subsection{N Body Benchmark}
 This benchmark simulates the implemented n body simulation for 1000
 time-steps with increasing number of bodies. It is compared a
-simulation implemented with MPI to one implemented with the GVON. In
-contrast to the synthetic benchmark, calculations have to be performed
-in between communication operations. Thus, the communication operations
-do not provide the main run-time. Figure \ref{fig:nbody_laser} shows
-the averaged run-time of a time-step with increasing number of bodies.
+simulation implemented with MPI to one implemented with the GVON.
+Thereby, each body is managed by an own peer. Thus, the number of
+peers increases with the number of bodies. The experiment is performed
+with and without network. A setup with 8 laser nodes is used in the
+network case. The number of peers per node is incremented for each
+experiment to a maximum of 64. The peers are equally distributed to
+the nodes.  Figure \ref{fig:nbody_laser} shows the averaged run-time
+of a time-step with increasing number of bodies with and without
+network.
 
 \begin{figure}[H]
   \begin{minipage}[t]{0.5\textwidth}
-   \includegraphics[width=\textwidth]{plots/50_nbody_laser}
-  \label{fig:nbody_laser}
-  \caption{ }
+    \includegraphics[width=\textwidth]{plots/50_nbody_laser}
   \end{minipage}%
   \begin{minipage}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{plots/50_nbody_network_laser}
-    \label{fig:nbody_network_laser}
-    \caption{ }
   \end{minipage}%
+  \label{fig:nbody_laser}
+  \caption{Average run-time of n body simulation with increasing number
+    of bodies. The simulation is executed with and without network.}
 \end{figure}
 
-The average run-time of a time-step raises quadratic with the number
-of bodies. Also the variance increases quadratic. Thus, the run-time
-of the time-steps varies strongly.
+Analog to the GoL simulation, this experiment also shows no overhead
+in comparison to the MPI implementation.
 
-\sitem{Still no explanation for strong variance}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% FLEXIBILITY BENCHMARK                                                        %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Flexibility Benchmark}
 
 \begin{itemize}
-  \item Simple N-Body
-    \begin{itemize}
-    \item 1 to 256 Bodies
-    \item runs on laser machine (64 CPU's)
-    \item run of 1000 time-steps
-    \item max 4 bodies per CPU
-    \item Compare with and without network
-    \item Compare MPI with GVON
-    \item Compare different amount of CPU's
-    \end{itemize}
-\end{itemize}
+\item GVON allows mapping of vertices to peers at run-time
+\item Remapping of vertices possible
+\item Furthermore, mapping of multiple vertices onto a single peer
 
-\subsubsection*{Including Network}
+
+\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

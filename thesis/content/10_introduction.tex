@@ -13,65 +13,88 @@
 % als 10 Seiten liest keiner.
 
 
+
 \section{Introduction}
 
-Only a few problems can be calculated without exchanging information
-between other nodes. Thus each node has the challange to retrieve all
-the data, that is needed to calculate the next step of its
-computation.
-
-% New 
 \begin{itemize}
-\item State of the art
-  \begin{itemize}
-  \item Homogeneous compute cluster (vertical and horizontal) with
-    fixed hardware configuration and network topologie
-  \item Simulation need to be domain decomposed in subdomains
-  \item one-to-one mapping from simulation onto hardware
-  \end{itemize}
 
-\item But modern simulations and cluster are not that homogeneous
-  \begin{itemize}
-  \item Simulation horizontal heterogenety by unbalanced load
-  \item Simulation vertical heterogenety by multiscale effect (varying communication topologies)
-  \item hardware vertical heterogenety by komplex compute architecture per node
-  \end{itemize}
+% State of the art petascale systems
+\item Current state of the art computing systems operate in area of
+  petaflop/s
+\item Only a small number worldwide have take advantage of a
+  petaflop/s system
+\item PIConGPU (a physic simulation) is a physic application that has
+  shown the ability for execution on Titan supercomputer at the Oak
+  Ridge National Laboratory in the United States
+\item The Titan is a supercomputer with about 27 petaflop/s peak
+  performance.
+\item Nevertheless, these applications are looking towards systems
+  with more computational power
 
-\item Mapping should be explicit from simulation domain onto hardware
+% Exascale systems
+\item Rapid progress in the development of computers and algorithms
+\item Symbiotic evolution of computing systems and high performance
+  applications
+\item Thus, the more compute power is necessary and soon available,
+  since current computers can no longer adequately cover the future
+  needs of complex and the compute intensive scientific and industrial
+  applications.
+\item Next milestone in the development of supercomputers, foray of
+  computing systems into with an exaflop/s computing power - an
+  exascale system
+\item That are computing systems that are capable of at least
+  $10^{18}$ flop/s
+\item That is thousandfold increase over the first petascale computer
+  from 2008.
+\item Not all questions of the construction of such a system are
+  solved
+\item But, it is certain, that exascale will increasing the amount and
+  the complexity of computers
+\item It is expected that the construction of the first exascale
+  systems will be finished in 2018.
 
-\item Developed system that does exactly this mapping
+% Upcoming problems with exascale system
+\item Applications with the objective to scale onto exascale systems
+  have to be prepared
+\item Challenge of reliability, programmability, power consumption and
+  usability
+\item Increasing failure probability of computer hardware
+\item Furthermore, emergence of accelerator hardware make computing
+  system more heterogeneous and hierarchical and more complex to
+  program and use.
+\item It is not enough to just increase computing power
+\item Therefore, simulation application has to be adapted onto
+  upcoming circumstances of exascale systems.
+\item Need for smart description concept that fit on future
+  heterogeneous, hierarchical, exascale computing systems.
+\item Foundation for load distribution and fault tolerant systems
 
+% Developed system
+\item Foundation for such a system is a portable and flexible
+  communication approach
+\item portable, so that deployment on varying computing systems is
+  possible
+\item ``For portability reasons, most of the parallel applications are on top
+  of widespread message passing interfaces such as PVM or MPI. But
+  this restricts the application to a single compute environment and
+  make an interconction of varying compute environments very hard.''
+\item flexible, so that mapping of communication processes can be
+  adjusted onto the needs of the simulation and the computing system.
+\item This behavior is achieved by abstraction from existing
+  communication libraries, modeling of the communication topology of
+  the arbitrary simulation and a mapping from the communication
+  topology onto the communication abstraction.
+
+% Overview following section
+\item The following section \ref{sec:technical_background} is a
+  summary of technical background, giving a brief overview of the
+  basic terms in high performance computing and communication in
+  computing systems.
+\item Section \ref{sec:related_work} examines research in the
+  area of interest.
 \item first design of such an system
-
 \item implementation of an prototype
-
 \item evaluation of the prototype in contrast to classic MPI implementation
-\end{itemize}
-
-
-
-% Old
-\begin{itemize}
-\item Computational power of single computer are limited by phsical
-  laws
-\item Single computers have only a limited amount of memory
-\item Applications / Simulations need to be decomposed into subdomains
-\item Subdomains need to be computed on varying computers
-\item Computers of a cluster need to work together
-\item Work together means, exchanging data between computers
-\item Communication plays an important role in cluster systems
-\item Cluster systems are the future of high performance computing for complex simulations
-\item Cluster systems are extendable and scale with the simulation complexity
-\end{itemize}
-
-\begin{itemize}
-  \item ``Make computing platforms more heterogeneous and hierarchical
-    and vasty more complex to program and use.''
-
-  \item ``For portability reasons, most of the parallel applications are on top
-    of widespread message passing interfaces such as PVM or MPI. But
-    this restricts the application to a single compute environment and
-    make an interconction of varying compute environments very hard.''
 
 \end{itemize}
 
