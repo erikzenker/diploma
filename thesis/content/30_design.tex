@@ -377,6 +377,16 @@ another compute architecture, only the adapter has to be exchanged,
 the application has to be recompiled, but the CAL interface stays the
 same.
 
+It is not planed in the actual design that the CAL provides routing
+abilities. Peers have to be connected directly by the network of the
+adapter. No routing makes it also impossible to forward data between
+different adapters of the CAL. Thus a specific CAL only provides a
+single adapter. But several CALs can be used with different adapters
+to communcate on several networks. In such a scenario the routing can
+be implemented on top of the CAL by the library user. Therefore, the
+design was first pushed forward in the direction of a single adapter
+design and a multi adapter design is left open for future work.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -402,60 +412,6 @@ is resolved by the adapter itself. Thus, the adapter defines how the participant
 of its network are mapped onto the given virtual address space of the CAL. This
 mapping is invisible for the CAL, so that the CAL only handle virtual addresses
 and the adapter handles its particular address space.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                              %
-% MULTI ADAPTER                                                                %
-%                                                                              %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Multiadapter Design}
-
-The possibility to exchange the adapter of the CAL also raises the
-question if a design with more than one adapter at the same time would
-be possible. Connecting the network of at least two adapters would
-form a heterogeneous network, where each network has its own
-properties like latency, bandwidth and hardware topology. The CAL
-would unify these varying networks under the same interface. Thus, a
-multi adapter design is the foundation for the usage of the developed
-system in jungle computing environments
-\ref{sec:jungle}.
-
-Assume, the CAL has two adapters, one for MPI and another for sockets,
-to chose from and some peers of the network are able to communicate
-through both adapters.  The CAL needs to provide a list of all
-avaiblabe adapters for a specific peer. A particular sorting of this
-list could state out the prefered adapter for communication between
-two peers. Exchanging data between peers always requires a lookup of
-which adapter needs to be selected to address the peers.
-
-\sitem{strategy patter}
-\sitem{variadic templates}
-
-Furthermore, varying real addresses spaces of different adapters have
-to be mapped onto the same unified address space of the CAL.
-It opens up the possibility that two peers which do not share a same
-adapter, but are connected over a third adapter, could still exchange data
-by routing over that third adapter. Thus, a multi adapter design
-does only make sense when routing between two adapters is implemented.
-
-\sitem{Connecting cluster systems over internet}
-\sitem{Easily create grid computing structures}
-
-Even if the design of a multi adapter communication abstraction layer
-looks quite interesting, the implementation is rather more komplex
-than a single adapter design. 
-
-It is not planed in the actual design that the CAL provides routing
-abilities. Peers have to be connected directly by the network of the
-adapter. No routing makes it also impossible to forward data between
-different adapters of the CAL. Thus a specific CAL only provides a
-single adapter. But several CALs can be used with different adapters
-to communcate on several networks. In such a scenario the routing can
-be implemented on top of the CAL by the library user. Therefore, the
-design was first pushed forward in the direction of a single adapter
-design and a multi adapter design is left open for future work.
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %

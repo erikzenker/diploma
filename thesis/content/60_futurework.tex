@@ -1,55 +1,328 @@
 \chapter{Future Work}
 \label{sec:futurework}
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% MORE ADAPTERS                                                                %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Further Adapter implementations}
+
 \begin{itemize}
 
-\item Implementation of further adapters
-  \begin{itemize}
-  \item Adapter for CUDA
-  \item Adapter for ZMQ
-  \item Adapter for Boost:asio
-  \end{itemize}
+% Short introduction
+\item For the prototype a MPI reference adapter was implemented
+\item MPI is useable on a wide range of computer systems
+\item But not all
 
-\item Implementation of multiadapter design
-  
-  Is maybe not the best idea. GVON should be maybe by design
-  bounded to only a single adapter. Discussion about such
-  a system is okay, but should not to be future work by need.
-  \begin{itemize}
-  \item Implementing grid system on basis of multiadapterdesign
-  \item Support of collective operations over the borders
-    of different adapters in the case that the CAL supports more than one adapter
-    being instanciated.
-  \item implement routing between multiadapters
-  \end{itemize}
+% IP based adapters
+\item Especially distributed system outside of clusters make use
+  of other communication libraries
+\item Exist of other very interesting communication libraries
+\item Adapter for ZMQ
+\item Adapter for Boost:asio
+\item These adapters are based on the tcp/ip or udp/ip protocol
+\item Computations with the internet as network imaginable
+\item Similar to projects like folding@home and seti@home
+\item Next to communication need to implement deployment of peers
 
-\item Thread safe implementation of the gvon collectives
+% Connection over the Internet (Grid)
+\item Connection of clusters over Internet
+\item Construction of a Grid of clusters or computers
+\item Easily extend computational power by further computing units
+\item All communication uses the same communication interface
 
-\item Deployment in real world applications like PIConGPU
+% Adapters for accelerators
+\item Furthermore, modeling of accelerator offload
+\item For CUDA or OpenCL 
+\item Offload is a one-sided communication concept
+\item But developed system supports only two-sided communication
+\item Need to transform one-sided communication into two-sided one
+\item Usually accelerator in offload mode has a host that
+  takes care of the control flow of the accelerator
+\item Communication in two steps
+\item Send data to the host of the accelerator
+\item The sender peer  could also be the receiver peer
+\item The receiver peer receives data
+\item Receiver peer has to know memory addresses to put
+  the data to
+\item It could allocate memory on the accelerator device
+\item Then copy of data onto the memory address
 
-\item Fault tolerance through multi vertex map
+% MPI on accelerators
+\item Future make use of accelerator MPI functionality
+\item Since CUDA 4.0 Unified Virtual Addressing (UVA) forms
+  uniform address space of host and devices of a single node
 
-\item Graph description of adapter hardware topologie
-  \begin{itemize}
-  \item Graph would describe physical connections between peers
-  \item Properties could describe bandwidth, latency etc. 
-  \item Instead mapping drom vertex to independent peers, mapping
-    from vertex to peers related to a graph
-  \item Usage of graph partitioning algorithm (metis, parmetis etc.)
-  \item static, dynamic, autotuning of mapping
-  \item basis for load balancing
-  \end{itemize}
+\item Since CUDA 4.0 GPUDirect P2P
+\item Transfer of data between GPUs within a node
+\item No interaction with host CPU necessary
 
-\item Deployment in real world application
-  \begin{itemize}
-  \item PIConGPU
-  \item HASEonGPU
-  \end{itemize}
+\item Since CUDA 5.0 GPUDirect RDMA available
+\item Transfer of data between GPUs directly over network
+\item No interaction with host CPU necessary
 
+\item Making use of these techniques creates CUDA-Aware MPI
+\item Direct data transfer between memory buffers of GPUs
+\item Reduces run-time for copies onto the host
+
+\todo{Graphic of CUDA with GPUDirect}
+\todo{Provide small example}
+
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% MULTIPLE ADAPTER                                                             %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Multiple Adapter Design}
+\sitem{Until now, the adapter design is chosen deliberately}
+
+But, the possibility to exchange the adapter of the CAL also raises
+the question if a design with more than one adapter at the same time
+would be possible. Connecting the network of at least two adapters
+would form a heterogeneous network, where each network has its own
+properties like latency, bandwidth and hardware topology. The CAL
+would unify these varying networks transparently under the same
+interface. Thus, a multi adapter design is the foundation for the
+usage of the developed system in jungle computing environments
+\ref{sec:jungle}.
+
+
+\sitem{A CAL with multiple adapters could connect two cluster systems
+  over internet.}
+
+\sitem{This would create a powerful tool to extend the computing power
+  of a single cluster}
+
+\sitem{Easily create grid computing structures}
+
+Assume, the CAL has two adapters, one for MPI and another for sockets,
+to chose from and some peers of the network are able to communicate
+through both adapters.  The CAL needs to provide a list of all
+avaiblabe adapters for a specific peer. A particular sorting of this
+list could state out the prefered adapter for communication between
+two peers. Exchanging data between peers always requires a lookup of
+which adapter needs to be selected to address the peers.
+
+\sitem{On the implementation side, there are two solution to switch
+  between adapters at run-time}
+
+\sitem{strategy patter, is the run-time solution}
+
+\todo{Inform about strategy pattern}
+
+\sitem{variadic templates, is the compile-time solution}
+
+Furthermore, varying real addresses spaces of different adapters have
+to be mapped onto the same unified address space of the CAL.  It opens
+up the possibility that two peers which do not share a same adapter,
+but are connected over a third adapter, could still exchange data by
+routing over that third adapter. Thus, a multi adapter design does
+only make sense when routing between two adapters is implemented.
+
+\sitem{Same problem with collective operations between varying
+  adapters}
+
+\sitem{Support of collective operations over the borders of different
+  adapters in the case that the CAL supports more than one adapter
+  being instantiated.}
+
+Even if the design of a multi adapter communication abstraction layer
+looks quite interesting, the implementation is rather more complex
+than a single adapter design. The decision for a single or multiple
+adapter CAL should be placed in the hand of the application developer.
+Thus, the developer could configure the CAL by a further policy that
+defines the adapter behavior.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% DEPLOYMENT IN REAL WORLD SIMULATION                                          %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Deployment in Real World Simulations}
+\begin{itemize}
+
+% PIConGPU
+\item Deployment in PIConGPU
+\item PIConGPU uses a grid-topology
+\item Communication based on plain MPI commands
+\item The system was also developed with the needs
+  of PIConGPU in mind
+\item Replacement of communication related part
+  in PIConGPU source code should be easily possible
+
+% HASEonGPU
+\item Deployment in HASEonGPU
+\item HASEonGPU is another project developed at the HZDR
+\item Communication based on star-topology
+\item A master peer distributes workload to all other peers
+\item Exchanging this topology by a more generic one
+\item This could be a tree instead of a star
+\item whereby a star is also a tree with depth one
+\item In a scenario with a lot of workload the master
+  could delegate responsibility to worker peers that
+  will distribute a subset of workload
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% GRAPH PARTITIONING                                                           %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Graph Partitioning}
+\begin{itemize}
+
+% Load balancing
+\item How to distribute the vertices of a graph onto peers ?
+\item Only rudimentary distribution functions implemented
+\item Refers to the topic of load balancing
+\item Load balancing has a big impact in the performance of a parallel
+  application
+\item Especially interesting when there are more vertices than peers
+\item In this case, the are oversubscribed with vertices
+\item Therefore, vertices on a peer should be as close connected as
+  possible regarding the graph
+\item This potentially minimizes the amount of messages that have to
+  be transferred over the network.
+\item Objective is to send as much messages locally as possible
+
+% Graph partitioning
+\item A well researched solution for this problem is partitioning of
+  graphs
+\item Partitioning divides the a graph into smaller components.
+\item A good partition is defined as one in which the number of edges
+  running between separated components is small
+\item Since the communication topology is described by a graph, it can
+  be also partitioned
+
+% Metis
+\item The tool METIS and its related tools hMETIS and ParMETIS are
+  applications for graph partitioning
+\item They provide high quality partitions and are extremely fast
+  compared to other graph partitioning tools (two magnitudes faster
+  than other widely used partitioning algorithms)
+\item Graphs with several millions of vertices can be partitioned in
+  256 parts in a few seconds on current generation workstations and
+  PCs
+\item published under the Apache Licence Version 2.0
+\item Metis could be added to the graph distribution functions
+
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% DESCRIPTION OF ADAPTER HARDWARE TOPOLOGY                                     %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Description of the Adapter Hardware Topology}
+\begin{itemize}
+
+% Cluster network topology
+\item Cluster systems are equipped with a varying network systems
+\item Usually with custom build network topologies
+\item Making use of the topology knowledge can increase application
+  performance
+\item These topologies can also be described as a graph
+\item Graph would describe physical connections between peers
+\item Therefore, graph is the representation of the real network
+  topology
+\item Properties of the graph could describe bandwidth, latency etc.
+\item Graph algorithms can estimate the distance between two peers
+\item Thus, peers that have to communicate with each other should be
+  located with a minimal distance
+
+% Mapping
+\item Instead mapping from vertex to independent peers
+\item Mapping from vertex to peers related to a graph properties
+\item Even better is a partitioning of the graph to the number of
+  available peers
+\item Then the partitions will be mapped onto the peers
+\item An optimal mapping would result in an graph homomorphism
+\item Deciding whether there exists a homomorphism from one graph to
+  another, is NP-complete
+\item Therefore, a heuristically approach that tries to maximize the
+  amount of same adjacent vertices in communication and network graph
+  should be chosen
+
+% Load balancing
+\item Mapping of the communication graph onto the network graph opens
+  new possibilities
+\item First of all a static mapping can be performed
+
+  % Static load balancing
+\item Static mapping takes already known information about the
+  simulation and network into account, before execution
+\item But the simulation can change their load distribution during
+  run-time
+
+  % Dynamic load balancing
+\item Dynamic redo load balancing at run-time
+\item load balancing at fixed points of code execution
+\item every n time-steps
+
+  % Auto tune
+\item Create algorithm to auto tune load balancing
+\item Generate a metric to evaluate balancing of simulation
+\item System recognizes load imbalance and start
+  load balancing step automatically
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% IDEAS FOR FAULT TOLERANCE                                                    %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Ideas for Fault Tolerance}
+\begin{itemize}
+\item No Fault tolerance techniques were implemented so far
+
+\item The developed system makes it possible to build
+  fault tolerance on top
+
+\item Failure of peers during execution of simulation not impossible
+\item Especially for increasing amount of computing power
+\item In best case no re-execution of full simulation necessary
+
+
+% Reload from checkpoint
+\item Failure peer has created check point on regular basis onto hard disk
+\item Loading of check point is possible
+\item Other peer can load checkpoint and take over vertices of failure
+  peer
+\item Peer announces its new vertices
+\item The other peer could already be a host
+\item Or it could be a special backup peer that usually
+  is not part of the simulation calculations
+\item after loading the state and re-announce of the vertices
+  calculations can go on
+
+
+% Redundant calculations
+\item Another possibility without the need for reloading the check point
+  is the redundant calculations of simulation subdomains
+\item A vertex can be distributed to several peers
+\item The system ensures that data receives all peers
+\item Usage of multi-maps
+
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% TWEAKS                                                                       %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Tweaks}
+\begin{itemize}
 \item Compile time generation of static graphs
-
 \item Optimization of the graph to reduce overhead
-
+\item Thread safe implementation of the gvon collectives
 \end{itemize}
 
 \cleardoublepage
