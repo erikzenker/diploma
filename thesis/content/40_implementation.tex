@@ -61,7 +61,7 @@ language and the dealing with templates is assumed.
 
 The communication abstraction layer was introduced in section
 \ref{sec:cal} as a portable communication abstraction based on an
-particular adapter. While the CAL defines the interface, the adapter
+particular adapter. While the CAL defines the adapter interface, the adapter
 implements communication operations based on an existing communication
 library.  It was claimed, that the adapter should be exchangeable and
 configurable at compile time. These requirements meet the properties of
@@ -101,9 +101,7 @@ that only the CAL itself can access members of the adapter class.
 The CAL provides all communication methods discussed in section
 \ref{sec:cal_comm} and context methods discussed in section
 \ref{sec:cal_context}. The Adapter implements all methods
-required by the communication policy defintion.
-
-\todo{What it the adapter interface ?}
+required by the communication policy defintion (Section \ref{sec:impl:policy_interface}).
 
 In addition to communication and context related methods, the CAL
 class provides class interface definitions of the context and the
@@ -116,6 +114,58 @@ CAL class inheritating functionality of the equivalent classes in the
 adapter class, also in protected mode. Section
 \ref{sec:cal_mpi_adapter} will discuss the implementation of the
 adapter specific context and event class implementation in detail.
+
+% Policy interface
+\subsubsection{Communication Policy interface}
+\label{sec:impl:policy_interface}
+\begin{itemize}
+\item The policy interface was chosen to stay on a very low level
+\item Because it should provide as much freedom to the adapter
+  implementer as possible
+\item Furthermore it was inspired by the sophisticated MPI language
+  binding for C
+\item Thus, it is more C then C++ like
+
+\item A subset of adapter methods were chosen to
+  illustrate the adapter interface
+
+\item A full listing of all methods should be retrieved from
+  the source code documentation
+
+  \begin{itemize}
+  \item Point-to-point operation\\
+    \begin{lstlisting}[language=C++, breaklines=false, label={}]
+Event asyncSendData(const T_Data* data,
+                    const size_t count,
+                    const VAddr destVAddr,
+                    const T_Context context,
+                    const MsgType msgType);
+    \end{lstlisting}
+
+  \item Collective operation\\
+    \begin{lstlisting}[language=C++, breaklines=false, label={}]
+void gather(const T_Data* sendData,
+            const size_t sendCount,
+            const T_Data* recvData,
+            const size_t recvCount,
+            const VAddr rootVAddr,
+            const T_Context context);
+    \end{lstlisting}
+  \item Grouping operation\\
+    \begin{lstlisting}[language=C++, breaklines=false, label={}]
+      T_Context createContext(const std::vector<VAddr> vAddrs,
+                              const T_Context oldContext);
+    \end{lstlisting}
+    
+  \end{itemize}
+
+\item Only a subset of operations known from MPI or other
+  communication libraries have been implemented
+
+\item Operations that were necessary during the implementation
+  of the system and of example were implemented
+  
+\end{itemize}
 
 % Addressing of peers
 \subsubsection{Mapping to virtual addresses}
@@ -284,8 +334,6 @@ adapter need to be able to handle these operators. Section
 \ref{sec:bin_operator} covers the conversion from abitrary
 binary operators to operators that can be used for MPI.
 
-\todo{Collectives with varying data size are something special too!}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
 % BINARY OPERATOR                                                              %
@@ -453,9 +501,6 @@ bool ready(){
 
 }
 \end{lstlisting}
-
-\todo{wait and ready where never introduced, just hint in design chapter for existance of two methods}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -736,8 +781,6 @@ of the root vertex is stored.
 collector.data.push_back(vertexData);
 \end{lstlisting}
 
-\todo{mention that this is all graph dependent?}
-
 A peer could try to mix the execution of collective operations of
 several graphs. But, it is only one collective per pair of a graph and
 a vertex allowed concurrently. To ensure that, the amount of already
@@ -786,16 +829,17 @@ the foundation for usage in other simulation applications.
 
 \begin{enumerate}
 
-\item Configuration
+\item \textbf{Configuration}
 \begin{enumerate}
 
 \item Configure the CAL
   
-  The Target system for the example is a compute cluster with an
-  available MPI implementation. Thus, the CAL is configured with the
+  The Target system for the example is a compute cluster providing MPI
+  as communication library. Thus, the CAL is configured with the
   reference MPI adapter described in section
   \ref{sec:cal_mpi_adapter}. It provides type definitions for the
-  virtual address, event and context:
+  virtual address, event and context that are necessary for
+  later usage:
 
   \begin{lstlisting}[language=C++, label=lst:conf_cal, caption={\ }]
 // Configure CAL
@@ -807,9 +851,9 @@ typedef typename MpiCAL::Event                    Event;
 
 \item Configure graph
 
-  The graph is configured with properties for vertices \cpp{Cell} and
-  edges \cpp{SimpleProperty}. It provides type definitions for vertex, edge and
-  edge descriptor:
+  The graph is configured with properties for vertices \cpp{Cell}
+  (Listing \ref{lst:gol_cell}) and edges \cpp{SimpleProperty}. It
+  provides type definitions for vertex, edge and edge descriptor:
 
   \begin{lstlisting}[language=C++, label=lst:conf_graph, caption={\ }]
 // Configure graph
@@ -819,32 +863,11 @@ typedef typename LifeGraph::Edge                  Edge;
 typedef typename LifeGraph::EdgeDescriptor        EDesc;
   \end{lstlisting}
 
+  A \cpp{Cell} does contain the state information of the cell, theand
+  inherits from \cpp{SimpleProperty} the vertex id. 31.25
+  percent of all cells are initialized with state alive set to true.
 
-\item Configure GVON
-
-  The graph-based virtual overlay network uses the previously configured
-  CAL and graph for its configuration:
-
-  \begin{lstlisting}[language=C++, label=lst:conf_gvon, caption={\ }]
-// Configure GVON
-typedef VirtualOverlayNetwork<LifeGraph, MpiCAL>  GVON;
-  \end{lstlisting}
-
-\end{enumerate}
-
-\item Initialization
-  \begin{enumerate}
-  
-  \item Create graph object
-
-    The graph is configured by the property of the \cpp{Cell} struct
-    (Listing \ref{lst:gol_cell}) and the edge property by
-    \cpp{SimpleProperty} .  The \cpp{Cell} does contain the state
-    information of the cell and inherits from \cpp{SimpleProperty} the
-    vertex id, whereby 31.25 percent of all cells are initialized with
-    state alive set to true.  
-
-    \begin{lstlisting}[language=C++, label=lst:gol_cell, caption={\ }]
+\begin{lstlisting}[language=C++, label=lst:gol_cell, caption={\ }]
 struct Cell : public SimpleProperty { 
 
  Cell() : SimpleProperty(0), isAlive(false){ 
@@ -865,7 +888,24 @@ struct Cell : public SimpleProperty {
  bool isAlive;
  
 };
-    \end{lstlisting}
+\end{lstlisting}
+
+\item Configure GVON
+
+  The graph-based virtual overlay network uses the previously configured
+  CAL and graph for its configuration:
+
+  \begin{lstlisting}[language=C++, label=lst:conf_gvon, caption={\ }]
+// Configure GVON
+typedef VirtualOverlayNetwork<LifeGraph, MpiCAL>  GVON;
+  \end{lstlisting}
+
+\end{enumerate}
+
+\item \textbf{Initialization}
+  \begin{enumerate}
+  
+  \item Create graph object
 
     The graph is generated by the predefined graph generator for grids
     (Listing \ref{lst:gol_generator_graph}). The generator was
@@ -892,14 +932,14 @@ GVON gvon(cal);
 
 \item Distribute vertices of the graph
 
-  The graph vertices are distributed by the round robin method for
+  The graph vertices are distributed by the round-robin method for
   testing, which is by far no optimal vertex distribution method, but
   this is not the focus of this work (Listing \ref{lst:gol_distribution}).  
 
   \begin{lstlisting}[language=C++, label=lst:gol_distribution, caption={\ }]
-// Distribution of graph by round robin
+// Distribution of graph by round-robin
 Context context = cal.getGlobalContext();
-vector<Vertex> hostedVertices = Dist::roundRobin(context, graph);
+vector<Vertex> hostedVertices = Dist::roundrobin(context, graph);
   \end{lstlisting}
 
   Other abitrary distribution methods are also possible. Figure
@@ -960,11 +1000,12 @@ of its hosted cells with neihboring cells.
 
 \paragraph*{}
 First, each host sends the state of its hosted cells to neihboring
-cells (Listing \ref{lst:gol_send}). Therefore, the host retrieves the target cells of outgoing
-edges for a hosted cell from the graph. After that, the state of the
-hosted cell is transmitted to the target cells sequentially in non
-blocking mode (Figure \ref{fig:gol_communication}). Events of the send
-operation are collected and checked later for termination.
+cells (Listing \ref{lst:gol_send}). Therefore, the host retrieves the
+target cells of outgoing edges for a hosted cell from the graph. After
+that, the state of the hosted cell is transmitted to the target cells
+sequentially in non blocking mode (Figure
+\ref{fig:gol_communication}). Events of the send operation are
+collected and checked later for termination.
 
 \begin{lstlisting}[language=C++, label=lst:gol_send, caption={\ }]
 // Send state to neighbor cells
@@ -1031,7 +1072,51 @@ for(Vertex v: hostedVertices){
 }
 \end{lstlisting}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% Implementation N-BODY                                                        %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementing a N-Body Simulation}
+\begin{itemize}
+\item The implementation of the n body simulation, discussed in
+  section \ref{sec:design:nbody}, does not differ very much from the
+  GoL implementation in the fashion it uses the developed system.
+
+\item The implementation is separated in three phases: Configuration, initialization
+  and communication.
+
+  \begin{enumerate}
+  \item \textbf{Configuration}\\
+    The Graph is annotated by the property \cpp{Particle}, containing
+    Particle information mass, velocity and location.
+
+  \item \textbf{Initialization}\\
+    Since, the chosen N-body algorithm is based on an all to all communication
+    schema, the communication dependencies are described by an fully connected
+    graph. The vertices are distributed by round-robin onto the available
+    peers and then announced.
+
+  \item \textbf{Communication}\\
+    Every host sends particle information of its hosted vertices to
+    adjacent vertices. In turn, it receives particle information from
+    all adjacent vertices. Since, a vertex is adjacent to all other
+    vertices, it sends and receives to and from all other vertices.
+  \end{enumerate}
+
+\item A host updates the state of the particles of its hosted
+  vertices, after the communication has finished.
+
+\item The algorithm repeats the communication phase
+  until the simulation has finished or is canceled.
+
+\item Totally different simulation but similar communication
+  concepts
+
+\item Very easy construction of distributed simulation application
+  
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %

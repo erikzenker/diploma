@@ -318,7 +318,7 @@ distributed computing.
 
 The challange is to provide a very general interface, that gives the
 possibility to address varying communication libraries through it.
-This interface should be as transparent as possible, such that it
+This interface should be as common as possible, such that it
 reminds the interface user on his present communication library.  It
 should be easily deployable into existing applications by replacing
 the actual communication library without changing the fundamental
@@ -336,7 +336,7 @@ communication interface.
 \label{sec:cal}
 
 The \textit{Communication Abstraction Layer}, shortly \textit{CAL}, is
-a generic communication interface on top of an existing communication
+a general communication interface on top of an existing communication
 library. The libraries are addressable through
 adapters, which makes it possible to address varying communication
 libraries. By exchanging the adapter, the application based on the
@@ -351,8 +351,9 @@ While the CAL provides an abstract interface with common communication
 methods, the adapter implements the interface demanded by the CAL
 through library its particular communication operations.
 
-The interface of the CAL provides basic direct communication
-operations, collective operations and operation for grouping of peers
+The interface of the CAL provides basic point-to-point communication
+operations, collective operations (Section \ref{sec:cal_comm}) and
+operation for grouping of peers (Section \ref{sec:cal_context}).
 Figure \ref{fig:design_cal} shows the communication abstraction layer
 on top of existing communication layers.  The CAL with a specific
 adatper could already replace a specific communication library in
@@ -377,15 +378,16 @@ another compute architecture, only the adapter has to be exchanged,
 the application has to be recompiled, but the CAL interface stays the
 same.
 
-It is not planed in the actual design that the CAL provides routing
-abilities. Peers have to be connected directly by the network of the
-adapter. No routing makes it also impossible to forward data between
+Peers have to be connected directly by the network of the
+adapter. Because, It is not planed that the CAL provides routing
+abilities. No routing makes it impossible to forward data between
 different adapters of the CAL. Thus a specific CAL only provides a
 single adapter. But several CALs can be used with different adapters
-to communcate on several networks. In such a scenario the routing can
-be implemented on top of the CAL by the library user. Therefore, the
-design was first pushed forward in the direction of a single adapter
-design and a multi adapter design is left open for future work.
+to communcate on several networks. In such a scenario a kind of
+routing can be implemented on top of the CAL by the system
+user. Therefore, the design was first pushed forward in the direction
+of a single adapter design and considerations regard to a multiple
+adapter design is left open for future work.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -421,7 +423,7 @@ and the adapter handles its particular address space.
 \subsection{Communication Interface}
 \label{sec:cal_comm}
 % Peer2Peer Operations
-\subsubsection{Peer to Peer Communication Methods}
+\subsubsection{Point-to-Point Communication Methods}
 
 In the first place, the CAL provides peer-to-peer communication. That
 are basic communication methods to exchange abitrary data between two
@@ -791,6 +793,7 @@ clustering vertices.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Modeling a N-Body Simulation as Graph}
+\ref{sec:design:nbody}
 An N-body simulation is a simulation of particles influenced by
 physical forces. The force considered for this simulation is the
 gravity among each particle in the domain.  A particle is described by

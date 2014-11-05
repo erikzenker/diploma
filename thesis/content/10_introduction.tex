@@ -16,86 +16,93 @@
 
 \section{Introduction}
 
-\begin{itemize}
-
 % State of the art petascale systems
-\item Current state of the art computing systems operate in area of
-  petaflop/s
-\item Only a small number of applications worldwide have taken advantage of a
-  petaflop/s system
-\item One of these applications is PIConGPU. It is a particle in cell
-  physic simulation that has shown the ability for execution on Titan
-  supercomputer at the Oak Ridge National Laboratory in the United
-  States
-\item The Titan is a supercomputer with about 27 petaflop/s peak
-  performance.
-\item Nevertheless, applications capable of petaflop/s system are looking towards systems
-  with more computational power
+The domain of high performance computing is subject to constant
+development.  The main focus of this development is the increase of
+computing power.  More computing power enables to solve more complex
+problems or increased problem sizes.  Current state of the art
+computing systems reached the area of petaflop/s (PFLOPS) in the year
+2008. That are $10^{15}$ floating point operations per second.  Only a
+small number of applications worldwide have taken advantage of so
+called petascale systems.
 
-% Exascale systems
-\item Rapid progress in the development of computers and algorithms
-\item Symbiotic evolution of computing systems and high performance
-  applications
-\item Thus, the more compute power is necessary and soon available,
-  since current computers can no longer adequately cover the future
-  needs of complex and the compute intensive scientific and industrial
-  applications.
-\item Next milestone in the development of supercomputers, foray of
-  computing systems into with an exaflop/s computing power - an
-  exascale system
-\item That are computing systems that are capable of at least
-  $10^{18}$ flop/s
-\item That is thousandfold increase over the first petascale computer
-  from 2008.
-\item Not all questions of the construction of such a system are
-  solved
-\item But, it is certain, that exascale will increasing the amount and
-  the complexity of computers
-\item It is expected that the construction of the first exascale
-  systems will be finished in 2018.
+One application, that has shown scalability on petascale systems, is
+PIConGPU. It is a particle in cell physic simulation that was running
+on the Titan supercomputer at the Oak Ridge National Laboratory in the
+United States. By making use of 18.000 Graphic Processing Units (GPUs)
+on the Titan, PIConGPU reached 7.1 PFLOPS peak performance.
+Nevertheless, applications capable of petascale system are looking
+towards systems with more computational power.
 
-% Upcoming problems with exascale system
-\item It is not enough to just increase computing power of the system
-  an application is running on
-\item Applications with the objective to scale onto exascale systems
-  have to be prepared
-\item Challenge of reliability, programmability, power consumption and
-  usability
-\item Furthermore, emergence of accelerator hardware make computing
-  system more heterogeneous and hierarchical and more complex to
-  program and use.
-\item Therefore, simulation application has to be adapted onto
-  upcoming circumstances of exascale systems.
-\item Need for smart description concept that fit on future
-  heterogeneous, hierarchical, exascale computing systems.
-\item Foundation for load distribution and fault tolerant systems
+Thus, Current computing systems will no longer adequately cover the
+future needs of complex and the compute intensive scientific and
+industrial applications.  To make more computing power available for
+this applications, a rapid progress in the development of computers
+and algorithms is necessary.  Next milestone in the development of
+supercomputers is the foray of computing systems into an area of an
+exaflop/s (EFLOPS) computing power - an exascale system. That are
+computing systems that are capable of at least $10^{18}$ floating
+point operations per second, a thousandfold increase over the first
+petascale supercomputer.  Not all questions for the construction of
+such a system are solved. But, it is certain, that exascale will
+increase the amount and the complexity of computers to a new
+level. Coming up with the challange of reliability, programmability
+and usability of such systems. The first exascale systems are expected
+to be finished in 2018.
 
-% Developed system
-\item Foundation for such a system is a portable and flexible
-  communication approach
-\item portable, so that deployment on varying computing systems is
-  possible
-\item ``For portability reasons, most of the parallel applications are on top
-  of widespread message passing interfaces such as PVM or MPI. But
-  this restricts the application to a single compute environment and
-  make an interconction of varying compute environments very hard.''
-\item flexible, so that mapping of communication processes can be
-  adjusted onto the needs of the simulation and the computing system.
-\item This behavior is achieved by abstraction from existing
-  communication libraries, modeling of the communication topology of
-  the arbitrary simulation and a mapping from the communication
-  topology onto the communication abstraction.
+Considering an exascale system, it is not sufficient to simply port
+the application that were previously running on a petascale
+system. The solely massivly increase in size of the compute system
+will lead to an decrease in the mean time to failure and increased
+importance of data locality.  Furthermore, emergence of accelerator
+hardware make computing system more heterogeneous and hierarchical and
+more complex to program and use. Therefore, the high performance
+application has to be adapted onto upcoming circumstances of exascale
+systems. It exists the need for a smart description concept for high
+performance applications, that fits on upcoming heterogeneous,
+hierarchical, exascale computing systems.
+
+% Why is communication necessary
+\begin{itemize}
+\item Since, communication is an often used approach to interconnect
+  parallel entities of an application.
+\item One possible approach to scale on upcoming systems is to enhance
+  well known communication libraries.
+\item Existing communication will be taken as fundament
+\item On top of this fundament additional layers will be installed to
+  improve flexibility of the communication library
+\end{itemize}
+
+% How such a system should be
+\begin{itemize}
+\item It were designed and implemented layers on top of existing
+  communication libraries that map common communication processes onto
+  these libraries.
+
+\item Abstraction from existing communication libraries
+\item Modeling of the communication topology of the simulation
+  application
+\item Mapping from the communication topology onto the communication
+  abstraction
+\end{itemize}
 
 % Overview following section
+\begin{itemize}
 \item The following section \ref{sec:technical_background} is a
   summary of technical background, giving a brief overview of the
   basic terms in high performance computing and communication in
   computing systems.
-\item Section \ref{sec:related_work} examines research in the
-  area of interest.
-\item first design of such an system
-\item implementation of an prototype
-\item evaluation of the prototype in contrast to classic MPI implementation
+
+\item Section \ref{sec:related_work} examines research in the area of
+  interest.
+\item Versatile readers can skip this section and continue straight
+  with the design section \ref{sec:design}.
+\item There will be discussed and justified design decisions.
+\item An implementation for the designed system is presented in
+  section \ref{sec:impl}.
+\item Finally, evaluation of the prototype in contrast to classic MPI
+  implementation
+
 
 \end{itemize}
 
