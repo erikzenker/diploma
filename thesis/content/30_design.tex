@@ -599,56 +599,57 @@ elements each peer has contributed to the collective.
 % GRAPH                                                                        %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checked
 \section{Modeling of the Application Domain by a Graph}
 \label{sec:graph}
-A simulation application always implements a particular algorithm
-that describes a particular model.
+A simulation application usually implements a particular algorithm
+that describes a particular model. Porting this algorithm onto a
+parallel computing system requires a decomposition
+(Section~\ref{sec:domain_decomposition}) of the simulation domain into
+a set of subdomains.  Assume, subdomains also need to interact among
+each other, communication between subdomains is necessary. Thus, the
+algorithm determines the communication topology of the simulation.
 
-This Algorithm often requires a
-domain decomposition (Section \ref{sec:domain_decomposition}) of the
-simulation domain into a set of subdomains. Assume, subdomains need
-to interact with each other, communication between subdomains is
-necessary. Thus, the algorithm of the simulation determines
-the communication topology.
+\todo{Refer to requirement}
 
-
-
-%The simulation domain is mapped fixed onto the compute resources.
-This communication topology is often implemented in a implicit and
-static manner.  Because the communication topology is not modeled
+Communication topologies are often implemented in a implicit and
+static manner.  But, if the communication topology is not modeled
 explicit, a change of the simulation algorithm needs to be translated
 into a change of the corresponding communication patterns, which can
-be quiet costly.
+be quiet costly. Furthermore, would a reutilization of already modeled
+communication topologies reduce implementation effort of
+implementations of future simulations.
 
 \paragraph*{}
-A more elegant approach is to explicitly model the relationships
-between the subdomains and therefore the communication topology. The
-most general method to model a topology is a \textit{graph}
-\cite{ref:graph}.  From a mathematical perspective, a graph is a pair
-of vertices and edges. Edges are pairs of vertices. So to speak, a
-graph represents a set of objects, where some of these objects are
-connected by links.
-
-Changing the simulation domain implies a different communication
-topology and in turn implies a different graph.  Since, the
-communication topology is explicit modeled by a graph, it is not
-necessary to rewrite the simulation application as long the
-application is oriented on the topology information provided by the
-graph. Thus, algorithms can by implemented on top of the graph
-description.
+A more elegant approach is the explicit modeling of relationships
+between the subdomains. Therefore, the communication topology of the
+simulation. The most general method to model a topology is a
+\emph{graph} \cite{ref:graph}.  From a mathematical perspective, a
+graph is a pair of vertices and edges. Edges are pairs of vertices. So
+to speak, a graph represents a set of objects, where some of these
+objects are connected by links.
 
 % directed cycle multi graph
-The graph has the property, that vertices are connected by directed edges. Loops
-and multiple edges between two vertices are allowed (Figure
-\ref{fig:graph}). The resulting graph is a directed multi graph with
-loops. The mathematical expression for this kind of graph is quiver
-\cite{ref:quiver}
+The graph that is used in further descriptions has the property, that
+vertices are connected by directed edges. Loops and multiple edges
+between two vertices are allowed (Figure~\ref{fig:graph}). The
+resulting graph is a directed multigraph with loops. The mathematical
+expression for this kind of graph is quiver \cite{ref:quiver}.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_graph}
-  \caption{The graph interface describes quivers. It is shown a directed cycle multi graph with four vertices.}
+  \caption{The graph interface describes quivers. It is shown a
+    directed cycle multi graph with four vertices.}
   \label{fig:graph}
 \end{figure}
+
+Changing the simulation algorithm implies a different communication
+topology and in turn implies a different graph.  But the graph has now
+the advantage, that the communication topology is modeled
+explicitly. It is not necessary to rewrite the simulation application
+as long the application is based on the topology information provided
+by the graph. Thus, communication operations can by implemented on top
+of the graph description.
 
 The presented graph should be addressable by the following interface:
 
@@ -657,22 +658,22 @@ The presented graph should be addressable by the following interface:
     Returns the list of all vertices of the graph.
     
   \item  \textbf{getVertex(index)}\\
-    Returns a particular vertex by vertex index.
+    Returns a particular vertex by vertex \textit{index}.
 
   \item  \textbf{getAdjacentVertices(vertex)}\\
-    Returns a list of all adjacent vertices of vertex.
+    Returns a list of all adjacent vertices of \textit{vertex}.
 
   \item  \textbf{getOutEdges(vertex)}\\
-    Returns a list of all outgoing edges from the vertex
+    Returns a list of all outgoing edges from the \textit{vertex}
     paired with their target vertex.
 
   \item  \textbf{getInEdges(vertex)}\\
-    Return a list of all incoming edges to the vertex 
+    Return a list of all incoming edges to the \textit{vertex}
     paired with their source vertex.
 
   \item  \textbf{createSubGraph(vertices)}\\
     Returns a subgraph, that only contains the defined
-    vertices from the supergraph.
+    \textit{vertices} from the supergraph.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -680,53 +681,58 @@ The presented graph should be addressable by the following interface:
 % GRAPH PROPERTIES                                                             %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checked
 \subsection{Properties}
-A graph alone is just the representation of connected vertices, but
-has no connection to the simulation domain. The connection usually
-only exists in the head of the programmer of the simulation
-application. But, a graph can be interpreted as a container, wherby the
-objects of the container are in a relation to each other.
+A graph in isolation is just the representation of connected vertices,
+but does not provide any further information. The connection to the
+application usually only exists in the head of the
+programmer. Interpreting the graph as a container offers the
+possibility to insert objects into the graph, whereby these objects
+are in a relation to each other.
 
-The container object will be called property and is introduced as a
-concept to annotate a graph. A property provides subdomain information
-and can be bound to vertices and edges (Figure
-\ref{fig:property}). Vertices and Edges of the same graph share
-respecively the same type of property. A graph annoted with properties
-is significantly more meaningful and thus helps to keep the connection
-of the simulation domain and communication topology.
+An object that resides in this containers will be called property and
+is introduced as a concept to annotate a graph. A property usually
+provides subdomain information and can be bound to vertices and edges
+(Figure \ref{fig:property}). Each vertices and edges of the same graph
+share respectively the same type of property. A graph annotated with
+properties is significantly more meaningful and thus helps to keep the
+connection of the simulation domain and communication topology.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_property}
-  \caption{A graph with both vertex and edge properties. The vertex
+  \caption{A graph annotated with both vertex and edge property. The vertex
     property primarily describe a subdomain. The edge property
     describe the dependencies between subdomains.}
   \label{fig:property}
 \end{figure}
 
-A Property can also be used to create a connection between a pair of
-graphs. Thus a modeling of hiararchical domains is also possible.  A
-later example will make use of this hierarchical modeling (Section
-\ref{sec:gol}).
+The field of application of properties can by diverse. It highly
+depends on the graph and its area of utilization.  A Property can also
+be used to create a connection between a pair of graphs. Thus a
+modeling of hierarchical dependencies is also possible.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
 % MODELING GAME OF LIFE AS A GRAPH                                             %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checked
 \subsection{Modeling Game of Life as a Graph}
 \label{sec:gol}
 To give an example for modeling a specific simulation application,
-Figure \ref{fig:gol_modeling} shows the modeling of the Game of Life (GoL) \cite{ref:gol}
-domain by a graph. GoL simulates the state evolution of a set of cells for
-an abitrary amount of time steps. The cells are arranged in a two-
-dimensional grid (Figure \ref{fig:gol_simulation}).  A cell has a
-state which is either alive or not alive and the state of the next
-time step is calculated by rules. The common set of rules determine
-the state of a cell for the next time step by the state information of
-the neighboring cells. One rule is, that a dead cell with
-exactly 3 living cells in the neighborhood will be reborn on the next
-time step. For the further description of GoL it is assumed that only
-this rule exists.
+Figure \ref{fig:gol_modeling} shows the modeling of the Game of Life
+(GoL) \cite{ref:gol} domain by a graph. GoL simulates the evolution of
+a set of cells for an abitrary amount of time steps. The cells are
+arranged in a two-dimensional grid (Figure \ref{fig:gol_simulation}).
+A cell has a state which is either alive or not alive and the state of
+the next time step is calculated by rules.  The common set of rules
+determine the state of a cell for the next time step by the current
+state information of the neighboring cells.  One rule is, that a dead
+cell with exactly 3 living cells in the neighborhood will be reborn on
+the next time step. For the further description of GoL it is assumed
+that only this rule exists.  Nevertheless, a GoL simulation can consist
+of a arbitrary set of rules.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_simulation}
@@ -735,36 +741,38 @@ this rule exists.
   \label{fig:gol_simulation}
 \end{figure}
 
-Modeling this common rule straight forward, ending up in a graph where
-every cell of the GoL world is represented by a vertex and neighboring
-cells are connected by an edge. Each vertex has the property cell, that
-contains the state of the cell. Figure \ref{fig:gol_modeling} shows a vizualized
-cut out of the GoL modeled domain. To determine the next state of a 
-cell, it has to count the living adjacent cells in the graph and if
-exactly three adjacent cells are alive, then the cell will also be
-alive on the next time step.
+The GoL domain with the single rule is modeled straight forward. Every
+cell is represented by a vertex and neighboring cells are connected by
+an edge.  Each vertex has the property cell, that contains the state
+of the cell. Figure \ref{fig:gol_modeling} shows a vizualized cut out
+of the GoL modeled domain. To determine the next state of a cell, it
+has to count the living adjacent cells and if exactly three adjacent
+cells are alive, then the cell will also be alive on the next time
+step.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_modeling}
   \caption{Cut-out of a Game of Life domain (on the left) was modeled
     as a graph (on the right). Each Vertex is described by the vertex
     property cell, containing the state information of the cell. A
-    Vertex determines next state by state of neighboring cells}
+    Vertex determines its next state by state of neighboring cells}
   \label{fig:gol_modeling}
 \end{figure}
 
-Changing this rules slightly to a GoL where a cells as alive in the
-next time step when at least one diagonal neighbor is alive.  Thus,
-this changes the GoL communication topology and therefore the
+The rule is now changed slightly: a cell is alive in the next time
+step when at least one diagonal neighbor is alive.  A changed rule
+also implies a change in the GoL algorithm.  This changes the GoL
+communication topology and therefore the modeled
 graph. Figure~\ref{fig:gol_modeling_changed} models the GoL domain
 with the changed rule. Vertices are connected with its diagonal
-located vertices. Nonetheless, to determine the next state of a cell,
-it has to count the living cells of of connected cells in the graph.
+located vertices. Nevertheless, to determine the next state of a cell
+also the number of living adjacent cells have to be counted.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_modeling_changed}
   \caption{Cut-out of a Game of Life domain (on the left) modeled
-    with a different rule. Only diagonal located vertices are connected.}
+    with a different rule. Only diagonal located vertices are connected.
+  A Vertex still determines its next state by state of neighboring cells}
   \label{fig:gol_modeling_changed}
 \end{figure}
 
@@ -774,13 +782,14 @@ it has to count the living cells of of connected cells in the graph.
 % PARTITIONING THE GoL GRAPH                                                   %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checked
 \subsection{Partitioning the GoL Graph}
-The graph in figure \ref{fig:gol_modeling} models the GoL domain very fine
+The graph in Figure~\ref{fig:gol_modeling} models the GoL domain very fine
 granular by every individual cell. While it is the smallest possible
 domain decomposition, it might not be very efficient when this graph
 is the foundation for a distributed computing application. Imagining, a
 single cell is calculated by a process and the cell state is exchanged
-by inter-process communication, but single process can compute
+by inter-process communication. But, a single process can compute
 considerably more cells.
 
 Figure \ref{fig:gol_bundle} shows the partioning of the fine granular
@@ -796,27 +805,30 @@ While the fine granular GoL graph represents the GoL cells in detail, the
 partitioned graph represents dependencies of bundled cells. Thus
 the properties of the partioned graph changed such that bundles
 have store the cells they bundle and edges refer to neighboring
-cells.
+cells. GoL graph and partitioned graph can coexist and be connected
+by its properties.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_bundle}
   \caption{The GoL graph is partitioned by bundling multiple
-    cells. The properties of the partioned graph have changed, such
-    that the vertex property contains the cells of a bundle, while the
-    edge property contains information about neighboring cells.}
+    cells. The properties of the partioned graph have changed. The
+    vertex property contains the cells of a bundle, while the edge
+    property contains information about neighboring cells.}
   \label{fig:gol_bundle}
 \end{figure}
 
 The partitioned graph could be used as foundation to distribute GoL to
-multiple devices on a cluster. Each bundle could be computed by an own
-process. The Processes do calculation for their local GoL graph and
-communicate states of their border cells to adjacent bundles.
+multiple nodes of a cluster. Each bundle could be computed by an own
+process. The processes calculate their local GoL graph and
+communicate the states of their border cells to adjacent bundles.
 
 It has been shown a different approach to model the Game of Life
-domain. It were used the same description language; the graph.
-Fine granular modeled domains can be partioned by common graph
-partition algorithm to obtain possibly more performance by
-clustering vertices.
+domain. It were used the same description language, the graph.  Fine
+granular modeled domains can be partioned by common graph partition
+algorithm to obtain possibly more performance by clustering
+vertices. A automated transformation from a graph description into a
+more efficient graph description is an interesting topic, but not
+covered by this work.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -824,51 +836,59 @@ clustering vertices.
 % MODELING GAME OF LIFE AS A GRAPH                                             %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Modeling a N-Body Simulation as Graph}
-\ref{sec:design:nbody}
-An N-body simulation is a simulation of particles influenced by
-physical forces. The force considered for this simulation is the
-gravity among each particle in the domain.  A particle is described by
-mass $m$, location $\overrightarrow{r}$ and velocity $\overrightarrow{v}$.  The gravitational forces
-between two particles $i$ and $j$ can be calculated in a two-body model 
-with the gravitationlal constant $G$ by the equation \ref{eq:two_body_force}:
+% Checked
+\subsection{Modeling a N-Body Simulation as a Graph}
+\label{sec:design:nbody}
+The N-body simulation, with a totally different algorithm in respect to GoL, was chosen as a
+second example to model a simulation application by a graph.  The
+N-body simulation is a simulation of particles in an two or three
+dimensional space influenced by physical forces. The force considered
+for this simulation is the gravity among each particle.
+A particle is described by its mass $m$, location $\overrightarrow{r}$
+and velocity $\overrightarrow{v}$.  The gravitational forces between
+two particles $i$ and $j$ can be calculated in a two-body model with
+the gravitationlal constant $G$ by the
+Equation~\ref{eq:two_body_force}:
 
 \begin{equation}
   \label{eq:two_body_force}
   \overrightarrow{F_{i,j}} = G  m_i  m_j \cdot \frac{\overrightarrow{r_j} - \overrightarrow{r_i}}{|\overrightarrow{r_j} - \overrightarrow{r_i}|^3}
 \end{equation}
 
-The gravitational force of particle $i$ to all other N-1 particles
-is the sum of each particluar force $\overrightarrow{F_{i,j}}$(Equation~\ref{eq:n_body_force}).
+\noindent Equation~\ref{eq:n_body_force} describes the gravitational force of
+particle $i$ to all other N-1 particles as the sum of each particular
+force $\overrightarrow{F_{i,j}}$.
 
 \begin{equation}
   \label{eq:n_body_force}
   \overrightarrow{F_{i,n}} = \sum_{j = 0 \atop j \neq i}^{N-1} \overrightarrow{F_{i,j}}
 \end{equation}
 
-Thus, to calculate the force affecting particle $i$, mass and
-loacation of all other particles have to be considered. Modeling the
-dependencies resulting from the simulations algorithm results in an
-all to all communcation pattern with a complexity of $o(N^2)$. Figure
-\ref{fig:nbody_modeling} models the N-body domain with $N = 6$ as a
-fully connected graph. Particles are represented as pentagon in a
-two-dimensional space. The size of the particles signals its mass and
-the arrow its velocity and move direction.  In the modeling, a vertex
-represents a particle and all particles are connected by an edge. A
-vertex has the property particle that includes the particle mass,
-location and velocity.
+\noindent Therefore, the force affecting particle $i$ is calculated by
+considering velocity, mass and location of all other
+particles. Modeling the dependencies, resulting from the simulations
+algorithm, results in an all-to-all communication pattern with a
+complexity of $o(N^2)$. Figure~\ref{fig:nbody_modeling} models the
+N-body domain with $N = 6$ as a fully connected graph. Particles are
+represented as pentagon in a two-dimensional space. The size of the
+particles signals its mass and the arrow its velocity and direction.
+In the modeling, a vertex represents a particle and all particles are
+connected by an edge. A vertex has the property particle that includes
+the particle mass, location and velocity.
 
+\todo{Borders of grid are ugly}
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_nbody_modeling}
-  \caption{Modeling of an N-body domain with $N = 6$. A particle is represented
-  by a vertex and all vertices are connected with each other by an edge.}
+  \caption{Modeling of an N-body domain with $N = 6$. A particle is
+    represented by a vertex and all vertices are connected with each
+    other by an edge.}
   \label{fig:nbody_modeling}
 \end{figure}
 
-A force on the particle results in a change of its velocity and a
-in a changed location for a fixed amount of time $t$. Calculating
-the results of equations \ref{eq:n_body_update} updates these
-values of the particle.
+\noindent A gravitational force on the particle $i$ results in a change of its velocity and
+location after a fixed amount of time $t$. The following equations describe these
+changes.
+
 \begin{align}
   \label{eq:n_body_update}
   \overrightarrow{a} =&~ \frac{\overrightarrow{F_{i,n}}}{m}\\
@@ -877,23 +897,23 @@ values of the particle.
 \end{align}
 
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
 % GRAPH-BASED VIRTUAL OVERLAY NETWORK (GVON)                                   %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checked
 \section{Graph-Based Virtual Overlay Network (GVON)}
 \label{sec:gvon}
 The previous sections described the tools to communicate and to model
-the communication topology. By providing an explicit mapping of the
-communication topology onto the abstract communication layer. The
-combination of these tools establish a virtual communication layer
-within the simulation domain.  Such that, communication between
-subdomains of the application can be represented. Therefore, this
-section introduces a \textit{graph-based virtual overlay network},
-short \textit{GVON}, that is based on the graphs and the CAL.
+the communication topology. The combination of these tools establish a
+virtual communication layer within the simulation domain. This layer
+is created by an explicit mapping of the communication topology onto
+the abstract communication layer. Therefore, An application domain and
+its according communication topology modeled by a graph can be used to
+perform communication between subdomains.  This section introduces a
+\textit{graph-based virtual overlay network}, short \textit{GVON},
+that is based on the graphs and the CAL.
 
 The graph does provide a simulation domain specific communication
 topology.  It is used as a blueprint for the virtual network topology.
@@ -923,51 +943,54 @@ CAL, otherwise a communication is not possible.
 % GVON MAPPING                                                                 %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checked
 \subsection{Mapping of the graph onto the CAL}
 \label{sec:mapping}
-The connection between a graph and a CAL is a mapping of vertices to
-peers, called the vertex map.  A vertex map is valid for a particular
-graph. The mapping of vertices to peers is a joint process of all
-peers that want participate in the communication based on a particular
-graph. This process is divided into two phases
+The connection between the graph and the CAL is a mapping of vertices
+to peers, called the \emph{vertex map}.  A vertex map is valid for a
+certain graph. Furthermore, the GVON provides a mapping of the graph
+to the context (Section~\ref{sec:cal_context}), called the \emph{graph
+  map}. This mapping is necessary since the GVON will also be used to
+map collective operations on the graphs onto the CAL.  The vertex and
+graph map are the basis for the mapping of communication processes
+onto the communication abstraction layer.  The mapping of vertices to
+peers and graphs to contexts is a joint process of all peers that want
+participate in the communication based on a particular graph.This
+mapping process is divided into two phases.
 
-\paragraph*{}
-The \textbf{first phase} is the distribution of the vertices of the graph to
-the peers (Figure \ref{fig:gvon_mapping}), where every peer gets
-assigned a set of vertices. There are a varity of methods to
+\subsubsection*{First Phase: Distribute}
+The first phase is the distribution of the vertices of the graph to
+the peers, whereby every vertex is assigned to a peer.
+Figure~\ref{fig:gvon_mapping} shows 3 peers and a graph of 4 vertices
+that are mapped onto the peers. It is possible that more than one
+vertex is mapped onto a peer.  There are a varity of methods to
 distribute the vertices.  It could be done totally randomized, round
 robin or even dictated by some master peer. The distribution behavior
-is defined by the user of the developed system and might be object for
-further optimization, but it was not topic of this work to find optimal
-distributions.
+is defined by the user of the GVON and might be object for further
+optimization.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gvon_mapping}
-  \caption{All vertices of a graph are distributed onto 3 peers. The vertices
-  are not distributed evenly, thus one peer is host for 2 vertices.}
+  \caption{All vertices of a graph are distributed onto 3 peers. The
+    vertices are not distributed evenly, thus, one peer is host for 2
+    vertices.}
   \label{fig:gvon_mapping}
 \end{figure}
 
-\paragraph*{}
-In the \textbf{second phase}, the peers announce their vertices to all other
-peers.  A peer that announces vertices is called host and the
+\subsubsection*{Second Phase: Announce}
+In the second phase, the peers announce their mapped vertices to all
+other peers.  A peer that announces vertices is called host and the
 announced vertices are called hosted vertices.  Every host receives
-from every other host a list of its hosted vertices and stores this
-information in its vertex map. A host is responsible for the
-communication of its hosted vertices. A host is responsible either for
-zero, one or more vertices. So to speak, it is also possible that host
-is responsible for all vertices of a graph and communicates finally
-always with itself.  Depending on the used adapter this might not even
-be a problem, since communication of a peer with itself can be mapped
-to local memory copies and does not necessarily go over the network.
-
-Furthermore the GVON provides a mapping of the graph of the announced
-vertices to a context (Section \ref{sec:cal_context}), called the
-graph map. This mapping is necessary since the GVON will also be used
-to map collective operations on the graphs onto the CAL.
-
-The vertex and graph map is the basis for the mapping of communication
-processes onto the hardware.
+from every other host a list of its hosted vertices.  This list is
+used to update the vertex map and to create a new context only
+including the hosts. The new context will be bounded to the graph of
+the hosted vertices in the graph map.  A host is responsible for the
+communication of its hosted vertices.  So to speak, it is also
+possible that a host is responsible for all vertices of a graph and
+communicates finally always with itself.  Depending on the used
+adapter this might not even be a problem, since communication of a
+peer with itself can be performed in shared memory and does not
+necessarily include network latency.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -975,27 +998,29 @@ processes onto the hardware.
 % GVON COMMUNICATION                                                           %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checked
 \subsection{Communication within the GVON}
-In the context of an overlay network, a vertex is interpreted as a
-virtual peer, edges between adjacent vertices indicate that the
-virtual peers are able to communicate with each other. Thus, the
-application on top of the GVON has the transparent view, that it is
-really exchanging messages between the vertices and the GVON is taking
-care, that the messages are reaching the correct vertex host. Thus, 
-this level of abstraction is finally the level the application
-interacts with.
+From the perspective of an overlay network, a vertex is interpreted as
+a virtual peer, edges between adjacent vertices indicate that the
+virtual peers are able to communicate with each other. An application,
+implemented on top of the GVON, has the transparent view of exchanging
+messages between vertices. The GVON is taking care, that the messages
+reaching the correct vertex host.  Finally, this is the level of
+abstraction an application interacts with.
 
 The GVON provides similar functionality like the introduced
-communication operations in the CAL, but on graph basis. Thus both
-peer to peer and collective operations are provided.
+communication operations in the CAL, but on graph basis. Therefore,
+both point-to-point and collective operations are provided.
 
-% GVON P2P
-A peer to peer operations within the GVON involves exchanging data
+\subsubsection*{GVON Point-to-Point}
+A point-to-point operations within the GVON involves exchanging data
 between adjacent vertices over a particular edge of a particular
-graph.  These opeations can be blocking or non block, whereby non
-blocking operations return an event known from the CAL.  The GVON
-provides the following interface for peer to peer operations:
+graph.  These operations exist in blocking or non-blocking
+variants. While Non-blocking operations return an event known from the
+CAL, nothing returned by blocking operations. The GVON provides the
+following interface for point-to-point operations:
 
+\todo{How to format pseudo code?}
 \begin{itemize}
   \item [] void \textbf{send}(graph, destination vertex, edge, data)
   \item [] void \textbf{recv}(graph, source vertex, edge, data)
@@ -1003,43 +1028,43 @@ provides the following interface for peer to peer operations:
   \item [] Event \textbf{asyncRecv}(graph, source vertex, edge, data)
 \end{itemize}
 
-The GVON has the task to resolv both the context of a graph and the
-host of the source or the destination vertex. This information are
-quieried from the vertex and graph map. When this information is
-resolved the programm flow is handed over to the CAL. The Cal is then
+\noindent The GVON has the task to resolv both the context of a graph and the
+host of source or destination vertex. This information are queried
+from the vertex and graph map. When this information is resolved the
+programm flow is handed over to the CAL. Finally, the Cal is
 responsible for exchange data between the hosts.
 
 % GVON collectives
 \subsubsection*{GVON Collectives}
 Operations between all vertices of a graph can be performed as
-collective operations (Section \ref{sec:cal_collective}). A host needs
-to perform the collective operation for all its hosted vertices,
-otherwise it blocks the execution of the operation.  Thereby, are
-collective operations absolutly transpaent to the application. Yet
-again, the result of the collective is received by some root vertex or
-by all vertices of the graph.
+collective operations (Section \ref{sec:cal_collective}).  The
+operation has to be performed for all hosted vertices of a
+host. Otherwise the overall execution of the operation is blocked by
+the CAL. The operation is absolutely transparent for each vertex.  the
+result of the collective is received by a root vertex or by all
+vertices of the graph.
 
-The collective operation is first executed locally for all hosted
-vertices of each host. Then it is further handled by the CAL and
-transmitted to the receiver(s). Figure \ref{fig:gvon_collective} shows
-a gather operation on the same graph and mapping of figure
-\ref{fig:gvon_mapping}. A gather operation collects the data of hosted
-vertices of a host first locally and uses then the gather operation
-provided by the CAL. A similar approach is used for the reduce
-operation, whereby data is either collected or reduced locally to a
-single value, depending on the commutativity of the reduce
-operation. 
+A collective operation is first executed locally for all hosted
+vertices of a host. Afterwards, it is handled by the CAL and
+transmitted to the receiver(s). Figure~\ref{fig:gvon_collective} shows
+a gather operation on the same graph and mapping of
+Figure~\ref{fig:gvon_mapping}. The gather operation collects the data
+of hosted vertices of a host first locally and uses then the gather
+operation provided by the CAL. A similar approach is used for the
+reduce operation, whereby data is either collected or reduced locally
+to a single value, depending on the commutativity of the reduce
+operation.
 
 The execution of the collective operation can be done sequentially or in
 parallel. Both variants have their specific implementation and usage
-problems. While sequential execution could lead to dead lock behavior
-when a peer forgets to execute the collective for at least one vertex,
+specific problems. While sequential execution could lead to dead lock behavior
+when a host forgets to execute the collective for at least one hosted vertex,
 a parallel execution needs to ensure that the GVON is implemented in
-a thread sage manner.
+a thread safe manner.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gvon_collective}
-  \caption{Gather operation with the GVON. Data is first locally 
+  \caption{Gather operation of the GVON. Data is first locally 
     and then globally collected. Finally the collected data
     is transmitted to the root vertex.}
   \label{fig:gvon_collective}
@@ -1051,18 +1076,21 @@ a thread sage manner.
 % REMAPPING                                                                    %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checked
 \subsection{Remapping of Vertices}
 \label{sec:remapping}
-Since, the communication topology is seperated from the communication
-layer, it is possible to change the mapping from vertices to peers at
-runtime. This runtime behavior is an interesting fact in respect to
-load balancing and fault tolerance. A remapping repeats the phases
-discussed in the mapping process of distribution and announcement.
-Figure \ref{fig:gvon_remapping} shows the remapping of the mapping
-from figure \ref{fig:gvon_mapping}. The vertices of the graph is
-distributed to now only two peers, while one peer announced three
-vertices and the other announces one vertex. The third peer is no
-host of this graph anymore.
+Since, the communication topology is separated from the communication
+library, it is possible to change the mapping from vertices to peers
+at runtime. This runtime behavior is an interesting fact in respect to
+load balancing and fault tolerance.
+
+%A remapping repeats the phases distribution and announcement.
+
+Figure~\ref{fig:gvon_remapping} shows the remapping of
+vertices of Figure~\ref{fig:gvon_mapping}. The mapping is modified, so that the
+vertices are distributed only to two peers. One peer hosts three
+vertices and the other one vertex. The third peer is no host of this
+graph anymore.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gvon_remapping}
@@ -1073,31 +1101,29 @@ host of this graph anymore.
 Load balancing can be an issue when the communication topology is
 changing during simulation execution. For example could the GoL
 simulation add a new rule, which leads to a changed communication
-topology for that in turn exists a better vertex mapping. Even if the
-performance of a cluster network link drops, thus, some peers are not
-able reach accetable latency and bandwidth between each other, a
-remapping could solve this problem at runtime.
+topology for that in turn exists a better vertex mapping.  Even if the
+performance of a network link drops, so that some peers are not able
+to reach accetable latency and bandwidth among each other, a
+remapping could solve this problem at run-time.
 
-A traditional field of application for remapping would be
-a moved compute load in the simulation domain. This movement
-could be noticed and a remapping could rearrange the compute load
+A traditional field of application for remapping would be unbalanced
+workload in the simulation application. The workload could be
+monitored and in unbalanced could a remapping rearrange the workload
 in a fair way.
 
 Another issue is the failure of single cluster nodes and therefore
-also a failure of hosts loacted on this nodes. Assuming, that the data
-of hosts where backuped, for example through checkpointing techniques,
-the hosted vertices of the failed host can be adopted by another host,
-also at runtime.
+also a failure of hosts located on this nodes. Assuming, that the data
+of hosts where check pointed, the hosted vertices of the failed host
+can be adopted by another host, also at run-time.
 
 The process of remapping is very similar to the mapping process of
-section \ref{sec:mapping}.  It is also divided in two steps:
+Section~\ref{sec:mapping}.  It is also divided in two phases:
 distribution and announcment. It has to be distinguished between
 global and local remapping. A global remapping is a repetition of the
-mapping process of section \ref{sec:mapping}. A local remapping does
-not require a full redistribution of vertices.  Since the remapping
-situation is slightly different, so that host already own a set of
-hosted vertices, the distribution is more a swap or occupation of
-vertices. 
+mapping process of Section~\ref{sec:mapping}.  Since, local remapping
+situation is slightly different, because the hosts already own a set
+of hosted vertices, it does not require a redistribution of all
+vertices.  The distribution is more a swap or occupation of vertices.
 
 \cleardoublepage
 

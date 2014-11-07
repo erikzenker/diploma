@@ -20,12 +20,16 @@
 % nichts zu suchen, auch nicht im Anhang, sondern gehören auf Rechner,
 % auf denen man sie sich ansehen kann.
 
-% Implementation motivation
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% CHAPTER INTRODUCTION                                                         %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checked
 While chapter \ref{sec:design} presented the design of the developed
 system, this chapter will pick up some design details and focus on
 their implementation.  It is not intended to provide a full
-documentation of the developed source code, moreover it should be a
+documentation of the emerged source code, moreover it should be a
 guide in understanding the system and also provide a basis for futher
 developement. Therefore, documentation should be retrieved from the
 source code or doxygen \cite{ref:doxygen} documentation.
@@ -33,11 +37,11 @@ source code or doxygen \cite{ref:doxygen} documentation.
 The developement of the system started from the analysed requirements
 of the PIConGPU source code (Section \ref{sec:picongpu}). Since,
 PIConGPU is implemented in C / C++ and makes additional usage of the
-Boost \cite{ref:boost} libraries, the same programming language was
-also choosen for the implemenation of the system. Additional libraries were
-selected with respect to the usage of similar design paradigms and an
-easy integration into the C++ environment. Furthermore, should the
-implementation make use of STL methods as often as possible to
+Boost libraries \cite{ref:boost}, the same programming language was
+also choosen for the implemenation of the system. Additional libraries
+were selected with respect to the usage of similar design paradigms
+and an easy integration into the C++ environment. Furthermore, should
+the implementation make use of STL methods as often as possible to
 gurantee easy integration into existing applications.  To make use of
 a richer feature set of the C++ programming language, features of the
 new C++11 standard were also included in the implementation
@@ -49,7 +53,7 @@ to proof functionality. The example should make use of all provided
 communication features.
 
 Particular C++ implementation details are highlighted by small source
-code snippets, hence, a basic knowledge of the C++ programming
+code snippets. Hence, a basic knowledge of the C++ programming
 language and the dealing with templates is assumed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
