@@ -13,98 +13,86 @@
 % als 10 Seiten liest keiner.
 
 
-
-\section{Introduction}
-
-% State of the art petascale systems
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% INTRODUCTION                                                                 % 
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checked
 The domain of high performance computing is subject to constant
 development.  The main focus of this development is the increase of
 computing power.  More computing power enables to solve more complex
-problems or increased problem sizes.  Current state of the art
+problems or to increase the problem size.  Current state of the art
 computing systems reached the area of petaflop/s (PFLOPS) in the year
-2008. That are $10^{15}$ floating point operations per second.  Only a
-small number of applications worldwide have taken advantage of so
-called petascale systems.
+2008 \cite{ref:ibm_roadrunner}. That are $10^{15}$ floating point
+operations per second.  Only a small number of applications worldwide
+have taken advantage of this so called petascale systems.
 
 One application, that has shown scalability on petascale systems, is
-PIConGPU. It is a particle in cell physic simulation that was running
-on the Titan supercomputer at the Oak Ridge National Laboratory in the
-United States. By making use of 18.000 Graphic Processing Units (GPUs)
-on the Titan, PIConGPU reached 7.1 PFLOPS peak performance.
-Nevertheless, applications capable of petascale system are looking
-towards systems with more computational power.
+PIConGPU \cite{ref:picongpu_scale}. It is a particle in cell physic
+simulation that was running on the Titan supercomputer at the Oak
+Ridge National Laboratory in the United States \cite{ref:titan}. By
+making use of 18.000 Graphic Processing Units (GPUs) on the Titan,
+PIConGPU reached 7.1 PFLOPS peak performance.  Nevertheless,
+applications capable of petascale system are looking towards systems
+with more computational power.
 
-Thus, Current computing systems will no longer adequately cover the
-future needs of complex and the compute intensive scientific and
+Thus, current computing systems will no longer adequately cover the
+future needs of complex and compute intensive scientific and
 industrial applications.  To make more computing power available for
 this applications, a rapid progress in the development of computers
 and algorithms is necessary.  Next milestone in the development of
 supercomputers is the foray of computing systems into an area of an
-exaflop/s (EFLOPS) computing power - an exascale system. That are
-computing systems that are capable of at least $10^{18}$ floating
-point operations per second, a thousandfold increase over the first
-petascale supercomputer.  Not all questions for the construction of
-such a system are solved. But, it is certain, that exascale will
-increase the amount and the complexity of computers to a new
-level. Coming up with the challange of reliability, programmability
-and usability of such systems. The first exascale systems are expected
-to be finished in 2018.
+exaflop/s (EFLOPS) - an exascale system. That are systems capable of
+at least $10^{18}$ floating point operations per second, a
+thousandfold increase over the first petascale system.  Not all
+questions for the construction of such a system are solved. But, it is
+certain, that exascale will increase the amount and the complexity of
+computers to a new level \cite{ref:cresta}. Coming up with the
+challenge of reliability, programmability and usability of such
+systems. The first exascale systems are expected to be finished in
+2018 \cite{ref:cresta}.
 
 Considering an exascale system, it is not sufficient to simply port
 the application that were previously running on a petascale
-system. The solely massivly increase in size of the compute system
-will lead to an decrease in the mean time to failure and increased
-importance of data locality.  Furthermore, emergence of accelerator
-hardware make computing system more heterogeneous and hierarchical and
-more complex to program and use. Therefore, the high performance
-application has to be adapted onto upcoming circumstances of exascale
-systems. It exists the need for a smart description concept for high
-performance applications, that fits on upcoming heterogeneous,
-hierarchical, exascale computing systems.
+system. The solely massively increase in size of the compute system
+will lead to an decrease in the mean time to failure (MTTF) and
+increased importance of data locality.  Furthermore, emergence of
+accelerator hardware make computing system more heterogeneous and
+hierarchical and more complex to program and use. Therefore, the high
+performance application has to be adapted onto upcoming circumstances
+of exascale systems. It exists the need for a smart description
+concept for high performance applications, that fits on upcoming
+heterogeneous, hierarchical, exascale computing systems.
 
-% Why is communication necessary
-\begin{itemize}
-\item Since, communication is an often used approach to interconnect
-  parallel entities of an application.
-\item One possible approach to scale on upcoming systems is to enhance
-  well known communication libraries.
-\item Existing communication will be taken as fundament
-\item On top of this fundament additional layers will be installed to
-  improve flexibility of the communication library
-\end{itemize}
+Many high performance applications connect their parallel entities by
+communication.  Therefore, one possible way to solve the mentioned
+problems is a smart communication approach. Already existing
+communication libraries should be enhanced with features necessary for
+the upcoming computing systems.  This work presents an approach that
+installs additional layers on top of existing communication
+layers. This layers give the existing communication library the
+portability and flexibility that is needed for the upcoming exascale
+system.
 
-% How such a system should be
-\begin{itemize}
-\item It were designed and implemented layers on top of existing
-  communication libraries that map common communication processes onto
-  these libraries.
+It were designed and implemented these layers on top of existing
+communication libraries such as MPI. They map common communication
+processes onto these existinging communication libraries. In general,
+Communication is separated in three components: an abstract
+communication layer, a description of the communication topology and a
+mapping from the topology onto the abstract communication layer.
 
-\item Abstraction from existing communication libraries
-\item Modeling of the communication topology of the simulation
-  application
-\item Mapping from the communication topology onto the communication
-  abstraction
-\end{itemize}
+The following Chapter~\ref{sec:state} is a introduction
+into technical background, giving a brief overview of the basic terms
+in high performance computing and communication in computing
+systems. Furthermore, it examines research in the area of
+interest. Versatile readers can skip this section and continue
+straight with the discussion about the design of the system components
+in Chapter~\ref{sec:design}.  An implementation for the designed
+system is presented in Chapter~\ref{sec:implementation}.  Finally, the
+developed prototype is evaluated and compared in contrast to a MPI
+implementation in Chapter~\ref{sec:evaluation}
 
-% Overview following section
-\begin{itemize}
-\item The following section \ref{sec:technical_background} is a
-  summary of technical background, giving a brief overview of the
-  basic terms in high performance computing and communication in
-  computing systems.
-
-\item Section \ref{sec:related_work} examines research in the area of
-  interest.
-\item Versatile readers can skip this section and continue straight
-  with the design section \ref{sec:design}.
-\item There will be discussed and justified design decisions.
-\item An implementation for the designed system is presented in
-  section \ref{sec:impl}.
-\item Finally, evaluation of the prototype in contrast to classic MPI
-  implementation
-
-
-\end{itemize}
 
 
 \cleardoublepage

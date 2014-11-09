@@ -10,29 +10,41 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Further Adapter implementations}
 
+
 \begin{itemize}
+\item The prototype implementation
+  (Section~\ref{sec:implementation}) utilized MPI as communication
+  backend. While, MPI is probably available on every compute system
+  and implements every important communication protocol, also other
+  interesting communication libraries could be used as communication
+  backend.
 
-% Short introduction
-\item For the prototype a MPI reference adapter was implemented
-\item MPI is useable on a wide range of computer systems
-\item But not all
+% Internet Socket based  
+\item Especially distributed system that are not deployed on cluster
+  system usually use other communication libraries than MPI.
 
-% IP based adapters
-\item Especially distributed system outside of clusters make use
-  of other communication libraries
-\item Exist of other very interesting communication libraries
-\item Adapter for ZMQ
-\item Adapter for Boost:asio
-\item These adapters are based on the tcp/ip or udp/ip protocol
-\item Computations with the internet as network imaginable
-\item Similar to projects like folding@home and seti@home
-\item Next to communication need to implement deployment of peers
+\item Two interesting libraries are ZMQ and Boost Asio, which are
+  based on the TCP/IP and UDP/IP protocol. They can be used to
+  interconnect applications over over the internet. Therefore,
+  computations using the internet as network are imagineable.
 
-% Connection over the Internet (Grid)
-\item Connection of clusters over Internet
-\item Construction of a Grid of clusters or computers
-\item Easily extend computational power by further computing units
-\item All communication uses the same communication interface
+\item Implementing an adapter that interface with ZMQ or Asio would
+  open an application based on the GVON interface the world of
+  distributed computing over the internet.
+  
+\item Examples for such application are folding@home
+  \cite{ref:folding_at_home} and or seti@home
+  \cite{ref:seti_at_home}. These application distribute a complex
+  problem to a big number of peers over the internet
+
+%\item Next to communication, a general interface for deploying
+%  applications or peers is also important
+
+\item A further use case for is the connection of cluster nodes over
+  the internet. This would construct a grid computing environment also
+  based on the GVON interface. It could easily extend the
+  computational power of a clust by further computing units. Whereby,
+  all peers utilize the same communication interface
 
 % Adapters for accelerators
 \item Furthermore, modeling of accelerator offload
