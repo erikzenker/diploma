@@ -21,67 +21,67 @@
 % Checked
 The domain of high performance computing is subject to constant
 development.  The main focus of this development is the increase of
-computing power.  More computing power enables to solve more complex
-problems or to increase the problem size.  Current state of the art
-computing systems reached the area of petaflop/s (PFLOPS) in the year
-2008 \cite{ref:ibm_roadrunner}. That are $10^{15}$ floating point
-operations per second.  Only a small number of applications worldwide
-have taken advantage of this so called petascale systems.
+computing power.  More computing power enables high performance
+applications to solve more complex problems or to increase the problem
+size.  Current state of the art computing systems reached the area of
+one petaflop, that are $10^{15}$ floating point operations per second
+(PFLOPS), in the year 2008 \cite{ref:ibm_roadrunner}. But, only a
+small number of applications worldwide have taken advantage of these
+so called petascale systems.
 
-One application, that has shown scalability on petascale systems, is
+One application that has shown scalability on petascale systems, is
 PIConGPU \cite{ref:picongpu_scale}. It is a particle in cell physic
 simulation that was running on the Titan supercomputer at the Oak
-Ridge National Laboratory in the United States \cite{ref:titan}. By
-making use of 18.000 Graphic Processing Units (GPUs) on the Titan,
-PIConGPU reached 7.1 PFLOPS peak performance.  Nevertheless,
-applications capable of petascale system are looking towards systems
-with more computational power.
+Ridge National Laboratory in the United States \cite{ref:titan},
+reaching 7.1 PFLOPS peak performance by utilizing 18.000 Graphic
+Processing Units (GPUs). Nevertheless, applications capable of
+utilizing a petascale system are looking foward to systems with more
+computational power.
 
-Therefore, current computing systems will no longer adequately cover the
-future needs of complex and computing intensive scientific and
+Therefore, current computing systems will no longer adequately cover
+the future needs of complex and computation intensive scientific and
 industrial applications.  To make more computing power available for
-this applications, a rapid progress in the development of computers
-and algorithms is necessary.  Next milestone in the development of
-supercomputers is the foray of computing systems into an area of an
-exaflop/s (EFLOPS) - an exascale system. That are systems capable of
-at least $10^{18}$ floating point operations per second, a
-thousandfold increase over the first petascale system.  Not all
-questions for the construction of such a system are solved. But, it is
-certain, that exascale will increase the amount and the complexity of
-computers to a new level \cite{ref:cresta}. Coming up with the
-challenge of reliability, programmability and usability of such
-systems. The first exascale systems are expected to be finished in
-2018 \cite{ref:cresta}.
+these applications, a rapid progress in the development of computers
+and algorithms is necessary. The next milestone in the development of
+supercomputers are computing systems that are capable of at least
+$10^{18}$ floating point operations per second (exaflop/s), a
+thousandfold increase over the first petascale system - an exascale
+system.
+
+Not all questions for the construction of such a system are
+solved. But, it is certain, that exascale will increase the amount and
+the complexity of computers to a further level \cite{ref:cresta},
+bringing up the challenge of reliability, programmability and
+usability of such systems.
 
 Considering an exascale system, it is not sufficient to simply port
-the application that were previously running on a petascale
-system. The solely massively increase in size of the computing system
-will lead to an decrease in the mean time to failure (MTTF) and an
-increased importance of data locality.  Furthermore, emergence of
-accelerator hardware make computing systems more heterogeneous and
-hierarchical and more complex to program and use. Therefore,
-applications running an high performance computers have to be adapted
-onto upcoming circumstances of exascale systems. It exists the need
-for a smart description concept for high performance applications,
-that fits on upcoming heterogeneous, hierarchical, exascale computing
-systems.
+the applications previously running on petascale systems. The solely,
+massive increase in size of the computing system will lead to a
+decrease in the mean time to failure (MTTF) and an increased
+importance of data locality.  Furthermore, the emergence of
+accelerator hardware make computing systems more heterogeneous,
+hierarchical, and more complex to program and use. Therefore,
+applications running on a high performance computers have to be
+adapted for upcoming circumstances of exascale systems. It exists the
+need for a smart description concept for high performance applications
+that models upcoming exascale computing systems.
 
-Many high performance applications connect their parallel entities by
-communication.  Therefore, one possible way to solve the mentioned
-problems is a smart communication approach. Already existing
+Many high performance applications connect their parallel entities via
+network.  Therefore, one possible way to solve the problems mentioned
+above is a smart communication approach. Already existing
 communication libraries should be enhanced with features necessary for
 the upcoming computing systems.  This work presents an approach that
 installs additional layers on top of existing communication
-layers. This layers give the existing communication library the
+libraries. These layers give the existing communication library the
 portability and flexibility that is needed for the upcoming exascale
 system.
 
-These layers were designed and implemented on top of existing
-communication libraries such as MPI. They map common communication
-processes onto these existing communication libraries. In general,
-Communication is separated in three components: an abstract
-communication layer, a description of the communication topology and a
-mapping from the topology onto the abstract communication layer.
+These layers were designed and implemented on top of MPI. They map
+common communication processes onto these existing communication
+libraries. In general, Communication is separated in three components:
+an abstract communication layer, a description of the communication
+topology and a mapping from the topology onto the abstract
+communication layer.
 
 The following Chapter~\ref{sec:state} is a introduction
 into technical background, giving a brief overview of the basic terms
@@ -89,7 +89,7 @@ in high performance computing and communication in computing
 systems. Furthermore, it examines research in the area of
 interest. Versatile readers can skip this section and continue
 straight with the discussion about the design of the system components
-in Chapter~\ref{sec:design}.  An implementation for the designed
+in Chapter~\ref{sec:design}.  Selected implementation details of the designed
 system is presented in Chapter~\ref{sec:implementation}.  Finally, the
 developed prototype is evaluated and compared in contrast to a MPI
 implementation in Chapter~\ref{sec:evaluation}.

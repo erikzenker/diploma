@@ -256,7 +256,7 @@ defines the adapter behavior.
   be easily partitioned by already existing graph partitioning tools.
 
   % Metis
-  \subsection[Metis as Graph Partitioning Tool}
+  \subsection{Metis as Graph Partitioning Tool}
 \item The tool METIS and its related tools hMETIS and ParMETIS are
   established applications for graph partitioning.T hey provide high
   quality partitions and are two magnitudes faster than other widely
@@ -284,10 +284,10 @@ defines the adapter behavior.
 \begin{itemize}
 
 % Cluster network topology
-\item Cluster systems are equipped with a varying network
-  systems. Usually with custom build network topologies.  Utilizing of
+\item Cluster systems are equipped with varying network
+  systems. Usually with custom build network topologies.  Utilizing the
   knowledge about the network topology can increase application
-  performance
+  performance.
 
 \item The most general approach to describe the network topology of a
   cluster is a graph. A graph would describe physical connections
@@ -304,7 +304,7 @@ defines the adapter behavior.
   topology, a mapping between these graphs is possible.
   
 \item Instead a mapping from vertices to independent peers, vertices
-  can be mapped onto peers modeled in the graph. Information that were
+  can be mapped onto peers modeled in the network graph. Information that were
   used to describe the network can be used to optimize this mapping.
 
 \item In an oversubscribed case, could the communication graph first
@@ -313,31 +313,36 @@ defines the adapter behavior.
 
 \item An optimal mapping would result in an graph
   homomorphism. Deciding whether there exists a homomorphism from one
-  graph to another, is NP-complete.Therefore, a heuristically approach
-  that tries to maximize the amount of same adjacent vertices in
-  communication and network graph should be chosen
+  graph to another, is NP-complete. Therefore, a heuristically
+  approach that tries to maximize the amount of same adjacent vertices
+  in communication and network graph should be chosen.
   
 % Load balancing
-\item Mapping of the communication graph onto the network graph opens
-  new possibilities
-\item First of all a static mapping can be performed
+\item A Mapping between the two graphs mentioned above opens new
+  possibilities for load balancing.
 
   % Static load balancing
-\item Static mapping takes already known information about the
-  simulation and network into account, before execution
-\item But the simulation can change their load distribution during
-  run-time
+\item The most simple load balancing approach is a load balancing at
+  the initialization of an application. The communication graph is
+  mapped only once and statically onto the network graph. This
+  approach is sufficient for applications that do not change with
+  respect to load distribution and the graphs.
 
   % Dynamic load balancing
-\item Dynamic redo load balancing at run-time
-\item load balancing at fixed points of code execution
-\item every n time-steps
+\item But simulations can change their load distribution during
+  run-time. The difference in workload could be estimated by run-time
+  measurements of a single time-step. The application needs to
+  initiate a rebalancing when the run-time of a host increases above a
+  defined threshold.
+
+\item A static load balancing could also be performed periodically every
+  n time-steps
 
   % Auto tune
-\item Create algorithm to auto tune load balancing
-\item Generate a metric to evaluate balancing of simulation
-\item System recognizes load imbalance and start
-  load balancing step automatically
+%% \item Create algorithm to auto tune load balancing
+%% \item Generate a metric to evaluate balancing of simulation
+%% \item System recognizes load imbalance and start
+%%   load balancing step automatically
 \end{itemize}
 
 
@@ -348,35 +353,61 @@ defines the adapter behavior.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Ideas for Fault Tolerance}
 \begin{itemize}
-\item No Fault tolerance techniques were implemented so far
+\item Similar to load balancing was fault tolerance with respect to
+  communication processes not the topic of this work. Nevertheless,
+  offers the developed system the possibility to build fault tolerance
+  techniques on top.
 
-\item The developed system makes it possible to build
-  fault tolerance on top
+\item The main problem is the failure of a peer during execution of simulation.
+  Some communication libraries such as MPI have the embarrassing behavior
+  that the whole program will fail too. Therefore, the simulation has to be
+  restarted, if only a single peer fails.
 
-\item Failure of peers during execution of simulation not impossible
-\item Especially for increasing amount of computing power
-\item In best case no re-execution of full simulation necessary
+\item Since, the amount of computing hardware increases with each new
+  cluster generation, it is not unlikely that a peer, that is host for
+  vertices of a simulation, fails. The library user has usually no
+  possibility to restart the failed peer, but the failed peer could be
+  ignored for further communication processes.
 
+  %Reload from checkpoint
+\item Assume, that the host checkpoints the state of its hosted
+  vertices at fixed points of the simulation execution. This
+  checkpoints could be written onto hard disk of an network attached
+  storage (NAS) or each peer could distribute the data of its hosted
+  vertices to other peers for backup reasons.
 
-% Reload from checkpoint
-\item Failure peer has created check point on regular basis onto hard disk
-\item Loading of check point is possible
-\item Other peer can load checkpoint and take over vertices of failure
-  peer
-\item Peer announces its new vertices
-\item The other peer could already be a host
-\item Or it could be a special backup peer that usually
-  is not part of the simulation calculations
-\item after loading the state and re-announce of the vertices
-  calculations can go on
+\item The network of peers needs to notice the failure of the peer.
+  Furthermore, the peers need estimate where the failed peer stored its
+  checkpointed states.
 
+\item Some peer has to adopt the hosted vertices of the failed host.
+  This adopter peer has to announce the adopted vertices together
+  with his already hosted vertices.
+
+\item The adopter peer has to load the checkpointed states of the
+  adopted vertices. In dependence whether the checkpointed state is
+  up-to-date, other host do also need to load checkpointed
+  states. When all vertices are synchronized to the same time-step,
+  the communication and therefore the simulation algorithm can be
+  continued.
+
+\todo{Make graphics that illustrates the fault tolerance idea}
 
 % Redundant calculations
-\item Another possibility without the need for reloading the check point
-  is the redundant calculations of simulation subdomains
-\item A vertex can be distributed to several peers
-\item The system ensures that data receives all peers
-\item Usage of multi-maps
+\item Redistribute the hosted vertices of a failed host onto the
+  remaining host increases the workload each host has to manage.
+  
+\item Instead, the vertices could be adopted by a backup peer
+  that has no hosted vertices so far.
+
+\item Equally, to the method mentioned above, needs the backup peer
+  to load the checkpointed state from its adopted vertices
+
+%% \item Another possibility without the need for reloading the check point
+%%   is the redundant calculations of simulation subdomains
+%% \item A vertex can be distributed to several peers
+%% \item The system ensures that data receives all peers
+%% \item Usage of multi-maps
 
 \end{itemize}
 
@@ -390,6 +421,7 @@ defines the adapter behavior.
 \item Compile time generation of static graphs
 \item Optimization of the graph to reduce overhead
 \item Thread safe implementation of the gvon collectives
+\item Multi-maps  
 \end{itemize}
 
 \cleardoublepage
