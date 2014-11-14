@@ -226,10 +226,11 @@
     <filter
        inkscape:collect="always"
        id="filter4223"
-       x="-0.054585384"
+       x="-0.054585382"
        width="1.1091708"
-       y="-0.18216259"
-       height="1.3643252">
+       y="-0.18216258"
+       height="1.3643252"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          inkscape:collect="always"
          stdDeviation="3.4887768"
@@ -243,11 +244,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.075437"
-     inkscape:cx="318.65679"
-     inkscape:cy="115.4966"
+     inkscape:zoom="2.9351112"
+     inkscape:cx="201.41083"
+     inkscape:cy="108.37264"
      inkscape:document-units="px"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer13"
      showgrid="false"
      showguides="false"
      inkscape:guide-bbox="true"
@@ -255,11 +256,11 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="838"
-     inkscape:window-height="1029"
+     inkscape:window-width="1918"
+     inkscape:window-height="1059"
      inkscape:window-x="0"
      inkscape:window-y="19"
-     inkscape:window-maximized="0"
+     inkscape:window-maximized="1"
      inkscape:snap-bbox="true"
      inkscape:bbox-nodes="true"
      inkscape:object-nodes="true"
@@ -334,7 +335,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -343,7 +344,7 @@
      id="layer11"
      inkscape:label="State of the art"
      style="display:none"
-     transform="translate(120.74953,-36.947504)">
+     transform="translate(120.74953,-36.947512)">
     <g
        inkscape:groupmode="layer"
        id="layer12"
@@ -410,7 +411,7 @@
            sodipodi:role="line"
            id="tspan3865-0"
            x="51.321705"
-           y="214.64105">Existing Communication Layers</tspan></text>
+           y="214.64105">Existing Communication Libraries</tspan></text>
       <path
          inkscape:connector-curvature="0"
          id="path4023-7"
@@ -481,7 +482,7 @@
          sodipodi:role="line"
          id="tspan3865"
          x="335.23904"
-         y="613.10291">Existing Communication Layers</tspan></text>
+         y="613.10291">Existing Communication Libraries</tspan></text>
     <rect
        y="455.71259"
        x="119.84394"
@@ -489,22 +490,22 @@
        width="618.57147"
        id="rect25597"
        style="fill:#999999;fill-opacity:1;stroke:none;display:inline;filter:url(#filter4218-9-8)"
-       transform="matrix(0.34452349,0,0,0.34452349,269.07054,478.5441)" />
+       transform="matrix(0.34452349,0,0,0.34452349,269.07054,477.43719)" />
     <rect
        style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.34452349;stroke-opacity:1"
        id="rect25599"
        width="213.11238"
        height="17.816786"
        x="308.98151"
-       y="634.16968" />
+       y="633.06274" />
     <text
        sodipodi:linespacing="125%"
        id="text25601"
-       y="646.23163"
+       y="645.12469"
        x="379.05859"
        style="font-size:10.3357048px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
        xml:space="preserve"><tspan
-         y="646.23163"
+         y="645.12469"
          x="379.05859"
          id="tspan25603"
          sodipodi:role="line">Physical Network</tspan></text>
@@ -682,7 +683,7 @@
      inkscape:groupmode="layer"
      id="layer8"
      inkscape:label="Graph"
-     transform="translate(120.74953,-36.947504)"
+     transform="translate(120.74953,-36.947512)"
      style="display:inline">
     <rect
        y="171.81052"
@@ -826,7 +827,7 @@
      id="layer15"
      inkscape:label="requirements"
      style="display:inline"
-     transform="translate(0,-36.947494)">
+     transform="translate(0,-36.947502)">
     <text
        xml:space="preserve"
        style="font-size:12.13351536px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
@@ -841,23 +842,23 @@
     <text
        xml:space="preserve"
        style="font-size:12.13351536px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
-       x="83.275101"
+       x="97.268929"
        y="112.65528"
        id="text27155"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan27157"
-         x="83.275101"
-         y="112.65528">Description</tspan></text>
+         x="97.268929"
+         y="112.65528">Modeling</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:12.13351536px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
-       x="99.271423"
+       x="99.271431"
        y="90.443993"
        id="text27159"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
-         x="99.271423"
+         x="99.271431"
          y="90.443993"
          id="tspan27167">Mapping </tspan></text>
     <path

@@ -30,11 +30,12 @@
 % (oder das Schwerste weil erste).
 
 
-This chapter provides first of all an introduction into technical
-background. Readers that are well versed in the are of high performance
-computing and communication in cluster systems can skip this part of
-the chapter. Secondly, it provides a brief overview about
-related work.
+This chapter opens with an introduction into technical topics used in
+later chapters. Readers that are well versed in the are of high
+performance computing and communication in cluster systems can skip
+the first part of the chapter. The second part of this chapter
+provides a brief overview of related work.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -44,17 +45,16 @@ related work.
 % Checked
 \section{Technical Background}
 \label{sec:technical_background}
-This section gives all necessary basics for understanding of the
-development of the system.  These basics are the foundations of
+This section gives all necessary basics to understand the
+developed system.  These basics are: the foundations of
 cluster computing in Section~\ref{sec:cluster}, an introduction into
 many-core architectures and accelerator devices in
-Section~\ref{sec:accel} and a brief overview on domain decomposition
-of applications in
+Section~\ref{sec:accel}, and a brief overview on domain decomposition in
 Section~\ref{sec:domain_decomposition}. Furthermore, communication
 techniques in cluster systems are discussed in
-Section~\ref{sec:communication} and it follows a definition of the
+Section~\ref{sec:communication} and are followed by  a definition of the
 term jungle computing in Section~\ref{sec:jungle}. Finally, the
-simulation application PIConGPU is introduced in
+simulation particle simulation PIConGPU is introduced in
 Section~\ref{sec:picongpu}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,27 +65,27 @@ Section~\ref{sec:picongpu}.
 % Checked
 \subsection{Cluster Computing}
 \label{sec:cluster}
-Parallel computers are not anymore specialized traditional
-supercomputing platforms, instead low cost off-the-shelf commodity
-computers form so called compute clusters \cite{ref:hpcc1}.
+Nowadays, most parallel computers are no longer traditional
+supercomputing platforms. Instead, low cost off-the-shelf commodity
+computers form so called compute clusters~\cite{ref:hpcc1}.
 
-A compute cluster is in principle a distributed memory architecture
+In principle, a compute cluster is a distributed memory architecture
 and forms a homogeneous network of similar compute entities, which
 will be called nodes. Each node is equipped with one or more central
-processing units (CPUs) and with a growing popularity also with one or
-more accelerator devices (e.g. GPUs) \cite{ref:accel}. Accelerator
+processing units (CPUs) and with growing popularity also with one or
+more accelerator devices (e.g. GPUs~\cite{ref:accel}). Accelerator
 devices will be discussed in Section~\ref{sec:accel}
 
-The main memory between the nodes is not shared, instead every node
-has its own local memory.  To exchange data between the local memories
-of the nodes, the nodes are interconnected via a high-speed network
-connection with small-latency and high-bandwidth,
+The main memory between the nodes is not shared. Instead every node
+can access exclusively its own local memory.  To exchange data between
+the local memories of the nodes, the nodes are interconnected via a
+high-speed network connection with low latency and a high bandwidth.
 
-The calculation power of a high performance computing cluster is used
-where time to solution is important and the memory of a single
-computer does not cover the demand of an application. These are
-physical \cite{ref:picongpu}, weather, astronomy, multimedia, medical
-imaging and biobanking simulations.
+The computational power of a high performance cluster is utilized
+where time to solution is important and the memory does not stress the
+huge amount of memory necessary for the following applications. These
+are physics~\cite{ref:picongpu}, weather, astronomy, multimedia, and
+medical imaging applications.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -99,45 +99,48 @@ imaging and biobanking simulations.
 
 Traditional cluster, grid, and cloud computing systems are adding more
 and more state-of-the-art many-core architectures or accelerator
-devices to their compute nodes to exploit high peak performance for
+devices to their compute nodes to offer high peak performance for
 their applications. This changes clusters from homogeneous systems,
 where a node has only one type of hardware, to heterogeneous systems
 with varying types of hardware.
 
-An accelerator device is some kind of a coprocessor which is usually
+An accelerator device is a coprocessor, which is usually
 able to execute operations in a massively parallel manner.  The
-devices are commonly optimized for a handful of operations (e.g
-floating point operations) in which they can outperform traditional
-CPU hardware. But, these devices do also require special treatment in
-regard to programming.
+devices are commonly optimized for a selected subset of operations
+(e.g floating point operations). The massive parallel execution of
+these operations (SIMD) can outperform traditional CPU hardware.
+However, these devices do also require special treatment regarding
+their programming.
 
-Particularly, General-purpose computing on graphics processing units
-(GPGPU), mainly manufactured from AMD or Nvidia, enter the world of
-compute clusters. Nvidia has pushed forward CUDA\cite{ref:cuda} as the
-preferred model and language to program their
-GPUs. OpenCL\cite{ref:opencl}, as alternative to CUDA, adopts a more
-general approach.  It provides a common model for accelerator
+Particularly, general-purpose computing on graphics processing units
+(GPGPU), mainly manufactured from AMD or NVIDIA, enter the world of
+compute clusters. Nvidia has pushed forward CUDA~\cite{ref:cuda} as
+the preferred model and language to program their GPUs. The
+open-source open compute language (OpenCL~\cite{ref:opencl} adopts a
+more general approach.  It provides a common model for accelerator
 programming and covers a wide range of accelerator devices.  Another
 member of the accelerator device family is the Xeon
-Phi\cite{ref:xeon_phi} from Intel. The Xeon Phi is a many-core
+Phi~\cite{ref:xeon_phi} from Intel. The Xeon Phi is a many-core
 coprocessor based on interconnected legacy x86 cores on a single
-chip. While, Xeon Phis can be programmed by OpenCL, Intel suggest to
-exploit the device performance by OpenMP \cite{ref:openmp}.
+chip. While Xeon Phis can be programmed using OpenCL, Intel suggest
+that OpenMP~\cite{ref:openmp} might be more suitable to exploit the
+performance of these devices.
 
-Usually, the accelerator devices need a CPU to manage their memory
-transfers between main memory and device memory and also for internode
-communication between the nodes. In this so called offload mode the
+Accelerators and CPUs have access to physically separated memories.
+Usually, accelerators need a CPU to manage their memory
+transfers between CPU memory and accelerator memory and also for inter-node
+communication. In this so-called offload mode the
 CPU is called the host of the accelerator device.
 
-But, accelerator devices have the future objective to run in a
-standalone or native mode, where a host is not needed anymore.  Which
-implies, that these devices are connected directly to a network,
+However, accelerator devices have the future objective to run in a
+standalone or native mode, where a host is not needed anymore.  This necessitates
+that these devices are connected directly to a network,
 giving them the possibility to communicate directly with each
-other. The Xeon Phi is already able to run in native mode and Nvidia
-also tries to get rid of the host CPU with GPUDirect.
+other. The Xeon Phi is already able to run in native mode and NVIDIA
+also NVIDIA tries to sidestep the host CPU with GPUDirect.
 
-Supercomputers of the TOP 500 list \cite{ref:top500} are already
-populated by accelerator devices, which demonstrated the development
+Supercomputers of the TOP 500 list~\cite{ref:top500} are already
+populated by accelerator devices, which demonstrates the development
 of compute clusters to heterogeneous cluster systems.
 
 
@@ -150,25 +153,24 @@ of compute clusters to heterogeneous cluster systems.
 \subsection{Domain decomposition}
 \label{sec:domain_decomposition}
 Domain decomposition is a very popular method to separate the
-computational domain of an application in smaller chunks of work,
-subdomains, which are mostly solveable independent from each
-other. This gives an application the chance to exploit the tremendous
+computational domain of an application into smaller chunks of work,
+called subdomains, which are often solvable independently of each
+other. This enables an application to exploit the tremendous
 performance gain of parallel computers.
 
-We usually do not live in a perfect parallel world, where each
-subdomain is totally independent from all other subdomains.
+We usually do not live in a perfectly parallel world, where each
+subdomain is completely independent from all other subdomains.
 Therefore, communication or coordination between certain subdomains is
-necessary. How communication is covered in an cluster environment
-is covered in Section~\ref{sec:communication}.
+necessary. Communication in a cluster environment is covered in
+Section~\ref{sec:communication}.
 
-The Decomposition of the application domain can be partitioned into three
-levels: subdomains which make local computations, the
-communication with neighboring subdomains and the global communication
-operations which include concurrent communication of several or all
-subdomains.
+The decomposition of the application domain can be partitioned into
+three parts: the local subdomain computations, the communication with
+neighboring subdomains, and the global communication operations
+includes concurrent communication of several or all subdomains.
 
 The challenge of domain decomposition methods is to map these three
-levels efficiently onto a parallel computer. So that, the application
+levels efficiently onto a parallel computer, so that the application
 exploits the available computing resources.
 
 
@@ -182,51 +184,52 @@ exploits the available computing resources.
 \label{sec:communication}
 Communication has a central role in complex simulation
 applications. The calculation of large data sets on a single computing
-device in a acceptable amount of time is not possible anymore.
-Therefore, the simulation need to be decomposed in subdomains and
+device in an acceptable amount of time is not possible anymore.
+Therefore, a simulation needs to be decomposed into subdomains and
 distributed to more than one computing device. Subdomains are usually
 not independent from each other, they need to exchange data.
 
-The most simple way for data exchange is the direct communication of
-nodes (peer-to-peer).  This can be done on protocols such as TCP, UDP,
-IP using Berkeley sockets (\ref{sec:tcp_udp_ip}), which is
-communication in the UNIX way; everything is a file or file
-descriptor. It provides a classical send-receive model of messages or
-data.  But Sockets where not designed for the usage in a high
-performance computing environment in mind. Libraries that are built
-directly on top of sockets are Boost Asio \cite{ref:boost_asio} and
-ZMQ \cite{ref:ZMQ}.
+The most simple way for data exchange is the direct communication
+between nodes (point-to-point).  This can be handled by protocols such
+as TCP, UDP, IP, or by using Berkeley sockets. It provides a classical
+send-receive model of messages or data, but sockets were not designed
+with high performance computing in mind. Libraries that are built
+directly on top of sockets are Boost Asio~\cite{ref:boost_asio} and
+ZMQ~\cite{ref:zmq}.
 
-Active messages \cite{ref:am} is a slight departure from the classical
+Another variant would be ``active messages'' designed by Eicken
+et. atl.~\cite{ref:am}, which is a slight departure from the classical
 send-receive model. It is based on one-sided communication operations,
 which transfer messages regardless of the current activity of the
 receiver process. It was designed to reduce the impact of
 communication overhead on application performance.
 
-A more modern and abstract model is the Message Passing Interface. It
+A more modern model is the Message Passing Interface (MPI). It
 provides a more abstract interface for communication and is available
 on top of several communication libraries. Because parts of MPI will
-be used for the implementation of the system, an introduction into MPI
-will be provided in Section~\ref{sec:mpi}.
+be used for the implementation of the system, a more detailed
+introduction will be provided in Section~\ref{sec:mpi}.
 
-An other way for data exchange, is transformation of a cluster into a
+Another way for data exchange is transformation of a cluster into a
 single large parallel computer with a single address space.  The
-operating system MOSIX \cite{ref:mosix} is a Linux based
+operating system MOSIX~\cite{ref:mosix} is a linux-based
 multi-computer OS (MOS), that provides a single-systems
-image\cite{ref:single_system_image} as if using one computer with
-multiple CPUs. The Parallel Virtual Machine\cite{ref:pvm} is a
+image~\cite{ref:single_system_image} as if using one computer with
+multiple CPUs.
+
+The Parallel Virtual Machine\cite{ref:pvm} is a
 software package that permits a heterogeneous collection of Unix
-and/or Windows computers hooked together by a network to be used as a
+and/or Windows computers connected through a network to be used as a
 single computer.
 
 These distributed shared architectures make it possible to use
 standard and simple parallelization approaches such as Pthreads or
 OpenMP.  Communication between nodes is covered by shared memory and
-does not have to be modeled explicitly.  Therefore, it is easy to ship
+need not to be modeled explicitly.  Therefore, it is easy to ship
 existing parallel applications for a single machine onto these kind of
-systems. But with higher abstraction always comes a loose of control
+systems. However, with higher abstraction comes always a loose of control
 and also efficiency. The underlying compute cluster has to provide
-such an architecture, which limits the application to this kind of
+a distributed shared architecture, which limits the application to this kind of
 clusters.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -235,10 +238,10 @@ clusters.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checked
-\subsubsection{Message passing intferface (MPI)}
+\subsubsection{Message passing intferface }
 \label{sec:mpi}
-The Message Passing Interface (MPI) is a standardized and portable
-message-passing specification, specified by the Message Passing
+The Message Passing Interface is a standardized and portable
+message-passing specification, defined by the Message Passing
 Interface Forum \cite{ref:mpi_specification}. It has become the
 defacto standard for communication in cluster systems.
 
@@ -246,16 +249,16 @@ The specification is language independent and its implementations are
 available on virtually every parallel computer system.  Popular
 implementations are MPICH and OpenMPI.  The MPI implementations are
 implemented on top of physical networks provided by the underlying
-cluster system ( AM, Ethernet, Infiniband, Myrinet etc.)
+cluster system (AM, Ethernet, Infiniband, Myrinet etc.)
 
 The first version of the specification, known as MPI-1, was completed
-in 1994 making use of the most attractive features of already
-existing message passing systems.  Further improvements followed 1997
-by version MPI-2 and 2008 by version MPI-3. Version numbers follow
-the policy that major versions like MPI-2 or MPI-3 come with new
-features to the MPI standard and minor versions like MPI-1.1 or
-MPI-1.2 come with clarifications of already existing features. In
-the following the key features of the varying MPI versions are listed:
+in 1994, utilizing the most attractive features of already
+existing message passing systems.  Further improvements followed in 1997
+with version 2 and in 2008 with 3. Version numbers follow
+the policy that major versions like 2 or 3 come with new
+features to the MPI standard and minor versions like 1.1 or
+1.2 come with clarifications of already existing features. In
+the following, the key features of the varying MPI versions are listed:
 
 \begin{itemize}
   \item MPI-1 (1994)
@@ -277,49 +280,50 @@ the following the key features of the varying MPI versions are listed:
     \end{itemize}
 \end{itemize}
 
-An MPI program is a set of autonomous processes, executing their own
-code, in an MIMD style \cite{Flynn:1972:COE:1952456.1952459}. Each
-process rests in his own address space and communicates via MPI
-communication primitives with other processes in the same MPI
-program.
+An MPI program is a set of autonomous processes, executing the same
+program, in a single program multiple data style (SPMD a subcategory
+of MIMD~\cite{Flynn:1972:COE:1952456.1952459}). Each process rests in
+its own address space and communicates via MPI communication
+primitives with other processes in the same MPI program.
 
-Processes are identified according to their relative rank in a group
-by consecutive integers from 0 to the group size minus 1. The
-initial group compromises the full set of processes with ranks in the
-range 0 to number of processes minus one. A typical MPI program run is
-composed from the following steps:
+Processes are identified according to their relative virtual address
+in a group, called the rank, by consecutive integers from 0 to the
+group size minus one. The initial group comprises of the full set of
+processes with ranks ranging from 0 to number of processes minus
+one. A typical MPI program run consists of the following steps:
 
 \begin{enumerate}
-\item Deploy MPI program onto the computing nodes
-\item Start MPI program
-\item Initialize MPI environment
-\item Each process retrieves own rank
-\item Each process retrieves number of ranks overall
-\item Depending on own rank and number of overall processes do some task\\
-  (varying flow of control between ranks)
-\item Exchange data with other processes
-\item Finalize MPI environment
-\item Exit MPI program
+\item Deploy MPI program onto the computing nodes.
+\item Start the MPI program.
+\item Initialize the MPI environment.
+\item Each process retrieves its own rank.
+\item Each process retrieves total number of ranks.
+\item Depending on the own rank and total number of ranks do some
+  task.\\ (varying flow of control among ranks)
+\item Exchange data with other processes.
+\item Utilize the received data and repeat communication with other processes.
+\item Finalize the MPI environment
+\item Exit the MPI program.
 \end{enumerate}
 
 MPI provides a large and versatile set of routines, that fit the needs
-of the parallel programming community. At its most basic, MPI has
+of the parallel programming community. At its very basics, MPI uses
 functions for sending and receiving a message (point-to-point
-operations).  These functions are available both blocking and
-non-blocking. While blocking, interrupts the program flow until the
-operation has finished, non-blocking operations are performed in the
-background.
+operations).  These functions are available both as blocking and
+non-blocking variants. While blocking operations interrupt the program
+flow until the operation has finished, non-blocking operations are
+performed in the background.
 
-Furthermore, a variety of collective operations, that involve a group
-of processes for communication, are defined. Collective operations
-collect, distribute and reduce data of the MPI processes.  All members
+Furthermore, a variety of collective operations that involve a group
+of processes for communication are defined. Collective operations
+collect, distribute, and reduce data of the MPI processes.  All members
 of the group have to participate to successfully execute the
 collective operation.  The result of the operation is either received
-by one process, the so called root, or by all processes of a group.  A
-collective operation can only be successful, when all peers of a
-context are participating. If only one peer does not execute the
-operation then the application is stuck. It will only continue when
-this peer also executes this collective operation.
+by one MPI process, the so-called root, or by all MPI processes of a group.  A
+collective operation can only be successful, if all MPI processes of a
+group are participating. If only one MPI process does not execute the
+operation, the application is stuck. It will only continue when
+this MPI process also executes this collective operation.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -330,35 +334,35 @@ this peer also executes this collective operation.
 \subsection{Jungle computing}
 \label{sec:jungle}
 Jungle computing can be seen as a further evolution step after grid
-computing. The initial intention of grid computing was the request to
+computing. The initial intention of grid computing was to
 bundle the tremendous compute power of cluster systems over the
-internet\cite{ref:grid}. It was meant to an easy to use system over a
+internet\cite{ref:grid}. It was meant to be an easy to use system over a
 set of distributed resources, which delivers potentially efficient
-computing, even at a worldwide scale.  The hook with grid computing
+computing, even at a worldwide scale.  The downside of grid computing
 is, that every compute systems has its own administration environment,
 submit system, communication middleware, and programming interface.
 
-Even though, every system viewed in isolation, by using platform
-specific code, designing applications that interconnects several
-compute systems can be a hard challenge.  With the increasing desire
-for speed, scalability and flexibility in many scientific research
-domains, it exist a demand for easy end-user access to multiple and
-potentially very diverse platforms.
+A system viewed in isolation utilizes platform specific
+code. Therefore, designing applications that interconnect several
+compute systems can be a challenge.  With the increasing desire for
+speed, scalability and flexibility in many scientific research
+domains, there exists a demand for easy end-user access to multiple
+and potentially very diverse platforms.
 
-``A true computing jungle'' where the words by which F. J. Seinastra
-introduced such heterogeneous systems as jungle computing
-systems\cite{ref:jungle}. It is defined as simultaneously using a
+F. J. Seinastra used the words ``A true computing jungle''
+to introduce such heterogeneous systems as jungle computing
+systems\cite{ref:jungle}. It is defined as: simultaneously using a
 combination of heterogeneous, hierarchical and distributed computing
 resources.
 
-This definition describes the undergoing revolutionary change in the
-high performance computing (HPC) area very well. On one hand,
+This definition describes the ongoing revolutionary change in the high
+performance computing (HPC) area very well. On the one hand,
 computations will be distributed to several compute clusters and on
-the other hand the underlying hardware of compute nodes are changing
-to heterogeneous hardware in the years to come. The efficient
-programming by scientist of such systems, and thereby the efficient
-mapping of computational problems onto the jungle has become
-enormously difficult to maintain and overview.
+the other hand the underlying hardware of compute nodes is going to
+change to heterogeneous hardware in the years to come. The efficient
+programming of such systems, and thereby the efficient mapping of
+computational problems onto the jungle has become enormously difficult
+to maintain.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -369,24 +373,24 @@ enormously difficult to maintain and overview.
 % Checked
 \subsection{PIConGPU - the application}
 \label{sec:picongpu}
-PIConGPU is a relativistic particle-in-cell (PIC) code designed for
-simulating laser-plasma interactions \cite{ref:picongpu}.  The
+PIConGPU is a relativistic particle-in-cell (PIC) application designed
+for simulating laser-plasma interactions \cite{ref:picongpu}.  The
 application is optimized for the execution on cluster systems with
 NVIDIA GPU-accelerated nodes (Section~\ref{sec:accel}), whereby the
-host CPUs are only utilized for memory transfers between CPU and GPU
-and for internode communication via MPI (Section~\ref{sec:mpi}). It
-was demonstrated that PIConGPU is capable to scale on systems with up
-to 18.000 GPUs \cite{ref:picongpu_scale}.
+host CPUs are only utilized for data transfers between CPU and GPU and
+for internode communication via MPI (Section~\ref{sec:mpi}). It was
+demonstrated that PIConGPU is capable to scale on systems with up to
+18.000 GPUs \cite{ref:picongpu_scale}.
 
-The simulation domain, a volume, is decomposed into subdomains
+The simulation domain is decomposed into subdomains
 \ref{sec:domain_decomposition} forming a three-dimensional grid. Each
-grid cell is mapped onto a GPU. Particles in a cell interact on one
-hand with particles in other cells and on the other hand a cross the
-border of the cells during the simulation. Furthermore, fields of a
+grid cell is mapped onto a single GPU. Particles in a cell interact on
+the one hand among particles in the same cell and on the other hand
+across the border of its cell. Furthermore, electrical fields of a
 cell interact with fields of neighboring cells. Thus, GPUs need to
-exchange data among cells borders. This data is not transferred
-directly between the GPUs hosting the cells, it has to take the detour
-via host and network.
+communicate with each other to exchange data across cell
+borders. This data is not transferred directly between the GPUs
+hosting the cells, it has to take the detour via the host CPU.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -397,149 +401,154 @@ via host and network.
 \label{sec:related_work}
 The developed system is related to systems that make it possible to
 decompose an application into smaller chunks of work and describe the
-relationship between this chunks.  Thus, there is some relationship to
-workflow and many task computing systems. These systems divide the
+relationship between these chunks.  Thus, there is some relationship
+to work-flow and many-task computing systems. These systems divide the
 application in tasks and perform a resource mapping or scheduling of
 tasks onto the available computing resources. The scheduling algorithm
-considers thereby the dependencies among tasks. Some systems allow a
-dynamic rescheduling of tasks at run-time for a better compute load
-distribution.
+considers the dependencies among tasks. Some systems allow a dynamic
+rescheduling of tasks at run-time to improve load-balancing.
 
 % MPI Topology
 % Checked
 \paragraph*{MPI Topology}
-An approach directly embedded in MPI, that describes dependencies of
+An approach directly embedded in MPI that describes dependencies of
 processes, are MPI virtual topologies \cite{ref:mpi_topology}. An MPI
-topology describes the communication pattern of a set of MPI processes
-in a group through a cartesian grid or a graph.  This topology is
-independent from the physical network structure and therefore the
+virtual topology describes the communication pattern of a set of MPI
+processes in a group as a cartesian grid or a graph.  This topology is
+independent of the physical network structure and therefore the
 mapping from MPI processes onto the hardware topology can be optimized
-by MPI process reordering. Thereby, is the number of vertices of the
-graph less or equal to the number of MPI processes, so that a
+by MPI process reordering. In that case, the number of vertices of the
+graph is less or equal to the number of MPI processes, so that a
 one-to-one mapping is possible.
 
 Boost MPI provides the possibility to describe the process topology by
-then Boost Graph Library (BGL)\cite{ref:boost_bgl}.  The resulting
+the Boost Graph Library (BGL)\cite{ref:boost_bgl}.  The resulting
 Graph Communicator \cite{ref:boost_graph_communicator} gives the
-possibility to communicate based on the graph topology.
+possibility to communicate based on this graph topology.
 
-In summary, MPI topology uses the well established mechanism to
-decompose the application in MPI processes, models their relationship
-and uses this information for an optimized deployment of MPI processes.
-Since this approach is statically based on MPI, the communication
-library is not exchangable even if MPI already supports a wide range
-of communication libraries.
+In summary, the MPI virtual topology uses the well established
+mechanism of MPI to decompose an application into MPI processes,
+models their relationship and uses this information for an optimized
+deployment of MPI processes.  Since this approach is directly based on
+MPI, the communication library is not exchangable even if MPI already
+supports a wide range of communication libraries.
+% Doofe Begründung !x
+
 
 % ULL_calibrate_lib
 \paragraph*{ULL\_calibrate\_lib}
-A library focusing on the balancing load among cluster systems
-supporting MPI is the ULL\_calibrate\_lib
-\cite{ref:ull_calibrate_lib}. It allows dynamic load balancing by
-enclosing critical section of the source code by library methods
-calls. The library compares the run-time of these enclosed tasks. Does
-the task exceeds a predefined threshold, the library tries to
-load balance these tasks. The load balancing and communication is based on
-the MPI platform.
+A library focusing on load-balancing among cluster systems is the
+ULL\_calibrate\_lib \cite{ref:ull_calibrate_lib}. It is based on MPI
+and allows for dynamic load-balancing by enclosing critical sections
+of the source code with library method calls. The library compares the
+run-time of these enclosed critical section. If a section exceeds a
+predefined threshold, the library tries to load-balance this section.
 
-The library uses communication mechanism from MPI as foundation and
-enhances this MPI with load balancing features. Thus, this library
-provides process redistribution features on MPI level. But, since it
-is fixed to the utilization of MPI, it offers also the same MPI
-problems.
+The library uses communication mechanisms from MPI as foundation and
+enhances them with load balancing features. Thus, this library
+provides process redistribution features on MPI level. However, since
+it relies on MPI, it suffers the same problems as MPI.
+
+% What Problems about MPI ?
 
 % Pegasus
 % Checked
 \paragraph*{Pegasus}
 The Pegasus system \cite{ref:pegasus} decomposes an application into
-tasks and models task dependencies by an abstract workflow
-representation. Workflows are modeled explicit as directed acyclic
-graphs representing the composition of task and data dependencies. The
-creation of application specific workflows is supported by tools like
-Chimera \cite{ref:chimera} and the Composition Analysis Tool (CAT)
-\cite{ref:cat}.  Tasks are submitted to the queuing system, that
+tasks and models task dependencies as an abstract workflow. Workflows
+are modeled explicitly as directed acyclic graphs representing the
+dependencies between tasks and data. The creation of
+application-specific workflows is supported by tools like Chimera
+\cite{ref:chimera} and the Composition Analysis Tool (CAT)
+\cite{ref:cat}.  Tasks are submitted to the queuing system, which
 schedules these tasks onto the available compute resources.
 
-Pegasus do not model explicit communication processes among tasks.
-Therefore, communication topologies are hard to describe by the used
-workflow system approach.
+Pegasus does not explicitly model communication processes among tasks.
+Therefore, communication topologies are difficult to describe by the
+used workflow system approach.
 
 
 % StarPU
 % Checked
 \paragraph*{StarPU} 
-A similar approach such as Pegasus is applied by the StarPU system
-\cite{ref:starpu}.  It is a unified execution model for tasks, that
-manages the execution of parallel tasks on heterogeneous hardware.
-Each task is implemented by a platform specific code, and the system
-takes care about task offloading and load balancing. Each target
-platform has to provide a driver that provides methods for memory
-transfer to the target platform and task execution. StarPU already
-implements drivers for multicore CPUs, the CUDA platform and the CELL
-processor.
+A similar approach as Pegasus is applied by the StarPU system
+\cite{ref:starpu}.  It is a unified execution model for tasks that
+manages their execution on heterogeneous hardware.  Each task is
+implemented by a platform specific code. The system takes care about
+task offloading and load balancing. Each target platform has to offers
+a driver that provides methods for memory transfer from the host CPU
+to the target platform and task execution. StarPU already implements
+drivers for multicore CPUs, the CUDA platform and the CELL processor.
+
+StarPU provides a model to execute code on varying target platforms,
+but does not model communication processes between these targets.
 
 % Charm++
 % Checked
 \paragraph*{Charm++} 
-An approach wich embeds into the C++ programming language is
-Charm++ \cite{ref:charm}. Charm++ has the concept of describing the
-application through so called charmes which describe data and work
-units. The units are over-decomposed. Thus, multiple work and data
-units are assinged to each processing element. They are not strictly
-bounded to processing elements. Instead, they can be migrated onto
-each processing element during execution. Charmes interact among each
-other with asynchronous method innvocation.
+An approach which embeds into the C++ programming language is Charm++
+\cite{ref:charm}. Charm++ has the concept of describing the
+application through so called charms, which describe data and work
+units. Multiple work and data units are assinged to each processing
+element. Therefore, these units are over-decomposed.  They are not
+statically assigned to processing elements. Instead, they can be
+migrated between the available processing element during
+execution. Charms interact with each other by using asynchronous
+communication methods.
 
-The downside of Charm++ is that an application has be transformed into
-a set of charmes, which may change the principle mechanics of an
+The downside of Charm++ is that an application has to be transformed
+into a set of charms, which change the fundamental structure of an
 application.
 
 % Ibis
 % Checked
 \paragraph*{Ibis} 
-Ibis \cite{ref:ibis} provides two logically independent subsystems.
-On one hand the programming system and on the other hand the
-deployment system. The programming system provides several programming
-models (MPI, RMI, Satin) that are implemented on the same
-communication library, the Ibis Portability Layer (IPL).  The IPL
-provides a range of communication primitives including point-to-point,
-multicast, streaming, serialization and deserialization. These
-primitives are implemented by adapters, adapting existing
-communication libraries like SmartSockets, TCP UDP, Bluetooth, Myrinet and
-MPI.
+Ibis \cite{ref:ibis} is an open source Java distributed computing
+software project, that provides two logically independent subsystems:
+the programming system and the deployment system. The programming
+system provides several programming models (MPI, RMI, Satin) that are
+implemented on the same communication library, the Ibis Portability
+Layer (IPL).  The IPL provides a range of communication primitives
+including point-to-point, multicast, streaming, serialization, and
+deserialization. These primitives are implemented by adapters,
+providing existing communication libraries like SmartSockets, TCP UDP,
+Bluetooth, Myrinet and MPI.
 
-The deployment system is based on the Java Grid Application Toolkit
-(JavaGAT).  It has the philosophy, that the development and
-compilation is done locally on a workstation and is then deployed from
-there onto the distributed computing system.
+The deployment system provides functions to deploy applications on a
+distributed computing environment and is based on the Java Grid
+Application Toolkit (JavaGAT).  It is based on the concept, that the
+development and compilation is done locally on a workstation and the
+application is then deployed to the distributed computing system.
 
-The Ibis platform is based on Java technologies. All subsystem come as
-jar file and do not need any library installation. It is easily
-applicable for application written in java. Non-java applications can
-make use of ibis through JNI, but it is complicated.
+The Ibis platform is based on the Java programming language. All subsystems are implemented as
+a Java Archive (jar) and do not need any library installation. It is easily
+applicable for applications written in Java. Applications that are not implemented in Java 
+can utilize Ibis through the Java Native Interface (JNI).
 
 % Constellation
 % Checked
 \paragraph*{Constellation}
 A software platform for distributed, heterogeneous and hierarchical
 computing is the Constellation \cite{ref:constellation} framework. An
-application is modeled by distinct activities and each activity
+application is modeled using distinct activities and each activity
 represents a distinct action on the application.  Activities can be
-related among each other by dependencies and are labeled with tags
-that define execution conditions like target system and data locality.
-Activities are implemented independently for their specific target
-system (MPI, CUDA, OpenMP) and are then scheduled to execution units
-on the target system. This mapping onto the available executors is
-performed automatically with respect to tags and
+related with each other by dependencies and are labeled with tags that
+define execution conditions like target system and data locality.
+They are implemented independently for their specific target system
+(MPI, CUDA, OpenMP) and are then scheduled to execution units, called
+executors, on the target system. This mapping onto the available
+executors is performed automatically with respect to tags and
 heterogeneity. Constellation is implemented in Java on top of Ibis,
 but is not restricted to Ibis.
 
 \paragraph*{}
-The approaches presented by Ibis and Constellation meet very close the
-idea of a platform for computations in a heterogeneous distributed
-environment. Both, are implemented in Java and therefore do not
+The approaches presented by Ibis and Constellation meet the idea of a
+platform for computations in a heterogeneous distributed environment
+very closely.Both are implemented in Java and, therefore, do not
 satisfy the requirements for integration in high performance computing
-application. But, Ibis and Constellation point the way for the
-development of the system.
+application. However, Ibis and Constellation point the way for the
+development of this kind of workload distribution in a distributed
+system.
 
 
 \cleardoublepage

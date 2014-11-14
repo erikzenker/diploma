@@ -503,8 +503,7 @@ of the C++ data type \cpp{int}.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checked
-\subsubsection{MPI Adapter specific Context and Event Implementation}
-\todo{What about the Context?}
+\subsubsection{MPI Adapter specific Event Implementation}
 The MPI adapter specific event utilizes MPI non-blocking testing
 features. In the MPI world, a non-blocking function provides a request
 object, which is the handle to verify the state of the
@@ -707,14 +706,14 @@ this graph.
 std::map<Graph, Context> graphMap;
 \end{lstlisting}
 
-\paragraph*{}
-\todo{What is the peerMap used for ?}
-\noindent The \cpp{peerMap} is kind of a reverse mapping of the
-\cpp{vertexMap}.  This map is a mapping from peers to its hosted
-vertices for a particular graph.
-\begin{lstlisting}[language=C++, label=lst:mapping3]
-std::map<Graph, std::map<VAddr, std::vector<Vertex>> > peerMap 
-\end{lstlisting}
+%% \paragraph*{}
+%% \todo{What is the peerMap used for ?}
+%% \noindent The \cpp{peerMap} is kind of a reverse mapping of the
+%% \cpp{vertexMap}.  This map is a mapping from peers to its hosted
+%% vertices for a particular graph.
+%% \begin{lstlisting}[language=C++, label=lst:mapping3]
+%% std::map<Graph, std::map<VAddr, std::vector<Vertex>> > peerMap 
+%% \end{lstlisting}
 
 \paragraph*{}
 \noindent Listing \ref{lst:comm_gvon} shows the \cpp{asyncSend} method of the
@@ -1123,47 +1122,51 @@ for(Vertex v: hostedVertices){
 % Implementation N-BODY                                                        %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\todo{Write implementation N-Body}
 \section{Implementing a N-Body Simulation}
 \label{sec:impl:nbody}
-\begin{itemize}
-\item The implementation of the n body simulation, discussed in
-  section \ref{sec:design:nbody}, does not differ very much from the
-  GoL implementation in the fashion it uses the developed system.
 
-\item The implementation is separated in three phases: Configuration, initialization
-  and communication.
 
-  \begin{enumerate}
-  \item \textbf{Configuration}\\
-    The Graph is annotated by the property \cpp{Particle}, containing
-    Particle information mass, velocity and location.
+The implementation of the N-body simulation, discussed in section
+\ref{sec:design:nbody}, does not differ very much from the GoL
+implementation based on the GVON. Its implementation is also separated
+into three phases: configuration, initialization and
+communication. The slight differences in implementation details are
+described in the following enumeration:
 
-  \item \textbf{Initialization}\\
-    Since, the chosen N-body algorithm is based on an all to all communication
-    schema, the communication dependencies are described by an fully connected
-    graph. The vertices are distributed by round-robin onto the available
-    peers and then announced.
+\begin{enumerate}
+\item \textbf{Configuration}
 
-  \item \textbf{Communication}\\
-    Every host sends particle information of its hosted vertices to
-    adjacent vertices. In turn, it receives particle information from
-    all adjacent vertices. Since, a vertex is adjacent to all other
-    vertices, it sends and receives to and from all other vertices.
-  \end{enumerate}
+  The Graph is annotated by the property
+  \cpp{Particle}, containing Particle information mass, velocity and
+  location.
 
-\item A host updates the state of the particles of its hosted
-  vertices, after the communication has finished.
+\item \textbf{Initialization}
 
-\item The algorithm repeats the communication phase
-  until the simulation has finished or is canceled.
+  Since, the chosen N-body algorithm is
+  based on an all to all communication schema, the communication
+  dependencies are described by an fully connected graph. The vertices
+  are distributed by round-robin onto the available peers and will be
+  announced.
 
-\item Totally different simulation but similar communication
-  concepts
+\item \textbf{Communication}
 
-\item Very easy construction of distributed simulation application
-  
-\end{itemize}
+  Every host sends particle information
+  of its hosted vertices to adjacent vertices. In turn, it receives
+  particle information from all adjacent vertices. Since, a vertex is
+  adjacent to all other vertices, it sends and receives to and from
+  all other vertices.
+\end{enumerate}
+
+After each communication step, a host updates the state of the
+particles of its hosted vertices.  The communication phase is repeated
+for an arbitrary amount of time-steps or until the simulation
+execution is canceled.
+
+The implemented N-body simulation is totally different from the
+presented GoL implementation, but provides similar communication
+concepts. Therefore, it was very easy to implement this N-body
+simulation by slightly change the GoL source code.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
