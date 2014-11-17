@@ -428,11 +428,9 @@ possibility to communicate based on this graph topology.
 
 In summary, the MPI virtual topology uses the well established
 mechanism of MPI to decompose an application into MPI processes,
-models their relationship and uses this information for an optimized
+models their relationship, and uses this information for an optimized
 deployment of MPI processes.  Since this approach is directly based on
-MPI, the communication library is not exchangable even if MPI already
-supports a wide range of communication libraries.
-% Doofe Begründung !x
+MPI, the communication library is not configurable at compile-time.
 
 
 % ULL_calibrate_lib
@@ -447,9 +445,8 @@ predefined threshold, the library tries to load-balance this section.
 The library uses communication mechanisms from MPI as foundation and
 enhances them with load balancing features. Thus, this library
 provides process redistribution features on MPI level. However, since
-it relies on MPI, it suffers the same problems as MPI.
-
-% What Problems about MPI ?
+it relies on MPI, it suffers the same problems as the MPI virtual
+topology.
 
 % Pegasus
 % Checked
