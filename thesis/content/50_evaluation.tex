@@ -30,10 +30,10 @@ number of messages to send, number of elements to send, and usage of
 network.
 
 The benchmark system was the HPC system of the Helmholz
-Zentrum Dresden Rossendorf (HZDR)\cite{ref:hzdr_cluster} and the
-system of the Zentrum für Informationsdienste und Hochleistungsrechnen
-(ZIH).
-
+Zentrum Dresden Rossendorf (HZDR)\cite{ref:hzdr_cluster}.
+%% and the
+%% system of the Zentrum für Informationsdienste und Hochleistungsrechnen
+%% (ZIH).
 A part of the HZDR system is the hypnos linux cluster (Ubuntu 12.04.4
 LTS) consisting of two head nodes and more than 150 compute nodes.
 The so-called laser nodes combine 4 AMD Interlagos Opterons by 4
@@ -41,18 +41,20 @@ sockets on a single mainboard resulting in 64 CPUs per node.  The
 Interlagos Opterons 6276 are two Valencia chips on a single die,
 whereby 2 core share a 64 KB L1 Cache and a 2 MB L2 Cache. Laser nodes
 are interconnected by an Infiniband network. These nodes are utilized
-in benchmarks where a big number of CPU are necessary.  In turn, are
-kepler nodes equipped with 2 Quad-Core Xeon CPUs from Intel clocked by
-2,4 GHz. These nodes are used if only a pair of peers is necessary for
-a benchmark.
+in for all synthetic and real simulation benchmarks.
 
-The ZIH system provides a cluster called taurus. The nodes are
-equipped each with two Intel Xeon(R) CPU : sandy E5-2690 (8 cores),
-gpu E5-2450 (cores), west X5660 (6 cores).
+%% In turn, are
+%% kepler nodes equipped with 2 Quad-Core Xeon CPUs from Intel clocked by
+%% 2,4 GHz. These nodes are used if only a pair of peers is necessary for
+%% a benchmark.
+
+%% The ZIH system provides a cluster called taurus. The nodes are
+%% equipped each with two Intel Xeon(R) CPU : sandy E5-2690 (8 cores),
+%% gpu E5-2450 (cores), west X5660 (6 cores).
 
 The nodes provide their software environment by the module system.
-The developed system is compiled with MPI in version 1.8.3 and
-g++ 4.9.1 
+The developed system is compiled with MPI in version 1.8.0 and
+g++ 4.8.2.  
 
 % Hier bisschen mehr
 
@@ -104,8 +106,8 @@ run-time ration in respect to MPI.
 
 \begin{figure}[H]
   \begin{minipage}[t]{0.5\textwidth} 
-    \includegraphics[width=\textwidth]{plots/50_nsend_cal_kepler}
-    \includegraphics[width=\textwidth]{plots/50_nsend_gvon_kepler}
+    \includegraphics[width=\textwidth]{plots/50_nsend_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsend_gvon_laser}
     \end{minipage}%
   \begin{minipage}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{plots/50_nsend_overhead_cal}
@@ -121,8 +123,8 @@ run-time ration in respect to MPI.
 \noindent The relative overhead of the CAL and GVON stabilize with
 increasing number of send/recv operations.  Through virtual address
 and context translations, the CAL adds a constant average overhead of
-around 10\% per send/recv operation with respect to MPI. The GVON adds
-a constant average overhead of around 150\% per send/recv operation.
+around 2\% per send/recv operation with respect to MPI. The GVON adds
+a constant average overhead of around 30\% per send/recv operation.
 Since the communication topology of the GVON is modeled by a graph,
 containing two nodes connected by a directed edge, the constantly look
 up of this graph adds a constant overhead to each send/recv operation.
@@ -137,10 +139,10 @@ $n$ send/recv operation.
 
 \begin{figure}[H]
   \begin{minipage}[t]{0.5\textwidth} 
-    \includegraphics[width=\textwidth]{plots/50_nsend_one_lookup_kepler}
+    \includegraphics[width=\textwidth]{plots/50_nsend_one_lookup_laser}
   \end{minipage}%
   \begin{minipage}[t]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{plots/50_nsend_one_lookup_overhead_gvon_kepler}
+    \includegraphics[width=\textwidth]{plots/50_nsend_one_lookup_overhead_gvon_laser}
   \end{minipage}%
   \caption{The amount of graph look ups is reduced to one look up for
     $n$ send/recv operations.  This reduces the GVON overhead to
@@ -148,10 +150,8 @@ $n$ send/recv operation.
   \label{fig:nsend_one_lookup_kepler}
 \end{figure}
 
-\todo{Name One graph look up, OGL}
-
 \noindent Changing the experiment, reduced the GVON overhead to the
-same level of the CAL (around 13\%). Nevertheless, the vertex and
+same level of the CAL (around 2\%). Nevertheless, the vertex and
 graph need to be translated to virtual address and context, so that, a
 small overhead in respect to the CAL is still present. It shows that
 the graph implementation need to be optimized with regard to look up
@@ -170,14 +170,14 @@ the run-time ration in respect to MPI on a single kepler node.
 \todo{Explain run-time jump}
 \begin{figure}[H]
   \begin{minipage}[t]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{plots/50_nsize_cal_kepler}
-    \includegraphics[width=\textwidth]{plots/50_nsize_gvon_kepler}
-    \includegraphics[width=\textwidth]{plots/50_nsize_one_lookup_gvon_kepler}
+    \includegraphics[width=\textwidth]{plots/50_nsize_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsize_gvon_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsize_one_lookup_gvon_laser}
   \end{minipage}%
   \begin{minipage}[t]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{plots/50_nsize_overhead_cal_kepler}
-    \includegraphics[width=\textwidth]{plots/50_nsize_overhead_gvon_kepler}
-    \includegraphics[width=\textwidth]{plots/50_nsize_one_lookup_overhead_gvon_kepler}
+    \includegraphics[width=\textwidth]{plots/50_nsize_overhead_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsize_overhead_gvon_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsize_one_lookup_overhead_gvon_laser}
   \end{minipage}%
   \caption{Increasing the number of elements per send/recv operations,
     reduces the relative overhead in respect to MPI.}
@@ -186,10 +186,11 @@ the run-time ration in respect to MPI on a single kepler node.
 
 \noindent With increasing number of elements per send/recv operations,
 the run-time of CAL and GVON converges with the run-time of MPI. The
-average CAL overhead is negligible and the average GVON overhead is
-reduced to around 18\% per send/recv operation. The last pair of
-Figures shows, that changing the GVON experiment to a one graph look
-up variant, drops the GVON run-time overhead even further.
+average CAL overhead is negligible (less then 1\%) and the average
+GVON overhead is reduced to around 7\% per send/recv operation. The
+last pair of Figures shows, that changing the GVON experiment to a one
+graph look up variant, drops the GVON run-time overhead to a
+negligible level.
 
 % Checked
 \subsection*{Including Network}
@@ -199,7 +200,7 @@ The experiments setup is changed to a configuration with two
 nodes, whereby the peers are not located on the same node. It is
 expected, that the relative overhead of CAL and GVON decreases even
 more in contrast to the previous experiments, while the overall
-run-time will increase.  A setup of two kepler nodes, each hosting one
+run-time will increase.  A setup of two laser nodes, each hosting one
 peer, was selected.  Figure \ref{fig:nsend_network} shows the average
 run-time of GVON and CAL in respect to MPI for a single send/recv
 operation including network latency.
@@ -207,14 +208,18 @@ operation including network latency.
 \todo{Repeat experiment with GVON OGL version and decide which experiment to illustrate}
 \begin{figure}[H]
   \begin{minipage}[t]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{plots/50_nsend_network_cal_kepler}
-    \includegraphics[width=\textwidth]{plots/50_nsend_network_gvon_kepler}
-    \includegraphics[width=\textwidth]{plots/50_nsize_network_cal_kepler}
-    \includegraphics[width=\textwidth]{plots/50_nsize_network_gvon_kepler}
+    \includegraphics[width=\textwidth]{plots/50_nsend_network_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsend_network_gvon_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsize_network_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsize_network_gvon_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsize_one_lookup_network_gvon_laser}
   \end{minipage}%
   \begin{minipage}[t]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{plots/50_nsend_network_overhead_cal_kepler}
-    \includegraphics[width=\textwidth]{plots/50_nsend_network_overhead_gvon_kepler}
+    \includegraphics[width=\textwidth]{plots/50_nsend_network_overhead_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsend_network_overhead_gvon_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsize_network_overhead_cal_laser}
+    \includegraphics[width=\textwidth]{plots/50_nsize_network_overhead_gvon_laser}
+        \includegraphics[width=\textwidth]{plots/50_nsize_one_lookup_network_overhead_gvon_laser}
   \end{minipage}%
   \caption{Synthetic benchmark including network latency}
   \label{fig:nsend_network}
@@ -332,15 +337,10 @@ measured with and without network influence.  Figure
 without network.
 
 \begin{figure}[H]
-  \begin{minipage}[t]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{plots/50_gol_ncells_laser}
-  \end{minipage}%
-  \begin{minipage}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{plots/50_gol_network_laser}
-  \end{minipage}%
   \label{fig:gol_laser}
   \caption{Average run-time of GoL simulation with increasing number
-    of cells. The simulation is executed with and without network.}
+    of cells. The simulation is executed with network.}
 \end{figure}
 
 The GVON implementation shows no overhead in comparison to the MPI
@@ -364,16 +364,10 @@ averaged run-time of a time-step with increasing number of bodies with
 and without network.
 
 \begin{figure}[H]
-  \begin{minipage}[t]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{plots/50_nbody_laser}
-  \end{minipage}%
-  \begin{minipage}[t]{0.5\textwidth}
-    \includegraphics[width=\textwidth]{plots/50_nbody_network_laser}
-  \end{minipage}%
+  \includegraphics[width=\textwidth]{plots/50_nbody_network_laser}
   \label{fig:nbody_laser}
   \caption{Average run-time of N-body simulation with increasing
-    number of bodies. The simulation is executed with and without
-    network.}
+    number of bodies. The simulation is executed with network.}
 \end{figure}
 
 Analog to the GoL simulation, this experiment also shows no overhead
@@ -384,8 +378,8 @@ in comparison to the MPI implementation.
 % FLEXIBILITY BENCHMARK                                                        %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\todo{Write flexibility benchmark}
 \section{Flexibility Benchmark}
+\todo{Write flexibility benchmark}
 \begin{itemize}
 \item GVON allows mapping of vertices to peers at run-time
 \item Remapping of vertices possible
