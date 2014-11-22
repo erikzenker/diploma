@@ -1,7 +1,12 @@
 \chapter{Future Work}
 \label{sec:futurework}
 
-
+This chapter will first introduce ideas for enhancing the CAL by further
+adapters. Second, a design for multiple adapters within the CAL is discussed. Third, the
+deployment of the developed system in existing simulation applications is examined.
+Finally, ideas for load balancing and fault tolerance are presented. The discussed ideas
+should be a guide for further development and call attention to the possibilities
+of the GVON interface.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -10,30 +15,31 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Further Adapters}
 
-The prototype implementation (Section~\ref{sec:implementation})
-utilized MPI as communication backend. While, MPI is probably
-available on every computing system and implements probably every
-important communication protocol, also other interesting communication
-libraries could be used as communication back-end.  This Section will
-discuss adapters based on a different communication library than MPI.
+The prototype implementation described in
+Section~\ref{sec:implementation} utilized MPI as communication
+back-end. While, MPI is probably available on every computing system
+and implements probably every important communication protocol, other
+interesting communication libraries could be used as communication
+back-end.  This Section will discuss adapters based on a different
+communication library than MPI.
 
 % Internet Socket Based
 \subsection*{Internet Socket Based Adapter}
 
 Distributed applications, that are not deployed on clusters,
-usually use other communication libraries than MPI. Two
+usually utilize different communication libraries to MPI. Two
 interesting libraries are ZMQ and Boost Asio, which are both based
 on the TCP/IP and UDP/IP protocol. They can be used to
 interconnect applications over the internet. Therefore,
 computations could be based on the internet as communication
-network.Implementing an adapter for the CAL that interfaces with
-ZMQ or Asio would open an application based on the GVON interface
+network. Implementing an adapter for the CAL that interfaces with
+ZMQ or Boost Asio would open an application based on the GVON interface
 to the world of distributed computing over the internet.
 
 Projects for distributed computing such as Folding@home
 \cite{ref:folding_at_home} and SETI@home \cite{ref:seti_at_home},
 utilize the computing power of computers distributed all over the
-world connected via internet.  These application distribute a
+world connected via the internet.  These application distribute a
 complex problem to a big number of peers. It would be interesting
 to move an application from a cluster to a distributed environment
 by just changing the CAL adapter (Figure~\ref{fig:internet_cal}).
@@ -46,28 +52,26 @@ by just changing the CAL adapter (Figure~\ref{fig:internet_cal}).
   \label{fig:internet_cal}
 \end{figure}
 
-\noindent A further use case is the connection of cluster nodes over the
-internet. This would construct a grid computing environment based
-on the GVON interface. The application could communicate via two
-CAL instantiations, one local CAL configured by MPI and a global
-CAL configured by internet sockets.  It could easily extend the
-computational power of a cluster by further computing
-units.
-
-\todo{What about a graphic connecting clusters here?}
-
+\noindent A further use case is the connection of cluster nodes over
+the internet. This would construct a grid computing environment based
+on the GVON interface. This application could communicate via two CAL
+objects, one local CAL configured by MPI and a global CAL
+configured by internet sockets.  This approach could extend the
+computational power of a cluster by further computing units of other
+clusters.
 
 % Adapters for Accelerators
 \subsection*{Accelerator Based Adapter}
 
-In contrast to communication over a network such as the internet
-or a local area network, is the modeling of the communication with
-and in between accelerator devices more similar to memory copies.
-An adapter could model the offload mechanism of accelerators for
-CUDA and OpenCL as communication processes.
+In contrast to the sender and receiver model of the communication over
+a network such as the internet or a local area network, is the
+communication with and in between accelerator devices mostly a
+one-sided communication model.  An CAL adapter could model the offload
+mechanism of accelerators for CUDA and OpenCL as communication
+processes.
 
 Since, offload is a one-sided communication concept, the
-accelerator device needs to be managed from a host CPU. This host
+accelerator needs to be managed from a host CPU. This host
 needs to transform the one-sided communication into a two-sided
 communication that is supported by the developed system.
 
@@ -81,13 +85,13 @@ another accelerator B (Figure~\ref{fig:acc_memcpy}) is separated into the follow
 \begin{enumerate}
 \item A Send data to B (send)
   \begin{enumerate}
-  \item Copy of data from ACC A memory to host A memory
+  \item Copy of data from accelerator A memory to host A memory
   \item Sending of data to host B
   \end{enumerate}
 \item B Receive data from A (recv)
   \begin{enumerate}
   \item Receiving of data from host A
-  \item Copy of data from host B memory to ACC B memory
+  \item Copy of data from host B memory to accelerator B memory
   \end{enumerate}
 \end{enumerate}
 
@@ -95,15 +99,15 @@ another accelerator B (Figure~\ref{fig:acc_memcpy}) is separated into the follow
 \noindent The adapter design for accelerators mentioned above has the
 drawback that data has to take the detour above the host CPU. But, the
 emerge of CUDA version 4.0 and 5.0 provides techniques that remove the
-need for the detour. NVIDIA introduced with CUDA 4.0 the Unified
-Virtual Addressing (UVA).  It creates a uniform address space of and
-devices of a single node. Utilizing UVA removes the need for explicit
-copies from and to accelerators.
+need of this detour. NVIDIA introduced with CUDA 4.0 the Unified
+Virtual Addressing (UVA).  It creates a uniform address space of host
+and devices of a single node. Utilizing UVA removes the need for
+explicit copies from and to accelerators.
 
 The introduction of further GPUDirect features with CUDA 5.0 offers
 the possibility for direct exchange of data between accelerators on
-the same node (P2P) and of data between accelerator connected by a
-network (RDMA).  Both approaches bypass the CPU and exchange data
+the same node by P2P and of data between accelerator connected by a
+network by RDMA.  Both approaches bypass the CPU and exchange data
 directly over the PCI bus or network controller
 (Figure~\ref{fig:gpudirect}).
 
@@ -111,7 +115,7 @@ directly over the PCI bus or network controller
   \begin{minipage}[t]{0.5\textwidth} 
     \includegraphics[width=\textwidth]{graphics/60_acc_memcpy}
     \caption{Exchanging data between accelerators. The data needs to be
-    temporarily stored on the host memory until the data is
+    temporarily stored on the host memories until the data is
     transmitted over a network connection.}
     \label{fig:acc_memcpy}
   \end{minipage}%
@@ -147,33 +151,34 @@ the internet. This could connect two cluster systems over internet
 to create a powerful tool to extend the computing power of a single
 cluster.
 
-Assuming a CAL configuration mentioned above, peers that are located
-in between networks are able to communicate through both adapters.
-The CAL needs to provide a list of all available adapters for a
-certain peer.  A particular sorting of this list could state out the
-preferred adapter for communication between two peers. Exchanging data
-between peers always requires a look up of which adapter needs to be
-selected to address the peers. The selection of a certain adapter
-can be performed at run-time by a strategy pattern or partly
-at compile-time with variadic templates.
+Assuming a CAL configuration with two adapters mentioned above. Peers
+that are present in the network of both adapters need to switch
+between the adapters at run-time.  The CAL needs to provide a list of
+all available adapters for a certain peer.  A particular sorting of
+this list could state out the preferred adapter for communication
+between two peers. Exchanging data between peers always requires a
+look up of which adapter needs to be selected to address the
+peers. The selection of a certain adapter can be performed at run-time
+by a strategy pattern or partly at compile-time with variadic
+templates.
 
-Furthermore, varying real addresses spaces of the adapters have
-to be mapped onto the same unified address space of the CAL.  It opens
-up the possibility that two peers which do not share a same adapter,
-but are connected over a third adapter, could still exchange data by
-routing over that third adapter. Thus, a multiple adapter design does
-only make sense when routing between two adapters is implemented.
+Varying address spaces of the adapters have to be mapped onto the same
+unified address space of the CAL.  This opens up the possibility that
+two peers which do not share a same adapter, but are connected over a
+third adapter, could still exchange data by routing over that third
+adapter. Thus, a multiple adapter design does only make sense when
+routing between two adapters is implemented.
 
 Problems occur if collective operations are performed between varying
 adapters. The collective operation has to be performed separately for
 each adapter and then connected by a final collective operation.
 
-Even if the design of a multiple adapter communication abstraction layer
-looks quite interesting, the implementation is rather more complex
-than a single adapter design. The decision for a single or multiple
-adapter CAL should be placed in the hand of the application developer.
-Thus, the Cal could be configure by a further policy that defines this
-adapter behavior.
+Even if the design of a multiple adapter communication abstraction
+layer looks quite interesting, the implementation is rather more
+complex than a single adapter design. The decision for a single or
+multiple adapter CAL should be placed in the hand of the application
+developer.  Thus, the Cal could be configure by a further policy that
+defines this adapter behavior.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -193,7 +198,7 @@ developed system into real wold simulations would be the next step.
 \subsection*{Deployment in PIConGPU}
 In the beginning of this work, PIConGPU was the first simulation whose
 communication processes were analyzed. But the system was not
-developed for the sole objective for utilization in
+developed for the sole objective of the utilization in
 PIConGPU. Therefore, it was developed independently from PIConGPU.
 The next step for evaluating the developed system is the deployment of
 the GVON as library into PIConGPU. This will show how well the
@@ -203,39 +208,39 @@ The PIConGPU communication processes are based on a three-dimensional
 grid topology with diagonal connections. It does not differ to much
 from communication patterns used in the GoL simulation. Thus, a
 replacement of communication related parts in the PIConGPU source code
-should be easily possible.
+should be possible.
 
-PIConGPU is also interesting with respect of an CUDA-aware adapter
-mentioned above.  Most calculation in PIConGPU are offloaded to
+PIConGPU is interesting with respect of an accelerator based adapter
+mentioned above, because calculations in PIConGPU are offloaded to
 GPUs. Therefore, bypassing the CPU in case of accelerator to
-accelerator communication would increase overall performance.
+accelerator communication would increase the overall performance.
 
 % HASEonGPU
 \subsection*{Deployment in HASEonGPU}
 HASEonGPU is another project developed at the Helmholz Zentrum
 Dresden Rossendorf (HZDR).  It was never an object of communication code
 analyses, but it would be interesting if the developed communication
-approach would easily fit on HASEonGPU.
+approach would fit on HASEonGPU.
 
-HASEonGPU is Monte-Carlo simulation of photons in a laser gain
+HASEonGPU is a Monte-Carlo simulation of photons in a laser gain
 medias. Whereby, the amplified spontaneous emission (ASE) of photons
-is calculated for certain sample points in the simulated volume of
-the gain media.The ASE value of each sample point can be calculated
+is calculated for a set sample points in the simulated volume of
+the gain media. The ASE value of each sample point can be calculated
 independently from each other. Thus, a distribution onto a cluster
 is possible.
 
-A master peer distributes sample points onto
+A master peer distributes these set of sample points onto
 available worker peers. This forms a communication based on a
 star topology, where the master peer is placed as star center. In a
 scenario with a lot of workload, e.g. by lot of sample points, the
 master peer would be the communication bottleneck.
 
-But, the utilization of the GVON would make an exchange of this
-topology very easy. The star topology could be replaced by a more
-general tree topology. The master peer could delegate distribution
-task to sub-master peers that are responsible for sub-trees.
+But, utilizing the GVON would provide the possibility to exchange this
+topology. The star topology could be replaced by a more general tree
+topology. The master peer could delegate the distribution task to
+sub-master peers that are responsible for sub-trees of worker peers.
 Figure~\ref{fig:haseongpu_topology} shows the graph representation of
-both the star topology and the tree topology.
+both the star topology and the tree topology. 
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/60_haseongpu_topology}
@@ -243,6 +248,11 @@ both the star topology and the tree topology.
   leads to a better work distribution in scenarios with a lot of workload.}
   \label{fig:haseongpu_topology}
 \end{figure}
+
+\noindent The number of sub-master peers could be adapted by the
+number of sample points.  Thus, more sample points increases the depth
+of the tree topology which leads to a better workload distribution and
+reduces the bottleneck effect.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -265,36 +275,30 @@ system.
 Assume, a simulation domain is modeled by a graph and the graph
 contains more vertices than the number of peers in the global
 context. These peers need to be oversubscribed by hosted vertices.
-Therefore, the hosted vertices should be connected as
-close as possible with respect to the graph. So that, communication
-between vertices of the same host are as local as possible. This
-potentially minimizes the amount of messages that have to be
-transferred over the network.
+Therefore, the hosted vertices should be connected as close as
+possible with respect to the graph. So that, communication of hosted
+vertices of the same host are as local as possible.  This potentially
+minimizes the number of messages that are transferred over the
+network.
 
 % Graph partitioning
 A well researched solution for this problem is partitioning of
-graphs. Partitioning divides the a graph into smaller components.  A
-good partition is defined as one in which the number of edges
-running between separated components is small. Since the
-communication topology is described by a graph, it can be easily
-partitioned by already existing graph partitioning tools.
-
-\todo{Here maybe an illustration for graph partitioning}
+graphs. Partitioning divides the a graph into smaller partitions.  A
+good partitioning algorithm reduces the number of edges running
+between partitions.  Since the communication topology of the GVON is
+described by a graph, this graph can be partitioned by already
+existing graph partitioning tools.
 
 % Metis
-\subsection*{Metis as Graph Partitioning Tool}
+\subsection*{Metis - a Graph Partitioning Tool}
 The tool METIS and its related tools hMETIS and ParMETIS are
-established applications for graph partitioning. They provide high
-quality partitions and are two magnitudes faster than other widely
-used partitioning algorithms compared to other graph partitioning
-tools. The developers claim that graphs with several millions of
-vertices can be partitioned in 256 parts in a few seconds on current
-generation workstations and PCs.  Furthermore, because the tool is
-published under the Apache Licence Version 2.0. , metis could
-support as library the graph distribution methods.
-
-\todo{Which format does Metis need}
-\todo{How can it be deployed in existing software}
+established applications for graph partitioning. The developers claim
+that they provide high quality partitions, are two magnitudes faster
+than other widely used partitioning algorithms, and that graphs with
+several millions of vertices can be partitioned in 256 parts in a few
+seconds on current generation workstations and PCs.  The tool is
+published under the Apache Licence Version 2.0., therefore, METIS
+could support the graph distribution methods as library.
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -304,15 +308,15 @@ support as library the graph distribution methods.
 \subsection*{Description of the Adapter Hardware Topology}
 
 % Cluster network topology
-Cluster systems are equipped with varying network systems. Usually
-with custom build network topologies.  Utilizing the knowledge about
-the network topology can increase application performance.  The most
-general approach to describe the network topology of a cluster is a
-graph. A network graph describes physical connections between nodes
-and could be annotated with latency and bandwidth information.  This
-graph could be the foundation of varying graph algorithm. For
-example could the distance between two nodes be estimated and
-utilized to reduce communication latency between peers.
+Cluster systems are equipped with varying network systems providing a
+certain network topologies.  Utilizing the knowledge about the network
+topology can increase application performance.  The most general
+approach to describe the network topology of a cluster is a graph. A
+network graph describes physical connections between nodes and could
+be annotated with latency and bandwidth information.  This graph could
+be the foundation of varying graph algorithm. For example could the
+distance between two nodes be estimated and utilized to reduce
+communication latency between peers.
 
 With the existence of two graphs, one modeling the communication
 topology of the simulation and another modeling the network
@@ -321,7 +325,7 @@ mapping from vertices to independent peers, vertices can be mapped
 onto peers modeled in the network graph. Information that were used
 to describe the network can be used to optimize this mapping.
 
-In an oversubscribed case, could the communication graph first be
+In an oversubscribed case mention above, could the communication graph first be
 partitioned to the number of available peers. After that, the
 partitions will be mapped onto the peers.  An optimal mapping would
 result in an graph homomorphism. Deciding whether there exists a
@@ -341,20 +345,18 @@ of a graph and a mapping of these partitions onto peers.
 \end{figure}
 
 % Load balancing
-\noindent A Mapping between the two graphs mentioned above opens new
-possibilities for load balancing.  The most simple load balancing
-approach is a load balancing at the initialization of an
-application. The communication graph is mapped only once and
-statically onto the network graph. This approach is sufficient for
-applications that do not change with respect to load distribution
-and graph topology.
+\noindent A Mapping between two graphs opens new possibilities for
+load balancing.  The most simple load balancing approach is a load
+balancing at the initialization of an application. The communication
+graph is mapped only once and statically onto the network graph. This
+approach is sufficient for applications that do not change with
+respect to load distribution and graph topology.
 
 But load distribution of simulations can change during run-time. The
 difference in workload among peers could be estimated by run-time
-measurements of a single time-step. The application needs to
-initiate a rebalancing when the run-time of a host increases above a
-defined threshold.  But, a static load balancing could also be
-performed periodically every n time-steps.
+measurements of a single time-step. The application needs to initiate
+a rebalancing when the run-time of a host increases above a defined
+threshold.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
@@ -367,55 +369,54 @@ Similar to load balancing was fault tolerance of communication
 processes not a topic for this work. Nevertheless offers the developed
 system the possibility to build fault tolerance techniques on top.
 
-The main problem is the failure of a peer during execution of
-simulation.  Some communication libraries such as MPI have the
-embarrassing behavior that the whole program will fail too. Therefore,
-the simulation has to be restarted, if only a single peer fails.
-Since, the amount of computing hardware increases with each new
-cluster generation, it is not unlikely that a peer, that is host for
-vertices of a simulation, fails. The library user has usually no
-possibility to restart the failed peer, but the failed peer could be
-replaced or even ignored in further communication processes.
+The main problem of a simulation is the failure of a peer during
+execution of simulation.  Some communication libraries such as MPI
+have the embarrassing behavior that the whole program will fail
+too. Therefore, the simulation has to be restarted, if only a single
+peer fails.  Since, the amount of computing hardware increases with
+each new cluster generation, it is not unlikely that a peer, that is
+host for vertices of a simulation, fails. The library user has usually
+no possibility to restart the failed peer, but the failed peer could
+be replaced or even ignored in further communication processes.
 
-  %Reload from checkpoint
-Assume, that the host checkpoints the state of its hosted
+% Reload from checkpoint
+Assume, that each host checkpoints the state of its hosted
 vertices at fixed points of the simulation execution. This
 checkpoints could be written onto hard disk of an network attached
-storage (NAS) or each peer could distribute the data of its hosted
-vertices to other peers for backup reasons.
+storage (NAS) or each host could distribute the data of its hosted
+vertices to other host for backup reasons.
 
-The network of peers needs to notice the failure of the peer.
-Furthermore, the peers need to estimate where the failed peer stored
-its checkpointed states.  Some peer has to adopt the hosted vertices
-of the failed host.  This so-called adopter peer has to announce the
+The network of hosts needs to notice the failure of hosts.
+Furthermore, the hosts need to estimate where a failed host stored its
+saved states.  Some host has to adopt the hosted vertices of
+the failed host.  This so-called adopter host has to announce the
 adopted vertices together with his already hosted vertices.  The
-adopter peer has to load the checkpointed states of the adopted
-vertices. In dependence whether the checkpointed state is up-to-date,
-other hosts also need to load checkpointed states. When all vertices
-are synchronized to the same time-step, the communication and
+adopter host has to load the saved states of the adopted
+vertices. In dependence whether the saved state is up-to-date,
+other hosts also need to load their saved states. When all
+vertices are synchronized to the same time-step, the communication and
 therefore the simulation algorithm can be continued.
 
-\todo{Make graphics that illustrates the fault tolerance idea?}
 
 % Redundant calculations
-Redistribute the hosted vertices of a failed host onto the
-remaining host increases the workload each host has to manage.
-Instead, the vertices could be adopted by a backup peer that has no
-hosted vertices so far.  Equally, to the method mentioned above,
-needs the backup peer to load the checkpointed state from its
-adopted vertices
+Redistribute the hosted vertices of a failed host onto the remaining
+host usually increases the workload each host has to manage.  Instead,
+the vertices could be adopted by a backup peer that has no hosted
+vertices so far.  Equally, to the previously mentioned method, needs
+the backup peer to load the saved state from its adopted
+vertices.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
 % TWEAKS                                                                       %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section*{Tweaks}
-
-\sitem{ Compile time generation of static graphs}
-\sitem{ Optimization of the graph to reduce overhead}
-\sitem{ Thread safe implementation of the gvon collectives}
-\sitem{ Multi-maps}
+%\section*{Tweaks}
+%
+%\sitem{ Compile time generation of static graphs}
+%\sitem{ Optimization of the graph to reduce overhead}
+%\sitem{ Thread safe implementation of the gvon collectives}
+%\sitem{ Multi-maps}
 
 
 \cleardoublepage
