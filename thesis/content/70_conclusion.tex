@@ -16,9 +16,71 @@
 % weitsichtig man doch ist. Dieses Kapitel muß kurz sein, damit es
 % gelesen wird.
 
-\ldots conclusion \ldots
 
-\todo{write conclusion}
+\begin{itemize}
+
+  % What to do with the developed system
+  
+  % What was developed - General Design
+\item A system was developed, which provides an intermediate layer in
+  between an application and existing communication libraries. This
+  intermediate layer maps common communication processes onto this
+  existing communication library and is build from three components:
+  First, the communication abstraction layer (CAL) that provides an
+  general interface for already existing communication libraries by
+  adapters. Second, a graph models the communication topology of an
+  application. This graphs can be generated from pre-defined graph
+  generation functions and be reused again. Third, the mapping of the
+  modeled graph onto the abstract communication layer constructs a
+  graph-based virtual overlay network (GVON), which allows to
+  communicate on graph-basis. This mapping is constructed at run-time
+  and can be modified if it is required by the applications algorithm.
+
+  % What was developed - Implementation
+\item The CAL is implemented through policy based design, which
+  provides the possibility to exchange the underlying communication
+  library by adapters. These adapters are configurable at compile-time
+  which minimizes run-time overhead with respect to the utilized
+  communication library.  The Boost Graph Library was utilized as
+  back-end to implement the graph. This library provides a rich set of
+  graph algorithms and can be deployed comfortable into C++ projects.
+  The combination of CAL and graph enables the GVON to provide
+  communication mechanism on basis of the modeled graph.
+  
+  % What was learned from evaluation
+\item An adapter based on MPI as underlying communication library was
+  implemented and tested in synthetic, real world and flexibility
+  benchmarks. The evaluation of these benchmarks turned out that an
+  implementation based on the system provides in the most cases
+  negligible overhead with respect to an MPI
+  implementation. Furthermore has the system demonstrated the
+  execution of a Game of Life simulation with varying number of peers
+  at run-time.  Only in some cases is the look up of graph information
+  a source of overhead, which should be addresses in future
+  optimizations.
+  
+  % What are the advantages of the system
+\item  The system offers the advantages that the CAL can be adapted to the utilized
+  computing system by exchanging the underlying adapter. By providing
+  an explicit mapping from vertices of the graph to peers of the CAL
+  are application based on the system very flexible because a
+  modification of this mapping possible at run-time.
+
+  % Outlook  
+\item The system shows acceptable performance for deployment in
+  simulation applications such as PIConGPU. The GVON could completely
+  replace the existing communication code of this simulation and
+  furthermore provide the ability to comfortable exchange
+  communication library and topology.
+
+\item The system can be enhanced by load balancing and fault
+  tolerance techniques required by the upcoming exascale systems.
+
+\item Future work should focus on the implementation of further
+  adapter. These adapters would expand the field of application
+  of the developed system. 
+  
+\end{itemize}
 
 \cleardoublepage
 

@@ -158,19 +158,15 @@ implementation needs to be optimized with regard to the look up of
 incoming and outgoing edges in future work.
 
 % Checked
-\subsection*{Increase the Number of Elements per Send/Recv Operation}
-This experiment increases the number of elements per send/recv
+\subsection*{Increase the Number of Elements per Send/Recv Operation $m$}
+This experiment increases the number of elements $m$ per send/recv
 operation from one to ten thousand by a step size of ten. A single experiment
 obtains the average run-time over thousand operations.  This experiment is
 limited to execution on a single node. Thus, no network latency is
 included in the results. Figure~\ref{fig:nsize_kepler} shows the
 averaged run-time of a send/recv operation for a single element and
-the run-time ration in respect to MPI on a single kepler node.
+the run-time ration in respect to MPI on a single laser node.
 
-
-
-\todo{Explain run-time jump}
-\todo{Divide results by 1000 (1000 send / recv operations)}
 \begin{figure}[H]
   \begin{minipage}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{plots/50_nsize_cal_laser}
@@ -352,15 +348,15 @@ from Section~\ref{sec:impl:gol} with an equivalent MPI
 implementation. The GoL domain is a rectangular field and the state of
 every cell is calculated exclusively by one peer. The average run-time
 for a time-step for an increasing number of cells is measured. The
-run-time is measured with network influence.  Figure
-\ref{fig:gol_laser} shows the average run-time of a time-step
+run-time is measured with network influence.
+Figure~\ref{fig:gol_laser} shows the average run-time of a time-step
 dependent on the number of peers.
 
 \begin{figure}[H]
-    \includegraphics[width=\textwidth]{plots/50_gol_network_laser}
-  \label{fig:gol_laser}
+  \includegraphics[width=\textwidth]{plots/50_gol_network_laser}
   \caption{Average run-time of GoL simulation for increasing number
     of cells.}
+  \label{fig:gol_laser}
 \end{figure}
 
 \noindent The GVON implementation shows no overhead in comparison to
@@ -379,15 +375,15 @@ This benchmark evaluates the implemented N-body simulation for a
 thousand time steps with increasing number of bodies. It is compared
 an implementation based on MPI to an implementation based on the GVON.
 Thereby, each body is managed by a peer. Therefore, the number of
-peers increases with the number of bodies. Figure
-\ref{fig:nbody_laser} shows the averaged run-time of a time-step with
-increasing number of bodies with and without network.
+peers increases with the number of
+bodies. Figure~\ref{fig:nbody_laser} shows the averaged run-time of a
+time-step with increasing number of bodies with and without network.
 
 \begin{figure}[H]
   \includegraphics[width=\textwidth]{plots/50_nbody_network_laser}
-  \label{fig:nbody_laser}
   \caption{Average run-time of N-body simulation for increasing
     number of bodies. The simulation is executed with network.}
+  \label{fig:nbody_laser}
 \end{figure}
 
 \noindent Analog to the GoL simulation, this experiment also shows no
@@ -426,10 +422,10 @@ number of hosts are varied.
 
 \begin{figure}[H]
   \includegraphics[width=\textwidth]{plots/50_gol_flexi_laser}
-  \label{fig:gol_flexi_laser}
   \caption{Average time per time step with a varying number of
     hosts. First, the number of hosts is decreased from 256 to
     one. Second, the number of hosts is increased from one to 256.}
+  \label{fig:gol_flexi_laser}
 \end{figure}
 
 \noindent Reducing the number of hosts means that the remaining hosts are

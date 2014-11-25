@@ -191,19 +191,18 @@ the problems of modern simulations.
 %% Furthermore, analyzed
 %% Section~\ref{sec:picongpu_analysis} the PIConGPU application with
 %% respect to its needs for a enhanced communication approach.
-It was
-claimed that an intermediate layer between application and communication
-library is required.  This layer should offer the possibility to
-describe the communication processes of the simulation in a very
-general manner.  The construction of this interlayer involves three
-steps.  First, existing communication libraries should be
-abstracted by a general communication interface. Thus, communication
-is not restrict to a single communication library and, therefore,
-makes the simulation more portable.  Second, the communication
-topology of the simulation should be modeled explicitly.  So that, the
-modeled communication topology can be mapped explicitly onto an
-communication abstraction layer.  Third, the combination of modeled
-communication topology and the abstraction from communication
+It was claimed that an intermediate layer between application and
+communication library is required.  This layer should offer the
+possibility to describe the communication processes of the simulation
+in a very general manner.  The construction of this interlayer
+involves three steps.  First, existing communication libraries should
+be abstracted by a general communication interface. Thus,
+communication is not restrict to a single communication library and,
+therefore, makes the simulation more portable.  Second, the
+communication topology of the simulation should be modeled explicitly.
+So that, the modeled communication topology can be mapped explicitly
+onto an communication abstraction layer.  Third, the combination of
+modeled communication topology and the abstraction from communication
 libraries form an approach to communicate virtually on basis of the
 described communication topology.  In summary, the discussion on the
 interlayer result in the following four requirements of the referred
@@ -517,9 +516,9 @@ result is either received by a single peer, the root, or by all peers.
 While a large number of collectives is known to the parallel
 computation commmunity, the CAL only provides the most common ones
 with respect to the analysis of the PIConGPU source code
-(Section~\ref{sec:picongpu}).  However, other collectives are 
-implementable in future work. The following is lists all provided
-collective operations of the CAL and their description:
+(Section~\ref{sec:picongpu}).  However, other collectives are
+implementable in future work. The following is lists a subset of the
+provided collective operations of the CAL and their description:
 
 
 \begin{itemize}
@@ -528,25 +527,25 @@ collective operations of the CAL and their description:
   peer contributes the same number of data elements. The collected
   data is received by the root peer.
 
-\item void \textbf{allGather} (context, send, recv)\\
-  The same as gather(), but all peers of the context receive the data.
+%\item void \textbf{allGather} (context, send, recv)\\
+%  The same as gather(), but all peers of the context receive the data.
 
 \item  void \textbf{scatter} (rootVAddr, context, send, recv)\\
   Distribution of data elements from the root peer to all other peers of
   the context. The data is divided into chunks of same
   size, depending on the number of peers. One chunk is send to each peer.
-\item  void \textbf{allScatter} ( context, send, recv)
 
-  The same as scatter(), but all peers of the context receive the same.
+%\item  void \textbf{allScatter} ( context, send, recv)
+%  The same as scatter(), but all peers of the context receive the same.
 
 \item  void \textbf{reduce} (root, context, binOperation, send, recv)\\
   Reduction of data elements from every peer of a context
   by a binary function that takes arguments of an arbitrary type
   and returns a values of the same type.
 
-\item  void \textbf{allReduce}  (context, operation, send, recv)\\
-  The same as reduce(), but all peers of the context receive the
-  result of the reduction.
+%\item  void \textbf{allReduce}  (context, operation, send, recv)\\
+%  The same as reduce(), but all peers of the context receive the
+%  result of the reduction.
 
 \item  void \textbf{broadcast} (root, context, data)\\
   Distributes data elements from the root peer to all other peers of
@@ -562,15 +561,16 @@ collective operations of the CAL and their description:
 
 \end{itemize}
 
-\noindent All peers of the listed collectives send or receive the same number of
-elements.  But some algorithms require an exchange of varying number
-of elements. Therefore, collectives like gather, allGather, scatter,
-allScatter are also available in a variant with varying number of
+\noindent All peers of the listed collectives send or receive the same
+number of elements.  But some algorithms require an exchange of
+varying number of elements. Therefore, the collectives gather and
+scatter are also available in a variant with varying number of
 elements per peer. These collectives get an additional receive count
 argument, that describes how many data elements each peer has
-contributed to the collective.
-
-\todo{List var variants}
+contributed to the collective. Furthermore are the operations gather,
+scatter, and reduce available in an all receive variant. All senders
+of the collective will receive the collective result. Therefore, the
+specification of a root peer can be omitted in for these variants.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -588,8 +588,6 @@ a parallel computing system requires a decomposition
 a set of subdomains.  Communication is necessary if these subdomains
 need to interact with each other.  Whereby, the communication topology
 of the simulation is determined by the algorithm.
-
-\todo{Refer to requirement}
 
 %% Communication topologies are often implemented in a implicit and
 %% static fashion. A change of the simulation algorithm needs to be translated
@@ -713,15 +711,15 @@ arranged in a two-dimensional grid (Figure \ref{fig:gol_simulation}).
 A cell has a state which is either alive or not alive and the state of
 the next time step is calculated by rules.  The common set of rules
 determines the state of a cell for the next time step using current
-state information of the neighboring cells.  Assume the rule: \emph{``a dead
+state information of the neighboring cells.  Assume the rule: ``a dead
 cell with exactly three living cells in the neighborhood will be reborn on
-the next time step''} is the only existing rule in further descriptions
+the next time step'' is the only existing rule in further descriptions
 of GoL.  Nevertheless, a GoL simulation can consist of a arbitrary set
 of rules.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_simulation}
-  \caption{A GoL domain showing 9 neighboring cells in an image section. The GoL
+  \caption{Image detail of a GoL domain showing 9 neighboring cells. The GoL
     domain is a rectangular grid of cells.  Cells have a state, while
     living cells are colored dark, dead cells are white. The state of
     a cell for the next time step is determined by a set of rules.}
@@ -732,7 +730,7 @@ of rules.
 every cell is represented by a vertex and neighboring cells are
 connected by an edge.  Each vertex has the property \emph{Cell}, which
 contains the state of the cell. Figure \ref{fig:gol_modeling} shows a
-visualized image section of the modeled GoL domain. To determine the next
+visualized image detail of the modeled GoL domain. To determine the next
 state of a cell, the number of living adjacent cells have to be counted. The cell
 will be alive on the next time step, if exactly three adjacent cells
 are alive.
@@ -740,7 +738,7 @@ are alive.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_modeling}
-  \caption{Image section of a Game of Life domain (on the left) was modeled
+  \caption{Image detail of a Game of Life domain (on the left) was modeled
     as a graph (on the right). Each Vertex is described by the vertex
     property \emph{Cell}, containing the state information of the cell.}
   \label{fig:gol_modeling}
@@ -757,7 +755,7 @@ the number of living adjacent cells have to be counted.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_modeling_changed}
-  \caption{Image section of a Game of Life domain (on the left)
+  \caption{Image detail of a Game of Life domain (on the left)
     modeled with a different rule (on the right. Only diagonal located
     vertices are connected.}
   \label{fig:gol_modeling_changed}
@@ -790,7 +788,6 @@ properties. Thus, the properties of the partioned graph changed with
 respect to the GoL graph, such that, partitions store the partitioned cells and
 the partition connections refer to cells in neighboring partitions.
 
-\todo{bundle --> partition}
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_bundle}
   \caption{The GoL graph is partitioned by combining multiple
@@ -863,7 +860,6 @@ model, a vertex represents a particle and all particles are connected
 via an edge. A vertex has the property \emph{Particle} that includes
 the particle mass, location and velocity.
 
-\todo{Borders of grid are ugly}
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_nbody_modeling}
   \caption{Modeling of an N-body domain with $N = 6$. A particle is
@@ -1022,6 +1018,7 @@ is responsible for the data exchange.
 
 % GVON collectives
 \subsubsection*{GVON Collectives}
+\label{sec:design:gvon_collectives}
 Operations between all vertices of a graph can be performed as
 collective operations (Section \ref{sec:cal_collective}).  The
 collective has to be performed for all hosted vertices of a
