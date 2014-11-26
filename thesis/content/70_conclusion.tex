@@ -17,70 +17,77 @@
 % gelesen wird.
 
 
-\begin{itemize}
-
   % What to do with the developed system
   
   % What was developed - General Design
-\item A system was developed, which provides an intermediate layer in
-  between an application and existing communication libraries. This
-  intermediate layer maps common communication processes onto this
-  existing communication library and is build from three components:
-  First, the communication abstraction layer (CAL) that provides an
-  general interface for already existing communication libraries by
-  adapters. Second, a graph models the communication topology of an
-  application. This graphs can be generated from pre-defined graph
-  generation functions and be reused again. Third, the mapping of the
-  modeled graph onto the abstract communication layer constructs a
-  graph-based virtual overlay network (GVON), which allows to
-  communicate on graph-basis. This mapping is constructed at run-time
-  and can be modified if it is required by the applications algorithm.
+A system was developed, which provides an intermediate layer in
+between an application and an existing communication library. This
+intermediate layer maps common communication processes onto this
+existing communication library and is build from three components:
+First, the communication abstraction layer (CAL) that provides an
+general communication interface for existing communication libraries
+which are exchangeable through adapters.  Second, a graph that models the
+communication topology of an application.  Third, the graph-based
+virtual overlay network (GVON) that provides a mapping from the
+modeled graph onto the CAL and therefore allows communication on
+basis of the graph.
 
-  % What was developed - Implementation
-\item The CAL is implemented through policy based design, which
-  provides the possibility to exchange the underlying communication
-  library by adapters. These adapters are configurable at compile-time
-  which minimizes run-time overhead with respect to the utilized
-  communication library.  The Boost Graph Library was utilized as
-  back-end to implement the graph. This library provides a rich set of
-  graph algorithms and can be deployed comfortable into C++ projects.
-  The combination of CAL and graph enables the GVON to provide
-  communication mechanism on basis of the modeled graph.
+% What was developed - Implementation
+
+Policy based design allows the CAL to exchange the utilized
+communication library by template programming, which offers
+flexibility and minimizes the run-time overhead by compile-time
+optimizations.  The Boost Graph Library was utilized as back-end to
+implement the graph class. This library provides a rich set of graph
+algorithms and can be deployed into C++ projects comfortably.
+
+%The combination of CAL and graph enables the GVON to provide
+%communication mechanism on basis of the modeled graph.
+
+% What are the advantages of the system
+
+The system offers the advantage that the CAL can be adapted to the
+utilized computing system by exchanging the underlying adapter.  The
+graphs can be generated from predefined graph generation functions
+which offer the possibility to reuse these graphs. Furthermore, are
+vertices of these graphs explicitly mapped onto peers of the CAL
+within the GVON at run-time. This mapping can be optimized to
+exploit maximum performance and be modified if it is required by the
+applications algorithm.
+
+% What was learned from evaluation
+
+An adapter based on the Message Passing Interface (MPI) as
+underlying communication library was implemented and tested in
+synthetic, real world and flexibility benchmarks. The evaluation of
+these benchmarks turned out that an implementation based on the
+system provides in the most cases negligible overhead with respect
+to an MPI implementation.  The system has demonstrated the variation
+of the number of peers during run-time for the execution of a Game
+of Life simulation. Which shows that the developed system can be the
+foundation to implement load balancing and fault tolerance mechanism
+on top.  Only in some cases is the look up of graph information a
+source of overhead, which should be addressed in future
+optimizations.
+
+% Outlook  
+
+The system shows acceptable performance for deployment in
+simulation applications such as PIConGPU. The GVON could completely
+replace the existing communication code of this simulation and
+furthermore provide the ability to comfortable exchange
+communication library and communication topology.
+
+Future work should focus on the implementation of further adapters. So
+could an accelerator aware adapter allow direct data exchange between
+accelerator devices without the detour of the CPU. Connecting peers
+over an internet socket based adapter would create a distributed
+system by keeping the same interface.  These adapters would expand the
+field of application of the developed system and the applications
+based on the system.  Furthermore, should the system be enhanced by
+load balancing and fault tolerance techniques required by the upcoming
+exascale systems.
   
-  % What was learned from evaluation
-\item An adapter based on MPI as underlying communication library was
-  implemented and tested in synthetic, real world and flexibility
-  benchmarks. The evaluation of these benchmarks turned out that an
-  implementation based on the system provides in the most cases
-  negligible overhead with respect to an MPI
-  implementation. Furthermore has the system demonstrated the
-  execution of a Game of Life simulation with varying number of peers
-  at run-time.  Only in some cases is the look up of graph information
-  a source of overhead, which should be addresses in future
-  optimizations.
-  
-  % What are the advantages of the system
-\item  The system offers the advantages that the CAL can be adapted to the utilized
-  computing system by exchanging the underlying adapter. By providing
-  an explicit mapping from vertices of the graph to peers of the CAL
-  are application based on the system very flexible because a
-  modification of this mapping possible at run-time.
-
-  % Outlook  
-\item The system shows acceptable performance for deployment in
-  simulation applications such as PIConGPU. The GVON could completely
-  replace the existing communication code of this simulation and
-  furthermore provide the ability to comfortable exchange
-  communication library and topology.
-
-\item The system can be enhanced by load balancing and fault
-  tolerance techniques required by the upcoming exascale systems.
-
-\item Future work should focus on the implementation of further
-  adapter. These adapters would expand the field of application
-  of the developed system. 
-  
-\end{itemize}
 
 \cleardoublepage
 
