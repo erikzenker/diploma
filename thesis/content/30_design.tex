@@ -35,33 +35,43 @@ exploit the performance of a parallel computer, the application needs
 to be distributed onto the computing environment and exchange data by
 communication over a network.
 
-For the following assume, the mentioned parallel computer is a compute
-cluster (Section~\ref{sec:cluster}). Furthermore assume, all cluster
-nodes are equipped with the same hardware(\emph{vertical homogeneous})
-and a node provides only one type of computing hardware
-(\emph{horizontal homogeneous}). Simulation applications are prepared
-for this kind of vertical and horizontal heterogeneous clusters by
-domain decomposition (Section~\ref{sec:domain_decomposition}). The
-simulation domain is decomposed by a fixed algorithm into smaller
-chunks of work called \emph{subdomains} and mapped onto the
-homogeneous network of nodes. Subdomains exchange simulation specific
-data through predefined paths with each other. This could mean in
-specific MPI terms (Section~\ref{sec:mpi}), that every MPI process
-manages a subdomain and communicates with a fixed set of other MPI
-processes by fixed communication operations. The simulation algorithm
-and the decomposition method defines what, when and with whom a
-process communicates.  Figure~\ref{fig:state_of_the_art} shows this
-for a one-to-one mapping from a domain onto a cluster.
+For the following assume, the mentioned
+parallel computer is a compute cluster. In principle, a compute
+cluster is a distributed memory architecture and forms a homogeneous
+network of similar compute entities, hereafter referred to as nodes.
+Furthermore assume, all cluster nodes are equipped with the same
+hardware and a node provides only one type of computing hardware.
+
+Simulation applications are prepared for this kind of homogeneous
+clusters by domain decomposition.Domain decomposition is a very
+popular method to separate the simulation domain of an application
+into smaller chunks of work, called subdomains, which are often
+solvable independently of each other. Subdomains exchange simulation
+specific data through predefined paths with each other. This enables
+an application to exploit the tremendous performance gain of parallel
+computers.  Domain decomposition is used to map the simulation domain
+$\Phi$ to the hardware topology $\Gamma$:
+\[\Phi \xrightarrow{\omega} \Gamma\]
+
+\noindent 
+Figure~\ref{fig:domain_decomposition} shows the domain decomposition
+of a simulation domain and the one-to-one mapping of the subdomains
+onto the nodes of the compute cluster.
+
+% This could mean in specific MPI terms, that every MPI process manages
+% a subdomain and communicates with a fixed set of other MPI processes
+% by fixed communication operations. The simulation algorithm and the
+% decomposition method defines what, when and with whom a process
+% communicates.
 
 \begin{figure}[H]
-  \centering \includegraphics[width=\textwidth]{graphics/30_state_of_the_art}
-  \caption{The simulation domain is decomposed in
-    subdomains. Subdomains are mapped one-to-one onto the homogeneous
-    compute cluster.}
-  \label{fig:state_of_the_art}
+  \centering \includegraphics[width=\textwidth]{graphics/30_domain_decomposition}
+  \caption{The simulation domain is decomposed in subdomains. These subdomains
+    are mapped one-to-one onto the homogeneous cluster.}
+  \label{fig:domain_decomposition}
 \end{figure}
 
-\noindent For most simulations computed on cluster systems is this approach
+\noindent For most simulations executed on cluster systems is this approach
 state of the art.  This approach works, as long as both hardware and
 simulation stay in this fixed relationship. Thus, there is no change
 necessary as long as a simulation will always be executed on the same
@@ -69,15 +79,50 @@ cluster, with the same network topology, and the same algorithms
 describing the simulation model.
 
 However, it is not possible to map all modern simulations in this
-model of a homogeneous world. Some simulation applications have also
-vertical and horizontal heterogeneous behavior.  In vertical
+model of a homogeneous world. Some simulation applications have
+horizontal and vertical heterogeneous behavior. In horizontal
+direction, the workload of subdomains can vary during the time of
+simulation. The simulation runs into an unbalanced state of workload
+distribution. Figure \ref{fig:load_balancing} shows the workload
+distribution of the simulation domain through a heat map. The workload
+distribution changes after a certain time $\Delta t$. Therefore, the
+simulation is decomposed again an mapped with a new $\omega$ to the
+hardware topology.
+
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_load_balancing}
+  \caption{Vertical heterogeneity by unbalanced load distribution
+    after a time $\Delta t$ presented through a heat map.  The
+    simulation domain is decomposed again and mapped with a new
+    $\omega$ to the hardware topology.}
+  \label{fig:load_balancing}
+\end{figure}
+
+\noindent Furthermore, implies a failure of a node the termination of subdomain
+calculations on this node. The simulation can be continued if the
+subdomain of the failed node can be mapped to another node. Figure \ref{fig:resilience}
+shows the failure of a node during simulation after a time $\Delta t$.
+The subdomain of the failed node is mapped with a new $\omega$.
+
+\begin{figure}[H]
+  \centering \includegraphics[width=\textwidth]{graphics/30_resilience}
+  \caption{ }
+  \label{fig:resilience}
+\end{figure}
+
+Even though there is an optimal mapping $\omega$ for a time step
+$t_0$, it does not imply that the same mapping is optimal for time
+step $t_1$.  Thus, a simulation behaves horizontal heterogeneous if
+$\omega(t_0) \neq \omega(t_1)$.
+
+In vertical
 direction, multiscale effects, each representing a specific algorithm
-of the simulation, lead to varying communication topologies between
+of the simulation, which leads to varying communication topologies between
 subdomains. Every communication topology usually requires
-sophisticated, time consuming programming. In
-horizontal direction, the workload of subdomains vary during the
-time of simulation. Therefore, sooner or later the simulation runs
-into an unbalanced state of workload distribution. That unbalanced
+sophisticated, time consuming programming. 
+
+
+That unbalanced
 state does neither saturates all available computing resources nor does it
 minimize the overall simulation time. Additionally, a globally
 increased workload might require a redistribution of the simulation
@@ -85,7 +130,7 @@ domain onto the computing nodes at run-time.
 
 Not only the simulation can be heterogeneous, but also the cluster
 hardware on which the simulation is executed
-(Section~\ref{sec:accel}): Vertical cluster heterogeneity describes
+(Section~\ref{sec:accel}): vertical cluster heterogeneity describes
 the usage of multisocket, multicore, and or additional accelerator
 hardware in cluster nodes, where each of these compute devices has its
 own hierarchical memory structure. This hardware needs to be
@@ -117,7 +162,7 @@ the PIConGPU simulation (Section \ref{sec:picongpu}). While magnetic
 and electric fields only influence their directly neighboring fields,
 particles interact globally with each other. The former necessitates
 next neighbor and the latter all-to-all communication
-algorithms.Furthermore, during simulation, particles can move to other
+algorithms. Furthermore, during simulation, particles can move to other
 subdomains, which leads to an unbalanced distribution of particles
 over the entire simulation domain.
 
@@ -191,26 +236,26 @@ the problems of modern simulations.
 %% Furthermore, analyzed
 %% Section~\ref{sec:picongpu_analysis} the PIConGPU application with
 %% respect to its needs for a enhanced communication approach.
-It was claimed that an intermediate layer between application and
+It was determined that an intermediate layer between application and
 communication library is required.  This layer should offer the
 possibility to describe the communication processes of the simulation
-in a very general manner.  The construction of this interlayer
+in a very general manner.  The construction of this intermediate layer
 involves three steps.  First, existing communication libraries should
 be abstracted by a general communication interface. Thus,
 communication is not restrict to a single communication library and,
-therefore, makes the simulation more portable.  Second, the
-communication topology of the simulation should be modeled explicitly.
-So that, the modeled communication topology can be mapped explicitly
+therefore, incraeses the simulations portability.  Second, the
+communication topology of the simulation should be modeled explicitly,
+so that the modeled communication topology can be mapped explicitly
 onto an communication abstraction layer.  Third, the combination of
 modeled communication topology and the abstraction from communication
 libraries form an approach to communicate virtually on basis of the
 described communication topology.  In summary, the discussion on the
-interlayer result in the following four requirements of the referred
-problems of modern simulations:
+intermediate layer result in the following three requirements of the
+referred problems of modern simulations:
 
 \begin{enumerate}
 \item Abstract data exchange method
-\item Description of the communication topology
+\item Modeling of the communication topology
 \item Mapping of communiation topology onto the abstract communication interface
 %\item Virtual data exchange method 
 \end{enumerate}
@@ -232,7 +277,7 @@ usually implemented directly on these existing communication
 libraries. The developed system introduces an intermediate layer
 between application and communication library. This layer fulfills all
 requirements set up in Section~\ref{sec:requirements}. Figure
-\ref{fig:design} shows the components of the intermediate layer and
+\ref{fig:design} shows the components of this intermediate layer and
 which requirement they fulfill.  On top of the existing communication
 libraries the communication abstraction Layer (CAL) uses library
 specific adapters to provide a general interface for upper layer.  A
@@ -243,11 +288,16 @@ the hardware topology of the communication abstraction layer.
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_design}
   \caption{Design of the developed system in layers. An intermediate
-  layer between application and communication library is introduced.}
+    layer between application and communication library is introduced.
+    This layer provides the communication abstraction layer (CAL), the
+    graph description of the communication topology, and the
+    graph-based virtual overlay network (GVON). These components
+    fulfill the discussed requirements in
+    Section~\ref{sec:requirements}.}
   \label{fig:design}
 \end{figure}
 
-The following sections discuss each component in detail:
+\noindent The following sections discuss each component in detail:
 Section~\ref{sec:comm_abstraction} presents the CAL;
 Section~\ref{sec:graph} explains the graph interface;
 Section~\ref{sec:gvon} follows up with the GVON.  Component interfaces

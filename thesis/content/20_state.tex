@@ -290,9 +290,9 @@ its own address space and communicates via MPI communication
 primitives with other processes in the same MPI program.
 
 Processes are identified according to their relative virtual address
-in a group, called the rank, by consecutive integers from 0 to the
+in a group, called the rank, by consecutive integers from zero to the
 group size minus one. The initial group comprises of the full set of
-processes with ranks ranging from 0 to number of processes minus
+processes with ranks ranging from zero to number of processes minus
 one. A typical MPI program run consists of the following steps:
 
 \begin{enumerate}
@@ -300,8 +300,8 @@ one. A typical MPI program run consists of the following steps:
 \item Start the MPI program.
 \item Initialize the MPI environment.
 \item Each process retrieves its own rank.
-\item Each process retrieves total number of ranks.
-\item Depending on the own rank and total number of ranks do some
+\item Each process retrieves the total number of ranks.
+\item Depending on the own rank and the total number of ranks do some
   task\\ (varying flow of control among ranks).
 \item Exchange data with other processes.
 \item Utilize the received data and repeat communication with other processes.
@@ -309,7 +309,7 @@ one. A typical MPI program run consists of the following steps:
 \item Exit the MPI program.
 \end{enumerate}
 
-MPI provides a large and versatile set of routines, that fit the needs
+\noindent MPI provides a large and versatile set of routines, that fit the needs
 of the parallel programming community. At its very basics, MPI uses
 functions for sending and receiving a message (point-to-point
 operations).  These functions are available both as blocking and
@@ -323,9 +323,9 @@ collect, distribute, and reduce data of the MPI processes.  All members
 of the group have to participate to successfully execute the
 collective operation.  The result of the operation is either received
 by one MPI process, the so-called root, or by all MPI processes of a group.  A
-collective operation can only be successful, if all MPI processes of a
+collective operation is successful, if all MPI processes of a
 group are participating. If only one MPI process does not execute the
-operation, the application is stuck. It will only continue when
+operation, the application is stuck. It will continue when
 this MPI process also executes this collective operation.
 
 
@@ -348,7 +348,7 @@ submit system, communication middleware, and programming interface.
 A system viewed in isolation utilizes platform specific
 code. Therefore, designing applications that interconnect several
 compute systems can be a challenge.  With the increasing desire for
-speed, scalability and flexibility in many scientific research
+speed, scalability, and flexibility in many scientific research
 domains, there exists a demand for easy end-user access to multiple
 and potentially very diverse platforms.
 
@@ -402,7 +402,7 @@ hosting the cells, it has to take the detour via the host CPU.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Related Work}
 \label{sec:related_work}
-The developed system is related to systems that make it possible to
+The developed system is related to systems that provide the possibility to
 decompose an application into smaller chunks of work and describe the
 relationship between these chunks.  Thus, there is some relationship
 to work-flow and many-task computing systems. These systems divide the
@@ -426,7 +426,7 @@ one-to-one mapping is possible.
 
 Boost MPI provides the possibility to describe the process topology by
 the Boost Graph Library (BGL)\cite{ref:boost_bgl}.  The resulting
-Graph Communicator \cite{ref:boost_graph_communicator} gives the
+Graph Communicator \cite{ref:boost_graph_communicator} provides the
 possibility to communicate based on this graph topology.
 
 The MPI virtual topology uses the well established
