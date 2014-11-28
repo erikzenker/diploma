@@ -43,20 +43,21 @@ Furthermore assume, all cluster nodes are equipped with the same
 hardware and a node provides only one type of computing hardware.
 
 Simulation applications are prepared for this kind of homogeneous
-clusters by domain decomposition.Domain decomposition is a very
+clusters by domain decomposition. Domain decomposition is a very
 popular method to separate the simulation domain of an application
 into smaller chunks of work, called subdomains, which are often
 solvable independently of each other. Subdomains exchange simulation
-specific data through predefined paths with each other. This enables
-an application to exploit the tremendous performance gain of parallel
-computers.  Domain decomposition is used to map the simulation domain
-$\Phi$ to the hardware topology $\Gamma$:
+specific data through predefined paths. This enables an application to
+exploit the tremendous performance gain of parallel computers.  The
+decomposed simulation domain $\Phi$ is used to map the subdomains to
+the hardware topology $\Gamma$:
+
 \[\Phi \xrightarrow{\omega} \Gamma\]
 
 \noindent 
 Figure~\ref{fig:domain_decomposition} shows the domain decomposition
-of a simulation domain and the one-to-one mapping of the subdomains
-onto the nodes of the compute cluster.
+of a simulation domain and a static one-to-one mapping of the
+subdomains onto the nodes of the compute cluster.
 
 % This could mean in specific MPI terms, that every MPI process manages
 % a subdomain and communicates with a fixed set of other MPI processes
@@ -66,105 +67,127 @@ onto the nodes of the compute cluster.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_domain_decomposition}
-  \caption{The simulation domain is decomposed in subdomains. These subdomains
-    are mapped one-to-one onto the homogeneous cluster.}
+  \caption{The simulation domain is decomposed in subdomains
+    (DD). These subdomains are mapped one-to-one to the homogeneous
+    cluster through $\omega$.  This kind of static mapping is
+    sufficient for the most applications on cluster systems}
   \label{fig:domain_decomposition}
 \end{figure}
 
-\noindent For most simulations executed on cluster systems is this approach
-state of the art.  This approach works, as long as both hardware and
+\noindent This static approach is sufficient for most simulations that
+are executed on clusters. It works, as long as both hardware and
 simulation stay in this fixed relationship. Thus, there is no change
-necessary as long as a simulation will always be executed on the same
-cluster, with the same network topology, and the same algorithms
-describing the simulation model.
+of the mapping $\omega$ necessary as long as a simulation will always
+be executed on the same cluster, with the same network topology, and
+the same algorithms describing the simulation model.
 
 However, it is not possible to map all modern simulations in this
-model of a homogeneous world. Some simulation applications have
-horizontal and vertical heterogeneous behavior. In horizontal
-direction, the workload of subdomains can vary during the time of
-simulation. The simulation runs into an unbalanced state of workload
-distribution. Figure \ref{fig:load_balancing} shows the workload
+model of a homogeneous world. Some simulations show horizontal and
+vertical heterogeneous behavior. Horizontal heterogeneity in a
+simulation denotes that subdomains are not optimal maped onto the
+hardware topology due to unbalanced load or failures of nodes.  Even
+though there is an optimal mapping $\omega$ for a time step $t_0$, it
+does not imply that the same mapping is optimal for time step $t_1$.
+Thus, a simulation behaves horizontal heterogeneous if $\omega(t_0)
+\neq \omega(t_1)$.
+
+This means especially for load balancing, that the workload of
+subdomains can vary during the time of simulation. The simulation may
+run into an unbalanced state of workload distribution after a time
+period $\Delta t$. That unbalanced state neither saturates all
+available computing resources nor does it minimize the overall
+simulation time. Figure \ref{fig:load_balancing} shows the workload
 distribution of the simulation domain through a heat map. The workload
 distribution changes after a certain time $\Delta t$. Therefore, the
-simulation is decomposed again an mapped with a new $\omega$ to the
+simulation is decomposed again an mapped through a new $\omega$ to the
 hardware topology.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_load_balancing}
-  \caption{Vertical heterogeneity by unbalanced load distribution
+  \caption{Horizontal heterogeneity by unbalanced load distribution
     after a time $\Delta t$ presented through a heat map.  The
     simulation domain is decomposed again and mapped with a new
-    $\omega$ to the hardware topology.}
+    $\omega$ to the hardware topology. After the remapping the
+    workload is distributed equally.}
   \label{fig:load_balancing}
 \end{figure}
 
-\noindent Furthermore, implies a failure of a node the termination of subdomain
-calculations on this node. The simulation can be continued if the
-subdomain of the failed node can be mapped to another node. Figure \ref{fig:resilience}
-shows the failure of a node during simulation after a time $\Delta t$.
-The subdomain of the failed node is mapped with a new $\omega$.
+\noindent Another problem which leads to heterogeneous behavior is the
+failure of a node that implies the termination of subdomain
+calculations on this node. The simulation can be continued if it is
+possible to map the subdomain of the failed node through a new
+$\omega$ to another node. Figure \ref{fig:resilience} shows the
+failure of a node during simulation after a time $\Delta t$.  The
+subdomain of the failed node is mapped with a new $\omega$.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_resilience}
-  \caption{ }
+  \caption{Horizontal heterogeneity by the failure of a cluster node after
+    a time $\Delta t$. The subdomain of the failed node is mapped
+    through a new $\omega$ to another node. The simulation can be
+    continued after this remapping.}
   \label{fig:resilience}
 \end{figure}
 
-Even though there is an optimal mapping $\omega$ for a time step
-$t_0$, it does not imply that the same mapping is optimal for time
-step $t_1$.  Thus, a simulation behaves horizontal heterogeneous if
-$\omega(t_0) \neq \omega(t_1)$.
+\noindent The mapping $\omega$ is not sufficient to describe vertical
+heterogeneous effects of simulations. Therefore, the set of
+communication topologies $\Sigma$ is introduced and $\omega$ is split
+into the mappings $\sigma$ and $\gamma$, as the following formula
+shows:
 
-In vertical
-direction, multiscale effects, each representing a specific algorithm
-of the simulation, which leads to varying communication topologies between
-subdomains. Every communication topology usually requires
-sophisticated, time consuming programming. 
+\[\omega:~\gamma \circ \sigma:~\Phi \xrightarrow{\sigma} \Sigma \xrightarrow{\gamma} \Gamma\]
 
+\noindent Vertical heterogeneity is defined by the existence of
+multiple communication topologies.  Figure~\ref{fig:vertical_hetero}
+shows the modeling of the all-to-all and next neighbor communication
+topologies of a simulation by graphs through~$\sigma_0$
+and~$\sigma_1$.  Furthermore, these graphs are mapped to the hardware
+topology through~$\gamma$.
 
-That unbalanced
-state does neither saturates all available computing resources nor does it
-minimize the overall simulation time. Additionally, a globally
-increased workload might require a redistribution of the simulation
-domain onto the computing nodes at run-time.
-
-Not only the simulation can be heterogeneous, but also the cluster
-hardware on which the simulation is executed
-(Section~\ref{sec:accel}): vertical cluster heterogeneity describes
-the usage of multisocket, multicore, and or additional accelerator
-hardware in cluster nodes, where each of these compute devices has its
-own hierarchical memory structure. This hardware needs to be
-programmed with caution and knowledge about the device to achieve
-maximal performance.  Also, horizontal differences of cluster nodes
-are possible. For example, a cluster can consist of varying node types
-for different tasks in the simulation application. Therefore, the
-simulation domain can not be mapped one-to-one on such a cluster
-configuration, but rather the mapping should be configurable
-explicitly. Figure~\ref{fig:heterogeneous_cluster_node} shows, in
-contrast to an implicit one-to-one mapping, such an explicit mapping from the
-simulation domain onto a heterogeneous computing system. This example
-computing systems shows several device hierarchies. A single node has
-two sockets each equipped with a multicore CPU and each CPU has access
-to a pair of accelerator devices.
 
 \begin{figure}[H]
-  \centering
-  \includegraphics[width=\textwidth]{graphics/30_heterogeneous_cluster_node}
-  \caption{Explicit mapping of subdomains onto a node of a
-    heterogeneous and hierarchical computing system. The illustrated
-    node has two sockets each equipped with a multicore CPU and each
-    CPU has access to a pair of accelerator devices.}
-  \label{fig:heterogeneous_cluster_node}
+  \centering \includegraphics[width=\textwidth]{graphics/30_vertical_hetero}
+  \caption{Vertical heterogeneity by two communication topologies in a
+    single simulation. The mappings $\sigma_0$ and $\sigma_1$ model different
+    communication topologies. The topologies are mapped to the hardware
+  topology by $\gamma$.}
+  \label{fig:vertical_hetero}
 \end{figure}
 
-A real world example for such heterogeneous behavior of simulations is
-the PIConGPU simulation (Section \ref{sec:picongpu}). While magnetic
-and electric fields only influence their directly neighboring fields,
-particles interact globally with each other. The former necessitates
-next neighbor and the latter all-to-all communication
-algorithms. Furthermore, during simulation, particles can move to other
-subdomains, which leads to an unbalanced distribution of particles
-over the entire simulation domain.
+
+%Not only the simulation can be heterogeneous, but also the cluster
+%hardware on which the simulation is executed
+%(Section~\ref{sec:accel}): vertical cluster heterogeneity describes
+%the usage of multisocket, multicore, and or additional accelerator
+%hardware in cluster nodes, where each of these compute devices has its
+%own hierarchical memory structure. This hardware needs to be
+%programmed with caution and knowledge about the device to achieve
+%maximal performance.  Also, horizontal differences of cluster nodes
+%are possible. For example, a cluster can consist of varying node types
+%for different tasks in the simulation application. Therefore, the
+%simulation domain can not be mapped one-to-one on such a cluster
+%configuration, but rather the mapping should be configurable
+%explicitly.
+
+%Figure~\ref{fig:heterogeneous_cluster_node} shows, in
+%contrast to an implicit one-to-one mapping, such an explicit mapping from the
+%simulation domain onto a heterogeneous computing system. This example
+%computing systems shows several device hierarchies. A single node has
+%two sockets each equipped with a multicore CPU and each CPU has access
+%to a pair of accelerator devices.
+
+\noindent A real world example for such heterogeneous behavior of simulations is
+the PIConGPU simulation. PIConGPU is a relativistic particle-in-cell
+(PIC) application designed for simulating laser-plasma interactions
+\cite{ref:picongpu}. The simulation domain is decomposed into
+subdomains forming a three-dimensional grid of cells. Each grid cell
+is mapped onto a single Graphics Processing Unit (GPU).  While
+magnetic and electric fields of a cell only influence their directly
+neighboring fields, particles interact globally with each other. The
+former necessitates next neighbor and the latter all-to-all
+communication algorithms. Furthermore, during simulation, particles
+can move to other subdomains, which leads to an unbalanced
+distribution of particles over the entire simulation domain.
 
 On the hardware side, PIConGPU is developed for the execution on
 cluster systems with NVIDIA accelerator hardware.  CPUs are
@@ -175,24 +198,30 @@ data. Thus, vertical and horizontal heterogeneity, both in simulation
 domains and on the hardware cluster, are already present in real world
 simulation applications.
 
-Nowadays, state of the art communication libraries can not be adapted
-to the needs of modern simulation applications.  Therefore, there
-should be an intermediate layer between simulation application and the
-software stack of the cluster. This layer should allow for an explicit
-mapping of the simulation domain onto the communication library, while
-the communication library should be easily exchangeable. With such a
-setup, the mapping can be adjusted to heterogeneous behavior of
-simulation application and cluster hardware.  As an added benefit,
-this layer can be used to address problems like load balancing and
-fault tolerance. However, both of these problems will not be addressed
-by this system directly. Instead it should be possible to build an
-application that supports both fault tolerance and load balancing
-based on this system.
+This work will neither cover the implementation of a communication library
+nor will it cover load balancing or fault tolerance algorithms. But all
+these problem are solvable if the implicit mapping of the domain
+decomposed simulation onto the hardware topology is replaced by the
+separate mappings $\sigma$ and $\gamma$.
 
-To address these issues, an approach for a flexible mapping of
-communication processes onto arbitrary communication libraries was
-designed. This design will be presented in the following
-sections. At first, the requirements for such a system are
+Thus, this work provides an abstract description which enables to map
+the simulation algorithm to communication topologies and in turn to
+map the communication topologies onto the hardware topology by two
+mappings. These mappings are exchangeable during the run-time of the
+simulation. The most general approach to describe communication
+topologies is utilized: a graph. This graph is mapped at run-time
+to an abstract description of the hardware topology.
+
+It is implemented an intermediate layer between simulation application
+and the software stack of the cluster. This layer allows for the
+description of the simulation domain by a graph and an explicit
+mapping of this graph onto an abstract communication layer, while the
+underlying communication library is easily exchangeable. With such a
+setup, the mappings can be adjusted to heterogeneous behavior of
+simulation application and cluster hardware.
+
+The design of the implemented system will be presented in the
+following sections. At first, the requirements for such a system are
 discussed. It is followed by a description of the overall design and
 finally the design of each component is discussed in detail.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -230,8 +259,8 @@ finally the design of each component is discussed in detail.
 \section{Requirements}
 \label{sec:requirements}
 
-The previous Section~\ref{sec:motivation} described the state of the
-art of simulations on cluster systems and gave a motivation to solve
+The previous Section~\ref{sec:motivation} described the state-of-the-art
+of simulations on cluster systems and gave a motivation to solve
 the problems of modern simulations.
 %% Furthermore, analyzed
 %% Section~\ref{sec:picongpu_analysis} the PIConGPU application with
@@ -242,15 +271,15 @@ possibility to describe the communication processes of the simulation
 in a very general manner.  The construction of this intermediate layer
 involves three steps.  First, existing communication libraries should
 be abstracted by a general communication interface. Thus,
-communication is not restrict to a single communication library and,
+communication is not restricted to a single communication library and,
 therefore, incraeses the simulations portability.  Second, the
 communication topology of the simulation should be modeled explicitly,
 so that the modeled communication topology can be mapped explicitly
-onto an communication abstraction layer.  Third, the combination of
+onto a communication abstraction layer.  Third, the combination of
 modeled communication topology and the abstraction from communication
 libraries form an approach to communicate virtually on basis of the
 described communication topology.  In summary, the discussion on the
-intermediate layer result in the following three requirements of the
+intermediate layer results in the following three requirements of the
 referred problems of modern simulations:
 
 \begin{enumerate}
@@ -272,17 +301,17 @@ referred problems of modern simulations:
 
 Physical networks such as Ethernet, Infiniband or Myrinet are the
 foundation of common communication libraries such as MPI
-(Section~\ref{sec:mpi}).  State of the art simulation applications are
+(Section~\ref{sec:mpi}).  State-of-the-art simulation applications are
 usually implemented directly on these existing communication
 libraries. The developed system introduces an intermediate layer
 between application and communication library. This layer fulfills all
 requirements set up in Section~\ref{sec:requirements}. Figure
 \ref{fig:design} shows the components of this intermediate layer and
-which requirement they fulfill.  On top of the existing communication
-libraries the communication abstraction Layer (CAL) uses library
-specific adapters to provide a general interface for upper layer.  A
+which requirements they fulfill.  On top of the existing communication
+libraries the communication abstraction layer (CAL) uses library
+specific adapters to provide a general interface for the upper layer.  A
 graph is used to model the communication topology of the simulation
-domain and a graph-based virtual overlay network maps this graph onto
+domain and a graph-based virtual overlay network (GVON) maps this graph onto
 the hardware topology of the communication abstraction layer.
 
 \begin{figure}[H]
@@ -317,7 +346,7 @@ knowledge of programming and function interfaces.
 % Motivation for communication abstraction
 Simulation applications can be interconnected by a vast variety of
 communication libraries. Most simulations utilize exactly one possible
-libarary, but this restricts the simulation to computing systems which
+library, but this restricts the simulation to computing systems which
 only support the selected library (Figure
 \ref{fig:design_state_of_the_art}).
 
@@ -328,7 +357,7 @@ only support the selected library (Figure
   \label{fig:design_state_of_the_art}
 \end{figure}
 
-Assuming, that a simulation is distributed on a several computers and uses a
+Assuming, that a simulation is distributed on several computers and uses a
 communication library based on TCP/IP sockets. The execution of this
 simulation on a single machine is an interesting use case for
 testing. It results in no problem when the simulation is executed on
@@ -336,14 +365,12 @@ this local machine and communicates locally by sockets.  But, it might
 be more efficient to use shared memory to exchange data between
 subdomains, instead of TCP/IP messages.
 
-However, exchanging the communication interface in the example above,
+However, exchanging the communication interface in the example above
 usually requires a lot of reprogramming of the communication logic.
 Therefore, it is not a sufficient solution for the problem.  Rather,
-varying communication libraries should by addressable by the same
+varying communication libraries should be addressable by the same
 communication interface to make the application portable for varying
-computing environments. Although, there are existing standards for
-communication in cluster systems, the world of computer science is
-subject to constant change.  The possibility to exchange the
+computing environments. The possibility to exchange the
 underlying layer without changing the interface to this layer is a
 precondition for future applications in distributed computing.  Thus,
 the abstraction from this existing communication libraries is a
@@ -352,7 +379,7 @@ fundamental property for a portable application.
 The challenge is to provide a very general interface, that provides
 the possibility to address varying communication libraries through it.
 This interface should be as common as possible and should be easily
-deployable into existing applications by replacing the actual
+deployable to existing applications by replacing the actual
 communication library without changing the fundamental understanding
 of the way to communicate within this application. The following
 section describes the design of such an abstract communication
@@ -382,14 +409,14 @@ respect to MPI.
 
 The CAL provides an abstract interface for common communication
 operations. The adapter needs to implement the interface demanded by
-the CAL.  The Communication operations are performed by existing
+the CAL.  The communication operations are performed by existing
 communication libraries wrapped by an adapter.
 
 Instances participating on communication in general are called peers
 in the following.  The interface of the CAL provides basic
 point-to-point communication operations (Section~\ref{sec:des:p2p}),
 collective operations (Section~\ref{sec:cal_collective}) and
-operations for grouping of peers (Section~\ref{sec:cal_context}).
+operations for the grouping of peers (Section~\ref{sec:cal_context}).
 Figure \ref{fig:cal} shows the communication abstraction layer on top
 of existing communication libraries.  The CAL with a specific adapter
 could already replace a certain communication library in a simulation
@@ -412,7 +439,7 @@ of abstraction will be discussed in Sections \ref{sec:graph} and
 \noindent Using the CAL instead of a concrete communication library has
 the advantage, that only the adapter needs to be replaced when
 changing the communication environment, for example when migrating
-to another compute architecture. Although, the application has
+to another compute architecture. Although the application has
 to be recompiled, the CAL interface stays the same.
 
 
@@ -477,7 +504,7 @@ non-blocking variants.
 
 A non-blocking communication method returns an \emph{event} object that represents
 the state of the executed communication method. The state
-of the \emph{event}t is either \emph{ready} or \emph{not ready}. An
+of the \emph{event} is either \emph{ready} or \emph{not ready}. An
 \emph{event} provides functions to request the current state and 
 to  wait until the method has finished. The CAL only provides the
 event interface. Adapters implement the  event interface for their
@@ -517,7 +544,7 @@ communication methods of the CAL interface:
 % Checked
 \subsection{Grouping of peers}
 \label{sec:cal_context}
-Besides the communication methods,grouping of peers is the most
+Besides the communication methods, grouping of peers is the most
 important function the CAL provides through its interface.  By
 default, all peers of the CAL are members of the global group of peers.
 A group of peers will be called \textit{context}. Accordingly, the
@@ -555,7 +582,7 @@ real address has to be adapted to the currently used context.
 \label{sec:cal_collective}
 A \textit{collective operation}, short \textit{collective}, is a
 communication pattern that is executed simultaneously by all peers of
-a context. For example are collectives utilized to collect,
+a context. For example, collective are utilized to collect,
 share and reduce data.  Each collective can be implemented by a
 sequence of peer to peer operations, but communication libraries,
 especially the ones for high performance calculations such as MPI
@@ -567,7 +594,7 @@ While a large number of collectives is known to the parallel
 computation commmunity, the CAL only provides the most common ones
 with respect to the analysis of the PIConGPU source code
 (Section~\ref{sec:picongpu}).  However, other collectives are
-implementable in future work. The following is lists a subset of the
+implementable in future work. The following lists a subset of the
 provided collective operations of the CAL and their description:
 
 
@@ -670,9 +697,9 @@ multigraph with loops, which is called a quiver \cite{ref:quiver}.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_graph}
-  \caption{The graph interface describes quivers. It is shown a
-    directed cycle multi graph with four vertices. Graphs can be
-    used to describe the communication topology of domain decomposed
+  \caption{The graph interface describes quivers. This image depicts a
+    directed cycle multi graph with four vertices. Graphs can be used
+    to describe the communication topology of a domain decomposed
     applications.}
   \label{fig:graph}
 \end{figure}
@@ -721,7 +748,7 @@ vertices, not providing further information. Interpreting the graph as
 a C++ object container offers the possibility to insert objects into the graphs
 vertices and edges.
 
-An object that resides in this containers will be called property and
+An object that resides in these containers will be called property and
 is introduced as a concept to annotate a graph. A property usually
 provides subdomain information and can be bound to vertices and edges
 (Figure \ref{fig:property}). Each vertex and edge of the same graph
@@ -806,7 +833,7 @@ the number of living adjacent cells have to be counted.
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_modeling_changed}
   \caption{Image detail of a Game of Life domain (on the left)
-    modeled with a different rule (on the right. Only diagonal located
+    modeled with a different rule (on the right). Only diagonally located
     vertices are connected.}
   \label{fig:gol_modeling_changed}
 \end{figure}
@@ -826,17 +853,19 @@ be very efficient when a single cell is calculated by a single
 process. One process can compute considerably more cells.
 
 Figure~\ref{fig:gol_bundle} shows the creation of a partitioned graph
-by combining multiple vertices to partitions. Partitions are connected by edges when at least one cell at
-the border of a partition is the neighbor cell of a border cell from
-another partition.  The creation of a partioned graph  with a
-minimum of connections is the topic of graph partitioning algorithms.
+by combining multiple vertices to partitions. Partitions are connected
+by edges when at least one cell at the border of a partition is the
+neighbor cell of a border cell from another partition.  The creation
+of a partioned graph with a minimum of connections is the topic of
+graph partitioning algorithms.
 
 While the fine granular GoL graph represents the GoL cells in detail,
 the partitioned graph represents dependencies of partitions. The GoL
-graph and the partitioned graph can coexist and can be connected by their
-properties. Thus, the properties of the partioned graph changed with
-respect to the GoL graph, such that, partitions store the partitioned cells and
-the partition connections refer to cells in neighboring partitions.
+graph and the partitioned graph can coexist and can be connected by
+their properties. Thus, the properties of the partioned graph changed
+with respect to the GoL graph, such that partitions store the
+partitioned cells and the partition connections refer to cells in
+neighboring partitions.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_bundle}
@@ -853,13 +882,12 @@ multiple nodes of a cluster. Each partition can be calculated by its own
 process. The processes calculate a time step of their local GoL graph and
 communicate the states of their border cells to adjacent bundles.
 
-It has been introduced a different approach to model the Game of Life
-domain. It used the same description language, the graph.  Fine
-granular modeled domains can be partioned by common graph partition
-algorithms to obtain more performance by clustering
-vertices. A automated transformation from a graph description into a
-more efficient graph description is an interesting topic, but not
-covered by this work.
+A different approach to model the GoL domain has been introduced.  It
+used the same description language, the graph.  Fine granular modeled
+domains can be partioned by common graph partition algorithms to
+obtain more performance by clustering vertices. An automated
+transformation from a graph description into a more efficient graph
+description is an interesting topic, but not covered by this work.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -876,13 +904,14 @@ covered by this work.
 %% The N-body simulation, with a totally different algorithm in respect to GoL, was chosen as the
 %% second example to model a simulation application by a graph.
 
-The N-body simulation simulates particles in an two or three
-dimensional space influenced by physical forces. The force considered
-for this simulation is the gravity among each particle.  A particle is
-described by its mass $m$, location $\overrightarrow{r}$ and velocity
-$\overrightarrow{v}$.  The gravitational force between two particles
-$i$ and $j$ can be calculated in a two-body model with the
-gravitationlal constant $G$ by the Equation~\ref{eq:two_body_force}:
+The N-body simulation simulates particles in a two- or
+three-dimensional space influenced by physical forces. The force
+considered for this simulation is the gravity among each particle.  A
+particle is described by its mass $m$, location $\overrightarrow{r}$
+and velocity $\overrightarrow{v}$.  The gravitational force between
+two particles $i$ and $j$ can be calculated in a two-body model with
+the gravitationlal constant $G$ by the
+Equation~\ref{eq:two_body_force}:
 
 \begin{equation}
   \label{eq:two_body_force}
@@ -905,7 +934,7 @@ communication pattern with a complexity of
 $O(N^2)$. Figure~\ref{fig:nbody_modeling} models the N-body domain
 with $N = 6$ as a fully connected graph. Particles are represented as
 pentagons in a two-dimensional space. The size of the particles
-signals its mass and the arrow its velocity and direction.  In the
+symbolizes its mass and the arrow its velocity and direction.  In the
 model, a vertex represents a particle and all particles are connected
 via an edge. A vertex has the property \emph{Particle} that includes
 the particle mass, location and velocity.
@@ -914,7 +943,8 @@ the particle mass, location and velocity.
   \centering \includegraphics[width=\textwidth]{graphics/30_nbody_modeling}
   \caption{Modeling of an N-body domain with $N = 6$. A particle is
     represented by a vertex and each vertex is connected to all other
-    vertices by edges.}
+    vertices by edges. Each particle is connected with each other
+    particle forming an all-to-all topology.}
   \label{fig:nbody_modeling}
 \end{figure}
 
@@ -968,7 +998,7 @@ to know exactly the same graph. In order to ensure that, the graph can be
 constructed in parallel by all peers, loaded from the same file of a
 distributed file system, or could even be delivered by a master
 peer. Furthermore, peers need to use the same adapter configuring its
-CAL, otherwise a communication is not possible.
+CAL, otherwise communication is not possible.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -979,15 +1009,15 @@ CAL, otherwise a communication is not possible.
 % Checked
 \subsection{Mapping of a Graph to the CAL}
 \label{sec:mapping}
-The connection between a graph and the CAL is a mapping of vertices
-to peers, called the \emph{vertex map}.  A vertex map is valid for a
-certain graph. Furthermore, the GVON provides a mapping of  graphs
-to contexts (Section~\ref{sec:cal_context}), called the \emph{graph
+A mapping called the \emph{vertex map} connects the graph and the CAL
+by a mapping of vertices to peers.  A vertex map is valid for a
+certain graph. Furthermore, the GVON provides a mapping of graphs to
+contexts (Section~\ref{sec:cal_context}), called the \emph{graph
   map}. This mapping is necessary since the GVON will also be used to
-map collective operations on a graph to the CAL.  The vertex and
-graph map are the basis for the mapping of communication processes
-to the communication abstraction layer.  The mapping of vertices to
-peers and graphs to contexts is a joint process of all peers that want to
+map collective operations on a graph to the CAL.  The vertex and graph
+map are the basis for the mapping of communication processes to the
+communication abstraction layer.  The mapping of vertices to peers and
+graphs to contexts is a joint process of all peers that want to
 participate in the communication based on a particular graph. This
 mapping process is divided into two phases.
 
@@ -1012,16 +1042,16 @@ the GVON and might be object for further optimization.
 \subsubsection*{Second Phase: Announce}
 In the second phase, the peers announce their mapped vertices to all
 other peers.  A peer that announces vertices is called host and the
-announced vertices are called hosted vertices.  Every host receives
-from every other host a list of its hosted vertices.  This list is
-used to update the vertex map and to create a new context only
-including the hosts. The new context will be bounded to the graph of
-the hosted vertices in the graph map.  A host is responsible for the
+announced vertices are called hosted vertices.  Each host receives a
+list of its hosted vertices from every other host.  This list is used
+to update the vertex map and to create a new context only including
+the hosts. The new context will be bounded to the graph of the hosted
+vertices in the graph map.  A host is responsible for the
 communication of its hosted vertices.  So to speak, it is also
 possible that a host is responsible for all vertices of a graph and
-communicates finally always with itself.  Depending on the used
-adapter this might not even be a problem, since communication of a
-host with itself can be performed in shared memory and does not
+finally communicates with itself the entire time.  Depending on the
+used adapter this might not even be a problem, since communication of
+a host with itself can be performed in shared memory and does not
 necessarily include network latency.
 
 
@@ -1033,7 +1063,7 @@ necessarily include network latency.
 % Checked
 \subsection{Communication within the GVON}
 From the perspective of an overlay network, a vertex is interpreted as
-a virtual peer, edges between adjacent vertices indicate that the
+a virtual peer: edges between adjacent vertices indicate that the
 virtual peers are able to communicate with each other. An application,
 implemented on top of the GVON, has the transparent view of exchanging
 messages between vertices. The GVON is taking care, that the messages
@@ -1060,8 +1090,8 @@ point-to-point operations:
   \item  Event \textbf{asyncRecv} ( graph, sourceVertex, edge, data)
 \end{itemize}
 
-\noindent The GVON has the task to resolv both the context of a graph
-and the host of the source or destination vertex. This information are
+\noindent The GVON has the task to resolve both the context of a graph
+and the host of the source or destination vertex. These information are
 queried from the vertex and graph map. When this information is
 resolved the programm flow is handed over to the CAL. Finally, the CAL
 is responsible for the data exchange.
@@ -1081,9 +1111,9 @@ A collective operation is first executed locally for all hosted
 vertices of a host. Afterwards, it is handled by the CAL and
 transmitted to the receiver(s). Figure~\ref{fig:gvon_collective} shows
 a gather operation on the same graph and mapping of
-Figure~\ref{fig:gvon_mapping}. The gather operation collects the data
-of hosted vertices of a host first locally and uses then the gather
-operation provided by the CAL. A similar approach is used for the
+Figure~\ref{fig:gvon_mapping}.  The gather operation first collects
+the data of hosted vertices of a host locally, then uses the gather
+operation provided by the CAL.  A similar approach is used for the
 reduce operation, whereby data is either collected or reduced locally
 to a single value, depending on the commutativity of the reduce
 operation.
@@ -1112,7 +1142,7 @@ a thread safe manner.
 % Checked
 \subsection{Remapping of Vertices}
 \label{sec:remapping}
-Since, the communication topology is separated from the communication
+Since the communication topology is separated from the communication
 library, it is possible to move a hosted vertex to another host at
 run-time.  This run-time behavior is an interesting fact with respect
 to load balancing and fault tolerance.
@@ -1122,23 +1152,23 @@ to load balancing and fault tolerance.
 Figure~\ref{fig:gvon_remapping} shows the remapping of
 hosted vertices of Figure~\ref{fig:gvon_mapping}. The mapping is modified, such that the
 hosted vertices are distributed only to two hosts. One host is responsible for three
-vertices and the other for one vertex. The third peer is no host of this
+vertices and the other for one vertex. The third peer is not part of this
 graph anymore.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{graphics/30_gvon_remapping}
-  \caption{Redistribution of vertices to peers. The number of host of
-    the graph is reduced from three hosts to two hosts.}
+  \caption{Redistribution of vertices to peers. The number of hosts of
+    the graph is reduced from three to two hosts.}
   \label{fig:gvon_remapping}
 \end{figure}
 
-Load balancing can be an issue when the communication topology is
-changing during simulation execution. For example could the GoL
-simulation add a new rule, which leads to a changed communication
-topology for that in turn exists a better vertex mapping.  Even if the
-performance of a network link drops, so that some hosts are not able
-to reach accetable latency and bandwidth among each other, a
+\noindent Load balancing can be an issue when the communication
+topology is changing during simulation execution. For example, the GoL
+simulation could add a new rule that leads to a different
+communication topology for that might exist a better vertex mapping.
+Even if the performance of a network link drops, so that some hosts
+are not able to reach common latency and bandwidth among each other, a
 remapping can solve this problem at run-time.
 
 A traditional field of application for remapping would be unbalanced
@@ -1147,18 +1177,13 @@ be recognized by monitoring and eliminated by remapping the workload
 in a fair way.
 
 Another issue is the failure of single cluster nodes and therefore
-also a failure of hosts located on this nodes. Assuming, that the data
-of hosts where check pointed, the hosted vertices of the failed host
+also a failure of hosts located on these nodes. Assuming that the data
+of hosts were stored in a checkpoint, the hosted vertices of the failed host
 can be adopted by another host, also at run-time.
 
 The process of remapping is very similar to the mapping process of
 Section~\ref{sec:mapping}.  It is also divided in two phases:
-distribution and announcment. It has to be distinguished between
-global and local remapping. A global remapping is a repetition of the
-mapping process of Section~\ref{sec:mapping}.  Since, local remapping
-situation is slightly different, because the hosts already own a set
-of hosted vertices, it does not require a redistribution of all
-vertices.  The distribution is more a swap or occupation of vertices.
+distribution and announcement.
 
 \todo{Design summary}
 

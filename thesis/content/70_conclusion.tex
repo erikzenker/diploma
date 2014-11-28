@@ -1,4 +1,4 @@
-\chapter{Conclusion And Outlook}
+\chapter{Conclusion}
 \label{sec:conclusion}
 
 %  Schlußfolgerungen, Fragen, Ausblicke
@@ -17,23 +17,28 @@
 % gelesen wird.
 
 
-  % What to do with the developed system
-  
-  % What was developed - General Design
-A system was developed, which provides an intermediate layer in
-between an application and an existing communication library. This
-intermediate layer maps common communication processes onto this
+% Motivation
+A system was developed with the requirements for an explicit modeling
+of the communication topologies of an application and an explicit
+mapping of this topologies to the hardware topolgy at run-time. The
+modeling and mapping is necessary because modern simulations show
+heterogeneous behavior both in horizontal and vertical direction.
+
+To address these heterogeneities provides the developed system an
+intermediate layer in between an application and an existing
+communication library.  This layer maps common communication processes to a
 existing communication library and is build from three components:
 First, the communication abstraction layer (CAL) that provides an
 general communication interface for existing communication libraries
-which are exchangeable through adapters.  Second, a graph that models the
-communication topology of an application.  Third, the graph-based
+which are exchangeable through adapters.  Second, a graph that models
+the communication topology of an application.  Third, the graph-based
 virtual overlay network (GVON) that provides a mapping from the
-modeled graph onto the CAL and therefore allows communication on
-basis of the graph.
+modeled graph to the CAL at run-time and provides the possibilty to
+change that mapping during the simulation execution.  The
+communication topology modeled by the graph is used to provide
+communication operations on basis of the graph.
 
 % What was developed - Implementation
-
 Policy based design allows the CAL to exchange the utilized
 communication library by template programming, which offers
 flexibility and minimizes the run-time overhead by compile-time
@@ -41,52 +46,66 @@ optimizations.  The Boost Graph Library was utilized as back-end to
 implement the graph class. This library provides a rich set of graph
 algorithms and can be deployed into C++ projects comfortably.
 
-%The combination of CAL and graph enables the GVON to provide
-%communication mechanism on basis of the modeled graph.
-
 % What are the advantages of the system
-
 The system offers the advantage that the CAL can be adapted to the
 utilized computing system by exchanging the underlying adapter.  The
 graphs can be generated from predefined graph generation functions
 which offer the possibility to reuse these graphs. Furthermore, are
 vertices of these graphs explicitly mapped onto peers of the CAL
-within the GVON at run-time. This mapping can be optimized to
-exploit maximum performance and be modified if it is required by the
-applications algorithm.
+within the GVON at run-time. This mapping can be optimized to exploit
+maximum performance and be modified at run-time if it is required by
+the applications algorithm.
 
 % What was learned from evaluation
+An adapter based on the Message Passing Interface (MPI) as underlying
+communication library was implemented and tested in synthetic, real
+world and flexibility benchmarks. The evaluation of these benchmarks
+turned out that the overhead with respect to an MPI implementation is
+negligible.  The system has demonstrated the variation of the number
+of peers during run-time for the execution of a Game of Life
+simulation also with negligible overhead. Only in some extremely unrealistic
+cases is the look-up of graph information a source of overhead, which
+should be addressed in future optimizations.
 
-An adapter based on the Message Passing Interface (MPI) as
-underlying communication library was implemented and tested in
-synthetic, real world and flexibility benchmarks. The evaluation of
-these benchmarks turned out that an implementation based on the
-system provides in the most cases negligible overhead with respect
-to an MPI implementation.  The system has demonstrated the variation
-of the number of peers during run-time for the execution of a Game
-of Life simulation. Which shows that the developed system can be the
-foundation to implement load balancing and fault tolerance mechanism
-on top.  Only in some cases is the look up of graph information a
-source of overhead, which should be addressed in future
-optimizations.
+% Finally
+The evaluation has shown that the developed system can be used to
+implement heterogeneous applications on heterogeneous compute systems,
+load balancing and fault tolerance mechanisms. This was achieved
+through a consistent concept which allows to model an application by
+an abstract description. This description is provided by a very
+lightweight system, yet powerful.
+
+
+\chapter{Outlook}
+\label{sec:outlook}
 
 % Outlook  
 
-The system shows acceptable performance for deployment in
-simulation applications such as PIConGPU. The GVON could completely
+The system shows acceptable performance. Thus, the next step is the
+deployment into the simulation PIConGPU. The GVON could completely
 replace the existing communication code of this simulation and
-furthermore provide the ability to comfortable exchange
-communication library and communication topology.
+furthermore provide the ability to comfortable exchange communication
+library and communication topology.
 
 Future work should focus on the implementation of further adapters. So
-could an accelerator aware adapter allow direct data exchange between
+could an accelerator-aware adapter allow direct data exchange between
 accelerator devices without the detour of the CPU. Connecting peers
 over an internet socket based adapter would create a distributed
 system by keeping the same interface.  These adapters would expand the
 field of application of the developed system and the applications
-based on the system.  Furthermore, should the system be enhanced by
-load balancing and fault tolerance techniques required by the upcoming
-exascale systems.
+based on the system.  
+
+Load balancing and fault tolerance are important topics
+for the upcoming exascale system. The system could be utilized in
+these areas especially the remapping at run-time with respect to
+load and energy consumption information.
+
+All the developed techniques allow a unified description of
+heterogeneous computations, load balancing and fault tolerance
+and consequently clarify their similarities. Furthermore, reduce
+these techniques the complexity of these problem significantly.
+
+
   
 
 \cleardoublepage

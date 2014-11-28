@@ -139,7 +139,7 @@
      fit-margin-bottom="0"
      inkscape:window-width="1678"
      inkscape:window-height="1029"
-     inkscape:window-x="1688"
+     inkscape:window-x="0"
      inkscape:window-y="19"
      inkscape:window-maximized="1">
     <sodipodi:guide
@@ -239,7 +239,7 @@
      id="layer8"
      inkscape:label="Property">
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.99921262;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1.99842525,0.99921262;stroke-dashoffset:1.49881893"
+       style="fill:none;stroke:#000000;stroke-width:0.99921262;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1.99842525, 0.99921262;stroke-dashoffset:1.49881893"
        d="m 694.71107,353.31804 -53.30392,0.72225"
        id="path9781"
        inkscape:connector-type="polyline"
@@ -330,9 +330,9 @@
          style="font-size:7.82118177px"
          y="71.811981"
          x="237.99886"
-         sodipodi:role="line">+ dependencie</tspan><tspan
+         sodipodi:role="line">+ dependency</tspan><tspan
          style="font-size:7.82118177px"
-         y="81.588463"
+         y="81.588455"
          x="237.99886"
          sodipodi:role="line"
          id="tspan9451">    information</tspan><tspan
