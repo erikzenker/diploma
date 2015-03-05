@@ -19,24 +19,25 @@
 
 % Motivation
 A system was developed with the requirements for an explicit modeling
-of the communication topologies of an application and an explicit
-mapping of this topologies to the hardware topolgy at run-time. The
-modeling and mapping is necessary because modern simulations show
-heterogeneous behavior both in horizontal and vertical direction.
+of the communication topologies of a simulation and an explicit
+mapping of these topologies to the hardware topologies of the
+computing system at run-time. This is necessary since modern
+simulations show heterogeneous behavior both in horizontal and
+vertical direction.
 
-To address these heterogeneities provides the developed system an
-intermediate layer in between an application and an existing
-communication library.  This layer maps common communication processes to a
-existing communication library and is build from three components:
-First, the communication abstraction layer (CAL) that provides an
-general communication interface for existing communication libraries
-which are exchangeable through adapters.  Second, a graph that models
-the communication topology of an application.  Third, the graph-based
-virtual overlay network (GVON) that provides a mapping from the
-modeled graph to the CAL at run-time and provides the possibilty to
-change that mapping during the simulation execution.  The
-communication topology modeled by the graph is used to provide
-communication operations on basis of the graph.
+To address these heterogeneities, the developed system provides
+modeling and mapping through an intermediate layer in between a
+simulation application and an existing communication library.  This
+layer maps common communication processes to an existing communication
+library and is build from three components: First, the communication
+abstraction layer that provides an general communication interface for
+existing communication libraries which are exchangeable through
+adapters.  Second, a graph that models the communication topology of a
+simulation.  Third, the graph-based virtual overlay network that
+provides a mapping from the modeled graph to the CAL at run-time.
+Furthermore, the GVON enables to utilize the communication topology
+modeled by the graph to provide communication operations on basis of
+this graph.
 
 % What was developed - Implementation
 Policy based design allows the CAL to exchange the utilized
@@ -44,36 +45,34 @@ communication library by template programming, which offers
 flexibility and minimizes the run-time overhead by compile-time
 optimizations.  The Boost Graph Library was utilized as back-end to
 implement the graph class. This library provides a rich set of graph
-algorithms and can be deployed into C++ projects comfortably.
+algorithms and comfortable deployment into C++ projects.
 
 % What are the advantages of the system
 The system offers the advantage that the CAL can be adapted to the
 utilized computing system by exchanging the underlying adapter.  The
-graphs can be generated from predefined graph generation functions
-which offer the possibility to reuse these graphs. Furthermore, are
-vertices of these graphs explicitly mapped onto peers of the CAL
+graphs can be generated from predefined graph generation functions,
+which provides the possibility to reuse these graphs. Furthermore, 
+vertices of these graphs are explicitly mapped to peers of the CAL
 within the GVON at run-time. This mapping can be optimized to exploit
-maximum performance and be modified at run-time if it is required by
-the applications algorithm.
+maximum performance and be modified at run-time if this is required
+during execution.
 
 % What was learned from evaluation
-An adapter based on the Message Passing Interface (MPI) as underlying
-communication library was implemented and tested in synthetic, real
-world and flexibility benchmarks. The evaluation of these benchmarks
-turned out that the overhead with respect to an MPI implementation is
-negligible.  The system has demonstrated the variation of the number
-of peers during run-time for the execution of a Game of Life
-simulation also with negligible overhead. Only in some extremely unrealistic
-cases is the look-up of graph information a source of overhead, which
-should be addressed in future optimizations.
+An adapter based on MPI was implemented and tested in synthetic,
+real world, and flexibility benchmarks. The evaluation of these
+benchmarks turned out that the overhead with respect to an MPI
+implementation is negligible.  The system has demonstrated the
+variation of the number of peers during run-time for the execution of
+a Game of Life simulation also with negligible overhead. Only the
+look-up of graph information is in some extreme corner cases a
+source of overhead.
 
 % Finally
 The evaluation has shown that the developed system can be used to
-implement heterogeneous applications on heterogeneous compute systems,
-load balancing and fault tolerance mechanisms. This was achieved
-through a consistent concept which allows to model an application by
-an abstract description. This description is provided by a very
-lightweight system, yet powerful.
+implement heterogeneous applications, load balancing and fault
+tolerance mechanisms. This was achieved through a consistent concept
+which allows to model an application by an abstract description. This
+description is provided by a very lightweight, yet powerful system.
 
 
 \chapter{Outlook}
@@ -81,32 +80,27 @@ lightweight system, yet powerful.
 
 % Outlook  
 
-The system shows acceptable performance. Thus, the next step is the
-deployment into the simulation PIConGPU. The GVON could completely
-replace the existing communication code of this simulation and
-furthermore provide the ability to comfortable exchange communication
-library and communication topology.
+The developed abstract interface shows negligible run-time overhead
+with respect to the reference communication library MPI. The
+deployment into the previously mentioned simulation PIConGPU is the
+next step.  The GVON interface would replace the existing
+communication code completely and furthermore provide the ability to
+exchange the underlying communication library and the utilized
+communication topology.
 
-Future work should focus on the implementation of further adapters. So
-could an accelerator-aware adapter allow direct data exchange between
-accelerator devices without the detour of the CPU. Connecting peers
-over an internet socket based adapter would create a distributed
-system by keeping the same interface.  These adapters would expand the
-field of application of the developed system and the applications
-based on the system.  
+The implementation of further adapters would expand the field of
+application. So would an accelerator-aware adapter allow for direct data
+exchange between accelerator devices without the detour of the CPU.
+An adapter based on internet sockets would provide a distributed
+computing environment similar to grids.
 
-Load balancing and fault tolerance are important topics
-for the upcoming exascale system. The system could be utilized in
-these areas especially the remapping at run-time with respect to
-load and energy consumption information.
-
-All the developed techniques allow a unified description of
-heterogeneous computations, load balancing and fault tolerance
-and consequently clarify their similarities. Furthermore, reduce
-these techniques the complexity of these problem significantly.
-
-
-  
+Load balancing and fault tolerance are important topics for the
+upcoming exascale systems.  Especially the remapping feature at
+run-time with respect to workload and energy consumption would be
+reasons for a deployment which allows for a scaleable utilization of
+the hardware ressources. All these problems are solved through a
+unified description which clarifies their similarities and therefore
+reduces the complexity of such problems significantly.
 
 \cleardoublepage
 

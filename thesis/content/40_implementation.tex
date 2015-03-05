@@ -27,25 +27,25 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checked
 While chapter \ref{sec:design} presented the design of the developed
-system, this chapter will pick up some design details and focus on
+system will this chapter pick up some design details and focus on
 their implementation.  It is not intended to provide a full
 documentation of the developed source code. Instead, it is a
-guide in understanding the system and provide a basis for further
+guide in understanding the system that provides a basis for further
 development. Therefore, documentation should be retrieved from the
 source code or doxygen \cite{ref:doxygen}.
 
 The development of the system started from the analyzed requirements
-of the PIConGPU source code (Section \ref{sec:picongpu}). Since
-PIConGPU is implemented in C/C++ and makes additional usage of the
-Boost libraries \cite{ref:boost}, the C++ programming language was
-chosen for this implementation. Additional libraries were selected with
-respect to similar design paradigms and an easy
-integration into a C++ environment. Furthermore, the implementation
-utilizes Standard Template Library (STL) methods as often as
-possible to guarantee comfortable integration into existing applications.  To
-fully utilize the rich feature set of the C++ programming language,
-features of the new C++11 standard were also used in this 
-implementation \cite{ref:c++11}.
+of the PIConGPU source code. Since PIConGPU is implemented in C/C++
+and utilizes the Boost libraries \cite{ref:boost},
+the C++ programming language was chosen for this
+implementation. Additional libraries were selected with respect to
+similar design paradigms and an easy integration into a C++
+environment. Furthermore, the implementation utilizes Standard
+Template Library (STL) methods as often as possible to guarantee
+comfortable integration into existing applications.  To fully utilize
+the rich feature set of the C++ programming language, features of the
+new C++11 standard were also used in this implementation
+\cite{ref:c++11}.
 
 The objective was to develop the designed system as a fully functional prototype.
 The prototype is utilized to implement a simple example simulation such as GoL
@@ -119,7 +119,7 @@ detail.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/40_cal_uml}
-  \caption{CAL implemented through policy based design. The adapter is
+  \caption{The CAL implemented through policy based design. The adapter is
     configured by a template argument at compile-time. The CAL defines
     the context, event and communication interface. The adapter
     implements the determined interface of the CAL and the adapter-specific
@@ -129,9 +129,9 @@ detail.
 
 \noindent The CAL provides all communication methods discussed in
 Section~\ref{sec:des:p2p} and~\ref{sec:cal_collective} and context
-creation methods discussed in Section~\ref{sec:cal_context}. The
-communication policy implements all methods required by the adapter
-definition that were discussed in
+creation methods discussed in the following
+Section~\ref{sec:cal_context}. The communication policy implements all
+methods required by the adapter definition that are discussed in
 Section~\ref{sec:impl:policy_interface}.
 
 
@@ -276,7 +276,7 @@ parenthesis operator. The following listing shows such a struct for
 the maximum operator.
 
 \begin{minipage}[t]{\textwidth} 
-\begin{lstlisting}[language=C++, breaklines=false, caption={\ }, label={lst:binary_function}, caption={Implementation of the binary operator maximum. These kind of binary operators can be used for the CAL reduce operation.}]
+\begin{lstlisting}[language=C++, breaklines=false, caption={\ }, label={lst:binary_function}, caption={Implementation of the binary operator maximum. These kind of binary operators can be used for the CAL reduce operation. Some binary operators are predefined in the C++ STL functional header.}]
 template<typename T_Data>
 struct maximum : public std::binary_function<T_Data, T_Data, T_Data> {
 
@@ -315,13 +315,13 @@ adapter classes.
 
 The reference adapter implementation is based on MPI as existing
 communication library. The adapter acts as a translation or mapping
-from the CAL interface to the MPI interface.  MPI (Section
-\ref{sec:mpi}) was chosen because it already provides a lot of
-functionality required by the CAL interface without any further
-effort. Additionally, it is available on wide range of computing
-systems and can be used for free by open source implementations. This
-section will utilize very MPI specific vocabulary. It is assumed
-that the reader has a basic knowledge on MPI terminology.
+from the CAL interface to the MPI interface.  MPI was chosen because
+it already provides a lot of functionality required by the CAL
+interface without any further effort. Additionally, it is available on
+wide range of computing systems and can be used for free by open
+source implementations. This section will utilize very MPI specific
+vocabulary. It is assumed that the reader has a basic knowledge on MPI
+terminology.
 
 The instantiation of a CAL object configured to use the MPI adapter
 leads to an initialization of the MPI adapter. This initialization
@@ -355,8 +355,8 @@ of data types will be discussed in detail in
 Section~\ref{sec:data_type_conversion}.
 
 \begin{minipage}[t]{\textwidth} 
-\begin{lstlisting}[language=C++, breaklines=false, caption={Communication method for non-blocking sending of data. The virtual address of the destination is translated to its MPI rank. The context is translated to an MPI communicator and the template data type \cpp{T\_Data} is translated to an MPI data type. The communication operation is finally performed by MPI.}, label={lst:adapter_send}, escapechar=|]
-// Adapter Method
+\begin{lstlisting}[language=C++, breaklines=false, caption={Communication method for non-blocking sending of data within the MPI adapter class. The virtual address of the destination is translated to its MPI rank. The context is translated to an MPI communicator and the template data type \cpp{T\_Data} is translated to an MPI data type. The communication operation is finally performed by MPI.}, label={lst:adapter_send}, escapechar=|]
+// MPI Adapter Method
 template <typename T_Data, typename T_Context>      
 Event asyncSendData(const T_data* const data, 
                     const unsigned count, 
@@ -403,10 +403,10 @@ binary operators to operators that are utilized in MPI.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checked
-\subsection{Binary Operator}
+\subsection{Transformation of Binary Operators}
 \label{sec:bin_operator}
 
-MPI provides built-in support for binary operations by two
+MPI provides built-in support for binary operators by two
 approaches. The simplest approach is the direct usage of predefined
 binary MPI operators~\cite{ref:mpi_bin_op}. But, since the system user
 should not utilize MPI operators directly, the CAL could wrap all
@@ -437,9 +437,9 @@ code for transforming abitrary binary operators to binary MPI
 operators was taken from the boost::mpi project
 \cite{ref:boost_mpi} and was adapted for the needs of the MPI adapter.
 The following listing shows the transformation of the binary C++
-operator \cpp{op} from type \cpp{T\_BinaryOperation} with data type
-\cpp{T\_Data} to \cpp{MPIoperator} from type \cpp{MPI\_Op}.  After the
-transformation, the MPI operator can be retrieved by and used by all
+operator \cpp{op} from type \cpp{T\_BinaryOperation} with result data type
+\cpp{T\_Data}.  After the
+transformation, the MPI operator can be utilized by all
 MPI routines that are using binary operators through
 \cpp{MPIOperator.getOperator()}.
 
@@ -457,7 +457,7 @@ MPIOperator.getOperator()
 \end{minipage}
 
 \noindent The second approach is substantially more flexible as the
-first one. Thus, it was selected to implement binary operations for the
+first one. Thus, it was selected to implement binary operators for the
 MPI adapter.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -468,15 +468,16 @@ MPI adapter.
 % Checked
 \subsection{Data Type Conversion}
 \label{sec:data_type_conversion}
-On the one hand, MPI predefines primitive data types, but on the
-other hand also provides the possibility to define data structures
+C++ data types need to be transformed to MPI data types within the MPI
+adapter.  On the one hand, MPI predefines primitive data types, but on
+the other hand also provides the possibility to define data structures
 based upon sequences of the MPI primitive data types. These user
 defined data structures are called derived data types. Usually,
 primitive data types are contiguous, which means that they form a
 solid block of memory with no gaps in between. However, derived data
 types allow you to specify non-contiguous data in a comfortable manner
 and to treat it as though it was contiguous.  Therefore, more complex
-data types (e.g linked lists or maps) can be transformed into derived
+data types can be transformed into derived
 data types. The exchange of complex data types was not necessary in
 the development of the system based on examples of Section
 \ref{sec:gol_imp}. Therefore, the implementation was focused on the
@@ -504,7 +505,7 @@ type of \cpp{T_Data} can be retrieved by
 \cpp{ToMPIDatatype<T_Data>::type}.
 
 \begin{minipage}[t]{\textwidth} 
-\begin{lstlisting}[language=C++, label=lst:mpi_trait1, caption={A templated struct defines the default behavior of the type trait. It will transform arbitrary data types \cpp{T\_Data} to the MPI\_INT data type if no other type trait is defined}]
+\begin{lstlisting}[language=C++, label=lst:mpi_trait1, caption={A templated struct defines the default behavior of the type trait. It will transform arbitrary data types \cpp{T\_Data} to the \cpp{MPI\_INT} data type if no other type trait is defined}]
   template<typename T_Data> 
   struct ToMpiDatatype { 
 
@@ -522,7 +523,7 @@ C++ data type \cpp{char}, which will be transformed to the
 C++ data type needs to be defined by its own specialization template.
 
 \begin{minipage}[t]{\textwidth} 
-  \begin{lstlisting}[language=C++, label=lst:mpi_trait2, caption={A specialization of the default type trait for the C++ data type \cpp{char}. It transforms \cpp{char} to the \cpp{MPI\_CHAR} data type.}]
+  \begin{lstlisting}[language=C++, label=lst:mpi_trait2, caption={A specialization of the default type trait for the C++ data type \cpp{char}. It transforms the C++ data type \cpp{char} to the \cpp{MPI\_CHAR} data type of MPI.}]
   template<>
   struct ToMPIDatatypes<char> { 
 
@@ -627,7 +628,7 @@ class provides all methods discussed in design Section
 % Checked
 \subsection{Vertices Annotated by Properties}
 
-A graph in the BGL can be anotated by properties. These objects are
+A graph in the BGL can be annotated by property objects. These objects are
 used to describe vertices and edges with simulation-specific
 information, as it was discussed in Section~\ref{sec:graph}. Vertices
 and edges are provided with properties at compile-time through a
@@ -637,13 +638,13 @@ from so called property maps.  The graph connects these indices with
 its properties to create a vertex and edge description.
 
 The implementation of a property is a struct or a class with arbitrary
-content. It needs to provide an \cpp{id} member variable or inherit
-it from \cpp{SimpleProperty}. This \cpp{id} is used to create an internal
-mapping of the property to the vertex index of the BGL.  The 
-simplest property is a struct only containing the \cpp{id}, as
-presented in Listing \ref{lst:property}. This property is predefined
-in the graph header. It is used as default property when the graph is not
-configured by a certain property.
+content. The simplest property is a struct only containing an
+\cpp{id}, as presented in Listing \ref{lst:property}. This \cpp{id} is
+necessary since it is used to create an internal mapping of the
+property to the vertex index of the BGL.  The \cpp{SimpleProperty} is
+predefined in the graph header. It is used as default property when
+the graph is not configured by a certain property and it can be utilized
+to create custom properties by inheritance.
 
 \begin{minipage}[t]{\textwidth} 
 \begin{lstlisting}[language=C++, label=lst:property, caption={Predefined property within the graph class which only provides an id member variable. This property can be used a skeleton for further property implementations. }]
@@ -713,7 +714,8 @@ reused in different applications with same communication topology.
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{graphics/40_topologies}
-  \caption{Set of already implemented graph generators.}
+  \caption{Set of already implemented graph generators. Topology
+    descriptions can be reused in different projects.}
   \label{fig:topologies}
 \end{figure}
 
@@ -768,12 +770,13 @@ hypercube graph.
 % Checked
 \section{GVON Implementation}
 \label{sec:gvon_impl}
-The GVON was introduced as a combination
-of the graph and CAL. This combination is the connection of graph and CAL
-through mappings. These mappings are core components of the GVON and are
-constructed by the announcement process. The announcement process
-implementation is discussed in Section~\ref{sec:announcement_impl}. In
-the following, each map provided by the GVON is described:
+The GVON was introduced as a combination of the graph and CAL which
+provides communication operations on basis of the graph. This
+combination is the connection of graph and CAL through mappings. These
+mappings are core components of the GVON and are constructed by the
+announcement process. The announcement process implementation is
+discussed in Section~\ref{sec:announcement_impl}. In the following,
+each map provided by the GVON is described:
 
 \begin{itemize}
 \item [] The \cpp{vertexMap} is a mapping from a vertex to the virtual
@@ -815,7 +818,7 @@ GVON. The vertex is translated to its host's virtual address in line
 in line \ref{line:gvon_async_send2}.
 
 \begin{minipage}[t]{\textwidth} 
-\begin{lstlisting}[language=C++, label=lst:comm_gvon, caption={The \cpp{vertexMap} is used to translate vertices to virtual addresses and \cpp{graphMap} is used to translate graphs to contexts. The communication operation is performed by the the CAL.}, escapechar=| ]
+\begin{lstlisting}[language=C++, label=lst:comm_gvon, caption={The \cpp{vertexMap} is used to translate vertices to virtual addresses and the \cpp{graphMap} is used to translate graphs to contexts. The communication operation is performed by the the CAL.}, escapechar=| ]
 // Graph-Based Virtual Overlay Network Operation  
 template <typename T_Data>
 Event asyncSend(Graph& graph, 
@@ -980,7 +983,7 @@ system in a real world scenario. The set of implemented rules based on
 \subsection{Configuration and Initialization of Game of Life}
 The following source code describes necessary steps to configure and
 initialize the system before starting the communication of the
-GoL. The source code uses the presented MPI adapter, GoL graph and
+GoL. The source code uses the presented MPI adapter, GoL graph, and
 Cell property. It demonstrates the general program flow and can be the
 foundation for other simulation applications.
 
@@ -1011,7 +1014,7 @@ typedef typename MpiCAL::Event                    Event;
 
   The graph is configured with the vertex property \cpp{Cell} 
   (Listing~\ref{lst:gol_cell}) and the edge property \cpp{SimpleProperty}. It
-  provides type definitions for vertex and  edge:
+  provides type definitions for \cpp{Vertex} and  \cpp{Edge}:
 
   \begin{minipage}[t]{\textwidth} 
   \begin{lstlisting}[language=C++, label=lst:conf_graph, caption={\ }]
@@ -1177,14 +1180,13 @@ In the following, the implementation of a single time-step of the GoL
 is described. The communication between vertices of the GoL graph is
 handled by the GVON. A host knows all its hosted vertices whose
 communication it needs to manage. In the case of GoL, a host has to
-exchange the state of its hosted cells with all neighboring cells.
+exchange the state of its hosted vertices with all neighboring vertices.
 
 First, each host sends the state of its cells to all neighboring
 cells (Listing \ref{lst:gol_send}). The host retrieves the target
 vertex of each outgoing edge for a hosted vertex from the graph. After that,
 the state of the corresponding cell is transmitted to the target vertices
-sequentially in non-blocking mode (Figure
-\ref{fig:gol_communication}). Events of the send operation are
+sequentially in non-blocking mode. Events of the send operation are
 collected and checked later for termination.
 
 \begin{minipage}[t]{\textwidth} 
@@ -1218,7 +1220,9 @@ edges.
   \centering
   \includegraphics[width=\textwidth]{graphics/40_gol_communication}
   \caption{Image detail of one section of the GoL world. A host sends
-    the cell state of its hosted vertices to neighboring vertices.}
+    the cell state of its hosted vertices to neighboring
+    vertices. This can also imply that a host has to communicate with
+    itself.}
   \label{fig:gol_communication}
 \end{figure}
 
@@ -1255,7 +1259,7 @@ for(Vertex myVertex : hostedVertices){
 
 
 
-\noindent Once all send and receive operations terminated, the host
+\noindent Once all send and receive operations terminated, each host
 updates the cell states of its hosted vertices according to the introduced rules. Finally, the
 state information of all cells is gathered by the root vertex (vertex
 with id equal to zero) which prints it to the console for visualization (Listing
@@ -1265,7 +1269,7 @@ fixed number of time-steps is reached.
 
 \begin{minipage}[t]{\textwidth} 
   \begin{lstlisting}[language=C++, label=lst:gol_gather, caption={The cell states of all vertices of the GoL graph is
-    gathered by a host that hosts the root vertex.} ]
+    gathered by a host that is responsible for the root vertex. This host could visualize the current state of the GoL domain.}]
 // Gather state by root vertex
 for(Vertex myVertex: hostedVertices){
   gvon.gather(root, myVertex, graph, myVertex.isAlive, golGameField);
@@ -1291,6 +1295,7 @@ also split into three phases: configuration, initialization and
 communication. The slight differences in implementation details are
 described in the following enumeration:
 
+\begin{minipage}[t]{\textwidth} 
 \begin{enumerate}
 \item \textbf{Configuration}
 
@@ -1311,17 +1316,20 @@ described in the following enumeration:
   adjacent to all other vertices, it sends to and receives from
   all other vertices.
 \end{enumerate}
-
-\noindent After each communication step, a host updates the state of
-the particles of its hosted vertices.  The communication phase is
-repeated for an arbitrary but fixed amount of time steps or until the simulation
+\end{minipage}
+\\
+\\
+\\
+\\
+\noindent After each communication step, a host updates the particle
+state of its hosted vertices.  The communication phase is repeated for
+an arbitrary but fixed amount of time steps or until the simulation
 execution is canceled.
 
 The implemented N-body simulation is completely different from the
 presented GoL implementation, but uses similar communication
 concepts. Therefore, the source code responsible for communication in
 the GoL simulation can be reused to implement this N-body simulation.
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1383,7 +1391,6 @@ shows remapping of vertices at run-time and, therefore, the potential
 to establish load balancing and fault tolerance techniques on top of
 the system. Ideas on load balancing and fault tolerance are discussed
 in Section~\ref{sec:futurework}.
-% Mehr auf load balancing und fault tolerance eingehen
 
 \cleardoublepage
 

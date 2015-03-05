@@ -30,9 +30,9 @@
 These days, complex simulation applications no longer fit on a single
 computing device like a desktop computer. Therefore, parallel
 computers are necessary instruments in scientific computing where time
-to solution is important and a large amount of memory is required.  To
+to solution is important and a large amount of memory is required~\cite{ref:hpcc1}.  To
 exploit the performance of a parallel computer, the application needs
-to be distributed onto the computing environment and exchange data by
+to be distributed onto the computing environment and exchange data via
 communication over a network.
 
 For the following assume, the mentioned
@@ -49,15 +49,15 @@ into smaller chunks of work, called subdomains, which are often
 solvable independently of each other. Subdomains exchange simulation
 specific data through predefined paths. This enables an application to
 exploit the tremendous performance gain of parallel computers.  The
-decomposed simulation domain $\Phi$ is used to map the subdomains to
-the hardware topology $\Gamma$:
+decomposed simulation domain $\Phi$ is used to map its subdomains to
+the set of hardware topologies $\Gamma$ through a mapping $\omega$:
 
 \[\Phi \xrightarrow{\omega} \Gamma\]
 
 \noindent 
 Figure~\ref{fig:domain_decomposition} shows the domain decomposition
-of a simulation domain and a static one-to-one mapping of the
-subdomains onto the nodes of the compute cluster.
+of a simulation domain and a static one-to-one mapping of its
+subdomains to the nodes of the compute cluster.
 
 % This could mean in specific MPI terms, that every MPI process manages
 % a subdomain and communicates with a fixed set of other MPI processes
@@ -70,55 +70,55 @@ subdomains onto the nodes of the compute cluster.
   \caption{The simulation domain is decomposed in subdomains
     (DD). These subdomains are mapped one-to-one to the homogeneous
     cluster through $\omega$.  This kind of static mapping is
-    sufficient for the most applications on cluster systems}
+    sufficient for most applications on cluster systems.}
   \label{fig:domain_decomposition}
 \end{figure}
 
-\noindent This static approach is sufficient for most simulations that
+\noindent This static mapping is sufficient for most simulations that
 are executed on clusters. It works, as long as both hardware and
-simulation stay in this fixed relationship. Thus, there is no change
-of the mapping $\omega$ necessary as long as a simulation will always
+simulation stay in this fixed relationship. Thus, no change
+of the mapping $\omega$ is necessary as long as a simulation will always
 be executed on the same cluster, with the same network topology, and
 the same algorithms describing the simulation model.
 
 However, it is not possible to map all modern simulations in this
 model of a homogeneous world. Some simulations show horizontal and
 vertical heterogeneous behavior. Horizontal heterogeneity in a
-simulation denotes that subdomains are not optimal maped onto the
+simulation denotes that subdomains are not optimal mapped onto the
 hardware topology due to unbalanced load or failures of nodes.  Even
 though there is an optimal mapping $\omega$ for a time step $t_0$, it
-does not imply that the same mapping is optimal for time step $t_1$.
-Thus, a simulation behaves horizontal heterogeneous if $\omega(t_0)
-\neq \omega(t_1)$.
+does not imply that the same mapping is optimal or even possible for
+time step $t_1$.  Thus, a simulation behaves horizontal heterogeneous
+if $\omega(t_0) \neq \omega(t_1)$.
 
-This means especially for load balancing, that the workload of
+Especially for load balancing the implications are that the workload of
 subdomains can vary during the time of simulation. The simulation may
 run into an unbalanced state of workload distribution after a time
 period $\Delta t$. That unbalanced state neither saturates all
 available computing resources nor does it minimize the overall
 simulation time. Figure \ref{fig:load_balancing} shows the workload
 distribution of the simulation domain through a heat map. The workload
-distribution changes after a certain time $\Delta t$. Therefore, the
-simulation is decomposed again an mapped through a new $\omega$ to the
-hardware topology.
+distribution changes after a certain time period $\Delta t$. The
+simulation is decomposed again and mapped through a new $\omega$ to
+the hardware topology to reach a balanced workload distribution.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_load_balancing}
   \caption{Horizontal heterogeneity by unbalanced load distribution
-    after a time $\Delta t$ presented through a heat map.  The
+    after a time period $\Delta t$ presented through a heat map.  The
     simulation domain is decomposed again and mapped with a new
     $\omega$ to the hardware topology. After the remapping the
     workload is distributed equally.}
   \label{fig:load_balancing}
 \end{figure}
 
-\noindent Another problem which leads to heterogeneous behavior is the
-failure of a node that implies the termination of subdomain
-calculations on this node. The simulation can be continued if it is
-possible to map the subdomain of the failed node through a new
-$\omega$ to another node. Figure \ref{fig:resilience} shows the
-failure of a node during simulation after a time $\Delta t$.  The
-subdomain of the failed node is mapped with a new $\omega$.
+\noindent The failure of a node during the execution of a simulation
+that implies the termination of subdomain calculations on this node is
+another problem which leads to heterogeneous behavior. The simulation
+can be continued if it is possible to map the subdomain of the failed
+node through a new $\omega$ to another node. Figure
+\ref{fig:resilience} shows this failure of a node. The subdomain of
+the failed node is mapped with a new $\omega$.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_resilience}
@@ -137,20 +137,22 @@ shows:
 
 \[\omega:~\gamma \circ \sigma:~\Phi \xrightarrow{\sigma} \Sigma \xrightarrow{\gamma} \Gamma\]
 
-\noindent Vertical heterogeneity is defined by the existence of
-multiple communication topologies.  Figure~\ref{fig:vertical_hetero}
-shows the modeling of the all-to-all and next neighbor communication
-topologies of a simulation by graphs through~$\sigma_0$
-and~$\sigma_1$.  Furthermore, these graphs are mapped to the hardware
-topology through~$\gamma$.
-
+\noindent Vertical heterogeneity on a simulation is defined by the existence
+of multiple hardware topologies which requires multiple communication
+topologies. Each hardware topology might need
+a sophisticated modeling of their communication
+mechanism. Figure~\ref{fig:vertical_hetero} shows the modeling of the
+all-to-all and next neighbor communication topologies of a simulation
+by graphs through~$\sigma_0$ and~$\sigma_1$.  Furthermore, these
+graphs are mapped to the hardware topologies of an accelerator device
+through~$\gamma_0$ and a cluster through~$\gamma_1$. 
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_vertical_hetero}
   \caption{Vertical heterogeneity by two communication topologies in a
-    single simulation. The mappings $\sigma_0$ and $\sigma_1$ model different
-    communication topologies. The topologies are mapped to the hardware
-  topology by $\gamma$.}
+    single simulation. The mappings $\sigma_0$ and $\sigma_1$ model
+    different communication topologies. The topologies are mapped by
+    $\gamma_0$ to an accelerator and by $\gamma_1$ to a cluster.}
   \label{fig:vertical_hetero}
 \end{figure}
 
@@ -181,7 +183,7 @@ the PIConGPU simulation. PIConGPU is a relativistic particle-in-cell
 (PIC) application designed for simulating laser-plasma interactions
 \cite{ref:picongpu}. The simulation domain is decomposed into
 subdomains forming a three-dimensional grid of cells. Each grid cell
-is mapped onto a single Graphics Processing Unit (GPU).  While
+is mapped to a single Graphics Processing Unit (GPU).  While
 magnetic and electric fields of a cell only influence their directly
 neighboring fields, particles interact globally with each other. The
 former necessitates next neighbor and the latter all-to-all
@@ -195,35 +197,35 @@ responsible for data offloading and communication over the network,
 some of the available accelerators compute the interaction of fields
 and particles, while others generate a visualization of the simulated
 data. Thus, vertical and horizontal heterogeneity, both in simulation
-domains and on the hardware cluster, are already present in real world
+domains and on the hardware topology, are already present in real world
 simulation applications.
 
-This work will neither cover the implementation of a communication library
-nor will it cover load balancing or fault tolerance algorithms. But all
-these problem are solvable if the implicit mapping of the domain
-decomposed simulation onto the hardware topology is replaced by the
-separate mappings $\sigma$ and $\gamma$.
+This work will neither cover the implementation of a communication
+library nor will it cover load balancing or fault tolerance
+algorithms. But all these problems are solvable if the implicit
+mapping of the domain decomposed simulation to the hardware topology
+is replaced by separate mappings $\sigma$ and $\gamma$.
 
 Thus, this work provides an abstract description which enables to map
 the simulation algorithm to communication topologies and in turn to
-map the communication topologies onto the hardware topology by two
+map the communication topologies to the hardware topologies by two
 mappings. These mappings are exchangeable during the run-time of the
 simulation. The most general approach to describe communication
 topologies is utilized: a graph. This graph is mapped at run-time
-to an abstract description of the hardware topology.
+to an abstract description of hardware topologies.
 
-It is implemented an intermediate layer between simulation application
-and the software stack of the cluster. This layer allows for the
-description of the simulation domain by a graph and an explicit
-mapping of this graph onto an abstract communication layer, while the
+An intermediate layer between simulation application and the software
+stack of the computing system is implemented. This layer allows for
+the description of the simulation domain by a graph and an explicit
+mapping of this graph to an abstract communication layer, while the
 underlying communication library is easily exchangeable. With such a
 setup, the mappings can be adjusted to heterogeneous behavior of
-simulation application and cluster hardware.
+simulation application and computing hardware.
 
-The design of the implemented system will be presented in the
-following sections. At first, the requirements for such a system are
-discussed. It is followed by a description of the overall design and
-finally the design of each component is discussed in detail.
+The following sections will present the design of the implemented
+system. At first, the requirements for such a system are discussed. It
+is followed by a description of the overall design. Finally, the
+design of each component is discussed in detail.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
 % ANALYSIS OF PIConGPU CODE                                                    %
@@ -260,7 +262,7 @@ finally the design of each component is discussed in detail.
 \label{sec:requirements}
 
 The previous Section~\ref{sec:motivation} described the state-of-the-art
-of simulations on cluster systems and gave a motivation to solve
+of simulations on cluster systems and provided a motivation to solve
 the problems of modern simulations.
 %% Furthermore, analyzed
 %% Section~\ref{sec:picongpu_analysis} the PIConGPU application with
@@ -300,8 +302,18 @@ referred problems of modern simulations:
 \section{Design Overview}
 
 Physical networks such as Ethernet, Infiniband or Myrinet are the
-foundation of common communication libraries such as MPI
-(Section~\ref{sec:mpi}).  State-of-the-art simulation applications are
+foundation of common communication libraries such as the Message
+Passing Interface (MPI).  MPI is a standardized and portable
+message-passing specification, defined by the Message Passing
+Interface Forum \cite{ref:mpi_specification}. It has become the de
+facto standard for communication in cluster systems.  An MPI program
+is a set of autonomous processes, executing the same program, in a
+single program multiple data style (SPMD, a subcategory of
+MIMD~\cite{Flynn:1972:COE:1952456.1952459}). Each process rests in its
+own address space and communicates via MPI communication primitives
+with other processes in the same MPI program.
+
+State-of-the-art simulation applications are
 usually implemented directly on these existing communication
 libraries. The developed system introduces an intermediate layer
 between application and communication library. This layer fulfills all
@@ -353,11 +365,13 @@ only support the selected library (Figure
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_design_state_of_the_art}
   \caption{The simulation application is implemented directly on top
-    of a communication library.}
+    of a communication library. The application needs to directly
+    interface with this library. The exchange of the library and
+    keeping the same interface is hardly possible.}
   \label{fig:design_state_of_the_art}
 \end{figure}
 
-Assuming, that a simulation is distributed on several computers and uses a
+\noindent Assuming, that a simulation is distributed on several computers and uses a
 communication library based on TCP/IP sockets. The execution of this
 simulation on a single machine is an interesting use case for
 testing. It results in no problem when the simulation is executed on
@@ -397,13 +411,13 @@ interface.
 
 The \textit{Communication Abstraction Layer}, short \textit{CAL}, is a
 general communication interface on top of an existing communication
-library. The libraries are accessible through adapters, which makes it
-possible to access varying communication libraries. By exchanging the
-adapter, the application based on the interface can be ported to
-varying communication libraries without changing interface function
-calls. The CAL is configured with a certain adapter at compile
-time. Thus, by using this flexible approach, no run-time overhead
-should occur. The evaluation of the developed system in
+library. These libraries are accessible through adapters, which
+provides the possibility to access varying communication libraries. By
+exchanging the adapter, the application based on the interface can be
+ported to varying communication libraries without changing interface
+function calls. The CAL is configured with a certain adapter at
+compile-time. Thus, by using this flexible approach, no run-time
+overhead should occur. The evaluation of the developed system in
 Section~\ref{sec:evaluation} will show the run-time overhead with
 respect to MPI.
 
@@ -428,10 +442,9 @@ of abstraction will be discussed in Sections \ref{sec:graph} and
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{graphics/30_design_cal}
-  \caption{Communication Abstraction Layer (CAL) on top of existing
-    communication layers. Varying communication libraries can be
-    addressed through the CAL interface, when an according adapter for
-    this library is implemented.}
+  \caption{The CAL on top of existing communication layers. Varying
+    communication libraries can be addressed through the CAL interface
+    if an according adapter for this library is implemented.}
   \label{fig:cal}
 \end{figure}
 
@@ -494,11 +507,11 @@ its particular address space.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Peer2Peer Operations
-\subsection{Point-to-Point Communication Methods}
+\subsection{Point-to-Point Communication Interface}
 \label{sec:des:p2p}
 
 In the first place the CAL provides point-to-point communication
-methods. These are basic communication methods to exchange abitrary
+methods. These are basic methods to exchange abitrary
 data between two peers, which are available in blocking and
 non-blocking variants.
 
@@ -542,7 +555,7 @@ communication methods of the CAL interface:
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checked
-\subsection{Grouping of peers}
+\subsection{Grouping of Peers}
 \label{sec:cal_context}
 Besides the communication methods, grouping of peers is the most
 important function the CAL provides through its interface.  By
@@ -578,24 +591,24 @@ real address has to be adapted to the currently used context.
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checked
-\subsection{Collective Operations}
+\subsection{Collective Operation Interface}
 \label{sec:cal_collective}
 A \textit{collective operation}, short \textit{collective}, is a
 communication pattern that is executed simultaneously by all peers of
-a context. For example, collective are utilized to collect,
-share and reduce data.  Each collective can be implemented by a
-sequence of peer to peer operations, but communication libraries,
-especially the ones for high performance calculations such as MPI
-(Section~\ref{sec:mpi}), often provide optimized collective support.
+a context. For example, collective are utilized to collect, share and
+reduce data.  Each collective can be implemented by a sequence of peer
+to peer operations, but communication libraries, especially the ones
+for high performance calculations such as MPI, often provide optimized
+collective support.
 
 A collective is always executed with respect to a context and the
 result is either received by a single peer, the root, or by all peers.
 While a large number of collectives is known to the parallel
 computation commmunity, the CAL only provides the most common ones
-with respect to the analysis of the PIConGPU source code
-(Section~\ref{sec:picongpu}).  However, other collectives are
-implementable in future work. The following lists a subset of the
-provided collective operations of the CAL and their description:
+with respect to the analysis of the PIConGPU source code.  However,
+other collectives are implementable in future work. The following
+lists a subset of the provided collective operations of the CAL and
+their description:
 
 
 \begin{itemize}
@@ -647,7 +660,7 @@ argument, that describes how many data elements each peer has
 contributed to the collective. Furthermore are the operations gather,
 scatter, and reduce available in an all receive variant. All senders
 of the collective will receive the collective result. Therefore, the
-specification of a root peer can be omitted in for these variants.
+specification of a root peer can be omitted for these variants.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -659,12 +672,12 @@ specification of a root peer can be omitted in for these variants.
 \section{Modeling of the Application Domain by a Graph}
 \label{sec:graph}
 A simulation model is usually implemented through a particular
-algorithm in the simulation application.  Porting this algorithm onto
-a parallel computing system requires a decomposition
-(Section~\ref{sec:domain_decomposition}) of the simulation domain into
-a set of subdomains.  Communication is necessary if these subdomains
-need to interact with each other.  Whereby, the communication topology
-of the simulation is determined by the algorithm.
+algorithm.  Porting this algorithm onto
+a parallel computing system requires a decomposition of the simulation
+domain into a set of subdomains. Communication is necessary if these
+subdomains need to interact with each other.  Whereby, the
+communication topology of the simulation is determined by the
+algorithm.
 
 %% Communication topologies are often implemented in a implicit and
 %% static fashion. A change of the simulation algorithm needs to be translated
@@ -682,12 +695,8 @@ The most general method to model a topology is a
 \emph{graph}~\cite{ref:graph}. Furthermore, the explicit modeling of
 the communication topology by a graph has the advantage that the reuse
 of this topology reduces the implementation effort for future
-simulation applications.  A graph consists of vertices and
-edges. Edges are described as a pairs of vertices.
-
-%So to speak, a
-%graph represents a set of objects, where some of these objects are
-%connected by links.
+simulation applications.  A graph consists of edges and
+vertices. Edges are described as a pair of vertices.
 
 % directed cycle multi graph
 Vertices of the graph used in further descriptions are connected by
@@ -711,7 +720,7 @@ modeled explicitly. It is not necessary to rewrite the simulation
 application as long as the application is based on the topology
 information provided by the graph. Thus, communication processes can
 by implemented on top of the graph description. The presented graph
-should be addressable by the following interface:
+is addressable by the following interface:
 
 \begin{itemize}
   \item VertexList \textbf{getVertices} ()\\
@@ -782,17 +791,17 @@ hierarchical description.
 \label{sec:gol}
 To give an example on how to model a specific simulation application,
 Figure~\ref{fig:gol_modeling} shows the modeling of the Game of Life
-(GoL)~\cite{ref:gol} domain by a graph. The GoL simulates the evolution of
-a set of cells for an arbitrary amount of time steps. The cells are
-arranged in a two-dimensional grid (Figure \ref{fig:gol_simulation}).
-A cell has a state which is either alive or not alive and the state of
-the next time step is calculated by rules.  The common set of rules
-determines the state of a cell for the next time step using current
-state information of the neighboring cells.  Assume the rule: ``a dead
-cell with exactly three living cells in the neighborhood will be reborn on
-the next time step'' is the only existing rule in further descriptions
-of GoL.  Nevertheless, a GoL simulation can consist of a arbitrary set
-of rules.
+(GoL)~\cite{ref:gol} domain by a graph. The GoL simulates the
+evolution of a set of cells for an arbitrary amount of time steps. The
+cells are arranged in a two-dimensional grid (Figure
+\ref{fig:gol_simulation}).  A cell has a state which is either alive
+or not alive and the state of the next time step is calculated by
+rules.  The common set of rules determines the state of a cell for the
+next time step using current state information of the neighboring
+cells.  Assume for the following descriptions there is only one rule:
+``a dead cell with exactly three living cells in the neighborhood will
+be reborn on the next time step''.
+
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gol_simulation}
@@ -821,10 +830,10 @@ are alive.
   \label{fig:gol_modeling}
 \end{figure}
 
-\noindent The rule is now changed slightly: a cell is alive on the next time
-step when at least one diagonal neighbor is alive.  A changed rule
- implies a change in the GoL algorithm.  This changes the GoL
-communication topology and therefore the modeled
+\noindent The rule is now changed slightly: ``a cell is alive on the
+next time step when at least one diagonal neighbor is alive''.  A
+changed rule implies a change in the GoL algorithm.  This changes the
+GoL communication topology and therefore the modeled
 graph. Figure~\ref{fig:gol_modeling_changed} models the GoL domain
 with the changed rule. Vertices are connected with its diagonal
 located vertices. Nevertheless, to determine the next state of a cell
@@ -892,7 +901,7 @@ description is an interesting topic, but not covered by this work.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                              %
-% MODELING GAME OF LIFE AS A GRAPH                                             %
+% MODELING A N-BODY SIMULATION AS A GRAPH                                      %
 %                                                                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Checked
@@ -904,7 +913,7 @@ description is an interesting topic, but not covered by this work.
 %% The N-body simulation, with a totally different algorithm in respect to GoL, was chosen as the
 %% second example to model a simulation application by a graph.
 
-The N-body simulation simulates particles in a two- or
+The N-body simulation computes particles in a two- or
 three-dimensional space influenced by physical forces. The force
 considered for this simulation is the gravity among each particle.  A
 particle is described by its mass $m$, location $\overrightarrow{r}$
@@ -949,7 +958,7 @@ the particle mass, location and velocity.
 \end{figure}
 
 \noindent A gravitational force on the particle $i$ results in a change of its velocity and
-location after a fixed amount of time $t$. The following equations describe these
+location after a fixed amount of time $\Delta t$. The following equations describe these
 changes.
 
 \begin{align}
@@ -978,7 +987,7 @@ communication processes between subdomains.  This section introduces a
 \emph{graph-based virtual overlay network}, short \emph{GVON},
 that is based on the graphs and the CAL.
 
-The graph does provide a simulation domain specific communication
+The graph provides a simulation domain specific communication
 topology.  It is used as a blueprint for the virtual network topology.
 Communication operations are provided by the CAL as base for the
 overlay network.  Figure \ref{fig:gvon} shows the GVON as a layer
@@ -987,9 +996,9 @@ side.
 
 \begin{figure}[H]
   \centering \includegraphics[width=\textwidth]{graphics/30_gvon}
-  \caption{The graph-based virtual overlay network provides
-    communication functionality based on the CAL, but uses the
-    communication topology modeled by the introduced graph.}
+  \caption{The GVON provides communication functionality based on the
+    CAL, but uses the communication topology modeled by the introduced
+    graph.}
   \label{fig:gvon}
 \end{figure}
 
@@ -1072,7 +1081,7 @@ abstraction an application interacts with.
 
 The GVON provides similar functionality like the presented
 communication operations in the CAL in Section~\ref{sec:des:p2p}
-and~\ref{sec:cal_collective}, but on graph basis. Therefore, both
+and~\ref{sec:cal_collective}, but on graph-basis. Therefore, both
 point-to-point and collective operations are provided.
 
 \subsubsection*{GVON Point-to-Point Methods}
@@ -1129,7 +1138,8 @@ a thread safe manner.
   \centering \includegraphics[width=\textwidth]{graphics/30_gvon_collective}
   \caption{Gather operation of the GVON. Data is first locally and
     then globally gathered. Finally, the gathered data is transmitted
-    to the root vertex.}
+    to the root vertex. The local gather is executed by the GVON and
+    the global gather by the CAL.}
   \label{fig:gvon_collective}
 \end{figure}
 
@@ -1167,10 +1177,6 @@ graph anymore.
 topology is changing during simulation execution. For example, the GoL
 simulation could add a new rule that leads to a different
 communication topology for that might exist a better vertex mapping.
-Even if the performance of a network link drops, so that some hosts
-are not able to reach common latency and bandwidth among each other, a
-remapping can solve this problem at run-time.
-
 A traditional field of application for remapping would be unbalanced
 workload in the simulation application. Such an unbalanced state can
 be recognized by monitoring and eliminated by remapping the workload
@@ -1180,12 +1186,26 @@ Another issue is the failure of single cluster nodes and therefore
 also a failure of hosts located on these nodes. Assuming that the data
 of hosts were stored in a checkpoint, the hosted vertices of the failed host
 can be adopted by another host, also at run-time.
+The process of remapping is also divided in two phases:
+distribution and announcement and therefore very similar to the mapping process of
+Section~\ref{sec:mapping}. 
 
-The process of remapping is very similar to the mapping process of
-Section~\ref{sec:mapping}.  It is also divided in two phases:
-distribution and announcement.
+\section*{Design Summary}
+This chapter provided an abstract description which enables to map the
+simulation algorithm to communication topologies and in turn to map
+the communication topologies onto the hardware topologies by two
+separate mappings $\sigma$ and $\gamma$ mentioned in
+Section~\ref{sec:motivation}.
 
-\todo{Design summary}
+These mappings were establisehd as an intermediate layer between the
+simulation application and the communication topologie. This layer was
+built from three components: the CAL (Section~\ref{sec:cal}) that
+provides an abstract communication interface for communcation
+libraries, graphs (Section~\ref{sec:graph}) that model the
+communication topologies, and the GVON (Section~\ref{sec:gvon})
+that provides communication operations based on the graphs through mappings
+of vertices to peers at run-time.
+
 
 \cleardoublepage
 

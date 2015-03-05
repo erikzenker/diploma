@@ -43,12 +43,12 @@ the future needs of complex, computation intensive scientific and
 industrial applications.  To provide more computing power to these
 applications, a rapid progress in the development of computers and
 algorithms is necessary. The next milestone in the development of
-supercomputers are exascale systems, capable of at least $10^{18}$
+supercomputers are exascale systems, capable of at least one
 exaflop/s, which represents a thousandfold increase over the first
 petascale system.
 
 On the one hand, not all questions about the construction of such a system are
-solved. On the other hand, is is certain that exascale will increase the amount and
+solved. On the other hand, it is certain that exascale will increase the amount and
 complexity of computers to a new level \cite{ref:cresta}, amplifying
 the challenge of reliability, programmability and usability of such
 systems.
@@ -58,9 +58,9 @@ the applications previously running on petascale systems. The sole,
 massive increase in size of the computing system will lead to a
 decrease in the mean time to failure (MTTF) and an increased
 importance of data locality.  Furthermore, the emergence of
-accelerator hardware leads to computing systems that are more
+accelerator  hardware leads to computing systems that are more
 heterogeneous and hierarchical, as well as increasingly complex to
-program and use. Therefore, applications running on high performance
+program and use~\cite{ref:accel}. Therefore, applications running on high performance
 computers have to be adapted to utilize the upcoming generation of
 supercomputers.  Current applications lack techniques that form the
 basis for load balancing and fault tolerance.  Thus, there is a need
@@ -87,19 +87,21 @@ communication back-end underneath the communication abstraction
 layer. It maps common communication processes onto equivalent MPI
 methods.
 
-The following Chapter~\ref{sec:state} is an introduction into the
-current state of the art, giving a brief overview of the basic terms
-in high performance computing and communication in computing
-systems. Furthermore, it examines existing research in the area of
-interest. Chapter~\ref{sec:design} provides the discussion about the
-design of the system components.  Selected implementation details of
-the system is presented in Chapter~\ref{sec:implementation}. The
-developed prototype is evaluated and compared in contrast to an MPI
-implementation in
+%Chapter~\ref{sec:state} is an introduction into the
+%current state of the art, giving a brief overview of the basic terms
+%in high performance computing and communication in computing
+%systems. Furthermore, it examines existing research in the area of
+%interest.
+
+The following Chapter~\ref{sec:design} first motivates the design of
+the system and subsequently provides a discussion about of the system
+components.  Selected implementation details of the system is
+presented in Chapter~\ref{sec:implementation}. The developed prototype
+is evaluated and compared in contrast to an MPI implementation in
 Chapter~\ref{sec:evaluation}. Chapter~\ref{sec:futurework} provides
 ideas to enhance the system in future work. Finally,
 Chapter~\ref{sec:conclusion} summarizes the developed system and
-provides an outlook for future development.
+Chapter~\ref{sec:outlook} provides an outlook for future development.
 
 
 \cleardoublepage
