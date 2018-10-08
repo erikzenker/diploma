@@ -1,6 +1,6 @@
 # A Flexible and Portable Approach for Communication in Distributed Computing Systems
 
-* Latex sources of my diploma thesis from december 2014
+* [Latex sources](thesis/diplom.tex) of my diploma thesis from december 2014
 * [Precompiled pdf](thesis/diplom.pdf)
 
 ## Introduction
