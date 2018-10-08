@@ -1,4 +1,4 @@
-# A flexible and portable approach for communication in distributed computing systems
+# A Flexible and Portable Approach for Communication in Distributed Computing Systems
 
 Latex sources of my diploma thesis from december 2014
 
