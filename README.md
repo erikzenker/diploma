@@ -1,6 +1,7 @@
 # A Flexible and Portable Approach for Communication in Distributed Computing Systems
 
-Latex sources of my diploma thesis from december 2014
+* Latex sources of my diploma thesis from december 2014
+* [Precompiled pdf](thesis/diplom.pdf)
 
 ## Introduction
 The domain of high performance computing is subject to constant develop-
